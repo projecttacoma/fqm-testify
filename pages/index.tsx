@@ -9,7 +9,9 @@ const Home: NextPage = () => {
       <Head>
         <title>FQM Testify: an ECQM Analysis Tool</title>
       </Head>
-      <AppShell padding="md" header={<Header height={60}>{<AbacusHeader></AbacusHeader>}</Header>}></AppShell>
+      <AppShell padding="md" header={<Header height={60}>{<AbacusHeader></AbacusHeader>}</Header>}>
+        <></>
+      </AppShell>
     </>
   );
 };
