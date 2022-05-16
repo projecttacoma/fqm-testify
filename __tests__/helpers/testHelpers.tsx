@@ -3,18 +3,18 @@ import { NotificationsProvider } from '@mantine/notifications';
 import { RecoilRoot } from 'recoil';
 
 export function mantineRecoilWrap(children: JSX.Element) {
-return (
+  return (
     <ColorSchemeProvider
-    colorScheme="light"
-    toggleColorScheme={() => {
+      colorScheme="light"
+      toggleColorScheme={() => {
         void 0;
-    }}
+      }}
     >
-    <RecoilRoot>
+      <RecoilRoot>
         <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'light' }}>
-        <NotificationsProvider position="top-center">{children}</NotificationsProvider>
+          <NotificationsProvider position="top-center">{children}</NotificationsProvider>
         </MantineProvider>
-    </RecoilRoot>
+      </RecoilRoot>
     </ColorSchemeProvider>
-);
+  );
 }
