@@ -1,7 +1,8 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { AppShell, Header } from '@mantine/core';
+import { AppShell, Grid, Header } from '@mantine/core';
 import AbacusHeader from '../components/AbacusHeader';
+import MeasureUpload from '../components/MeasureUpload';
 
 const Home: NextPage = () => {
   return (
@@ -10,7 +11,11 @@ const Home: NextPage = () => {
         <title>FQM Testify: an ECQM Analysis Tool</title>
       </Head>
       <AppShell padding="md" header={<Header height={60}>{<AbacusHeader></AbacusHeader>}</Header>}>
-        <></>
+        <Grid>
+          <Grid.Col span={12}>
+            <MeasureUpload />
+          </Grid.Col>
+        </Grid>
       </AppShell>
     </>
   );
