@@ -14,7 +14,7 @@ describe('MeasureUpload', () => {
     expect(title).toBeInTheDocument();
   });
   it('renders a dropzone with measure bundle name label when measure uploaded', () => {
-    const MockMB = getMockRecoilState(measureBundleState, { name: 'testName' });
+    const MockMB = getMockRecoilState(measureBundleState, new File([], 'testName'));
     render(
       mantineRecoilWrap(
         <>
