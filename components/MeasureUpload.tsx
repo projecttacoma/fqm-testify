@@ -5,7 +5,7 @@ import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 
-function dropzoneChildren() {
+function DropzoneChildren() {
   const measureBundle = useRecoilValue(measureBundleState);
   return (
     <Grid justify="center">
@@ -40,7 +40,7 @@ export default function MeasureUpload() {
       accept={['.json']}
       multiple={false}
     >
-      {() => dropzoneChildren()}
+      {DropzoneChildren}
     </Dropzone>
   );
 }
