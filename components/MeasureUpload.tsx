@@ -5,6 +5,28 @@ import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 
+export default function MeasureUpload() {
+  const setMeasureBundle = useSetRecoilState(measureBundleState);
+  return (
+    <Dropzone
+      onDrop={files => setMeasureBundle(files[0])}
+      onReject={files =>
+        showNotification({
+          id: 'failed-upload',
+          icon: <IconAlertCircle />,
+          title: 'File upload failed',
+          message: `Could not upload file: ${files[0].file.name}. ${files[0].errors[0].message}`,
+          color: 'red'
+        })
+      }
+      accept={['.json']}
+      multiple={false}
+    >
+      {DropzoneChildren}
+    </Dropzone>
+  );
+}
+
 function DropzoneChildren() {
   const measureBundle = useRecoilValue<null | File>(measureBundleState);
   return (
@@ -20,27 +42,5 @@ function DropzoneChildren() {
         </Center>
       </Grid.Col>
     </Grid>
-  );
-}
-
-export default function MeasureUpload() {
-  const setMeasureBundle = useSetRecoilState(measureBundleState);
-  return (
-    <Dropzone
-      onDrop={files => setMeasureBundle(files[0])}
-      onReject={files =>
-        showNotification({
-          id: 'failed-upload',
-          icon: <IconAlertCircle />,
-          title: 'File upload failed',
-          message: `Could not upload file: ${files[0].file['path']}. ${files[0].errors[0].message}`,
-          color: 'red'
-        })
-      }
-      accept={['.json']}
-      multiple={false}
-    >
-      {DropzoneChildren}
-    </Dropzone>
   );
 }
