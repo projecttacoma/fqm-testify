@@ -6,7 +6,7 @@ import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 
 function DropzoneChildren() {
-  const measureBundle = useRecoilValue(measureBundleState);
+  const measureBundle = useRecoilValue<null | File>(measureBundleState);
   return (
     <Grid justify="center">
       <Grid.Col span={12}>
