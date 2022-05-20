@@ -2,14 +2,36 @@ import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
-import { useSetRecoilState, useRecoilValue } from 'recoil';
+import { useSetRecoilState, useRecoilValue, SetterOrUpdater } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 
 export default function MeasureUpload() {
   const setMeasureBundle = useSetRecoilState(measureBundleState);
+  // Need to nest this function so it has access to hooks
+  function extractMeasureBundle(file: File): void {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
+      if (!(bundle.resourceType === 'Bundle')) {
+        showNotification({
+          id: 'failed-upload',
+          icon: <IconAlertCircle />,
+          title: 'File upload failed',
+          message: `Uploaded file must contain a resource fo type 'Bundle'`,
+          color: 'red'
+        });
+      } else {
+        setMeasureBundle({
+          name: file.name,
+          content: bundle
+        });
+      }
+    };
+    reader.readAsText(file);
+  }
   return (
     <Dropzone
-      onDrop={files => setMeasureBundle(files[0])}
+      onDrop={files => extractMeasureBundle(files[0])}
       onReject={files =>
         showNotification({
           id: 'failed-upload',
@@ -28,16 +50,16 @@ export default function MeasureUpload() {
 }
 
 function DropzoneChildren() {
-  const measureBundle = useRecoilValue<null | File>(measureBundleState);
+  const measureBundle = useRecoilValue(measureBundleState);
   return (
     <Grid justify="center">
       <Grid.Col span={12}>
-        <Center>{measureBundle ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}</Center>
+        <Center>{measureBundle.name ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}</Center>
       </Grid.Col>
       <Grid.Col>
         <Center>
           <Text size="xl" inline>
-            {measureBundle ? measureBundle.name : 'Drag a Measure Bundle JSON file here or click to select files'}
+            {measureBundle.name ? measureBundle.name : 'Drag a Measure Bundle JSON file here or click to select files'}
           </Text>
         </Center>
       </Grid.Col>
