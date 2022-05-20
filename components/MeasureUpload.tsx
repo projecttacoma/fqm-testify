@@ -2,7 +2,7 @@ import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
-import { useSetRecoilState, useRecoilValue, SetterOrUpdater } from 'recoil';
+import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 
 export default function MeasureUpload() {
@@ -12,12 +12,21 @@ export default function MeasureUpload() {
     const reader = new FileReader();
     reader.onload = () => {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
-      if (!(bundle.resourceType === 'Bundle')) {
+      const numMeasures = bundle?.entry?.filter(r => r.resource.resourceType === 'Measure').length;
+      if (bundle.resourceType !== 'Bundle') {
         showNotification({
           id: 'failed-upload',
           icon: <IconAlertCircle />,
           title: 'File upload failed',
-          message: `Uploaded file must contain a resource fo type 'Bundle'`,
+          message: `Uploaded file must contain a resource of type 'Bundle'`,
+          color: 'red'
+        });
+      } else if (numMeasures !== 1) {
+        showNotification({
+          id: 'failed-upload',
+          icon: <IconAlertCircle />,
+          title: 'File upload failed',
+          message: `Uploaded bundle must contain exactly one resource of type 'Measure'`,
           color: 'red'
         });
       } else {
