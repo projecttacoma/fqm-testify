@@ -14,21 +14,9 @@ export default function MeasureUpload() {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
       const numMeasures = bundle?.entry?.filter(r => r?.resource?.resourceType === 'Measure')?.length;
       if (bundle.resourceType !== 'Bundle') {
-        showNotification({
-          id: 'failed-upload',
-          icon: <IconAlertCircle />,
-          title: 'File upload failed',
-          message: `Uploaded file must contain a resource of type 'Bundle'`,
-          color: 'red'
-        });
+        rejectFile("Uploaded file must be a JSON FHIR Resource of type 'Bundle'");
       } else if (numMeasures !== 1) {
-        showNotification({
-          id: 'failed-upload',
-          icon: <IconAlertCircle />,
-          title: 'File upload failed',
-          message: `Uploaded bundle must contain exactly one resource of type 'Measure'`,
-          color: 'red'
-        });
+        rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'");
       } else {
         setMeasureBundle({
           name: file.name,
@@ -37,6 +25,20 @@ export default function MeasureUpload() {
       }
     };
     reader.readAsText(file);
+  }
+
+  function rejectFile(message: string) {
+    showNotification({
+      id: 'failed-upload',
+      icon: <IconAlertCircle />,
+      title: 'File upload failed',
+      message,
+      color: 'red'
+    });
+    setMeasureBundle({
+      name: '',
+      content: null
+    });
   }
   return (
     <Dropzone
