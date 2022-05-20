@@ -12,7 +12,7 @@ export default function MeasureUpload() {
     const reader = new FileReader();
     reader.onload = () => {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
-      const numMeasures = bundle?.entry?.filter(r => r.resource.resourceType === 'Measure').length;
+      const numMeasures = bundle?.entry?.filter(r => r?.resource?.resourceType === 'Measure')?.length;
       if (bundle.resourceType !== 'Bundle') {
         showNotification({
           id: 'failed-upload',
