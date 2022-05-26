@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -19,14 +19,16 @@ describe('MeasureUpload', () => {
       name: 'testName',
       content: testBundle as fhir4.Bundle
     });
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockMB />
-          <MeasureUpload />
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MeasureUpload />
+          </>
+        )
+      );
+    });
 
     const dropzone = screen.getByRole('button');
     expect(dropzone).toBeInTheDocument();
