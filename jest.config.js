@@ -14,7 +14,9 @@ const customJestConfig = {
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: ['/node_modules/', '/__tests__/helpers/'],
-  transformIgnorePatterns: ['/node_modules/(?!fqm-execution|uuid)']
+  moduleNameMapper: {
+    '^uuid$': require.resolve('uuid')
+  }
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
