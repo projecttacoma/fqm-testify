@@ -2,8 +2,9 @@ import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
-import { useSetRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
+import MissingValueSetModal from './MissingValueSetModal';
 
 export default function MeasureUpload() {
   const setMeasureBundle = useSetRecoilState(measureBundleState);
@@ -41,22 +42,25 @@ export default function MeasureUpload() {
     });
   }
   return (
-    <Dropzone
-      onDrop={files => extractMeasureBundle(files[0])}
-      onReject={files =>
-        showNotification({
-          id: 'failed-upload',
-          icon: <IconAlertCircle />,
-          title: 'File upload failed',
-          message: `Could not upload file: ${files[0].file.name}. ${files[0].errors[0].message}`,
-          color: 'red'
-        })
-      }
-      accept={['.json']}
-      multiple={false}
-    >
-      {DropzoneChildren}
-    </Dropzone>
+    <>
+      <MissingValueSetModal />
+      <Dropzone
+        onDrop={files => extractMeasureBundle(files[0])}
+        onReject={files =>
+          showNotification({
+            id: 'failed-upload',
+            icon: <IconAlertCircle />,
+            title: 'File upload failed',
+            message: `Could not upload file: ${files[0].file.name}. ${files[0].errors[0].message}`,
+            color: 'red'
+          })
+        }
+        accept={['.json']}
+        multiple={false}
+      >
+        {DropzoneChildren}
+      </Dropzone>
+    </>
   );
 }
 
