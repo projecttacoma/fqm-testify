@@ -6,6 +6,8 @@ import { Modal, Alert, Text, List } from '@mantine/core';
 import { AlertCircle } from 'tabler-icons-react';
 import { useState } from 'react';
 
+const VSAC_REGEX = /http:\/\/cts\.nlm\.nih\.gov.*ValueSet/;
+
 export default function MissingValueSetModal() {
   const [measureBundle, setMeasureBundle] = useRecoilState(measureBundleState);
   const [missingValueSets, setMissingValueSets] = useState<string[]>([]);
@@ -55,7 +57,6 @@ export default function MissingValueSetModal() {
 async function identifyMissingValueSets(mb: fhir4.Bundle): Promise<string[]> {
   const allRequiredValuesets = new Set<string>();
   const includedValuesets = new Set<string>();
-  const VSAC_REGEX = /http:\/\/cts\.nlm\.nih\.gov.*ValueSet/;
 
   mb?.entry?.forEach(e => {
     if (e?.resource?.resourceType === 'ValueSet') {
