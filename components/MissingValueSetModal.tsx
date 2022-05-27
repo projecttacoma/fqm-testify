@@ -46,7 +46,7 @@ export default function MissingValueSetModal() {
 }
 
 /**
- * Runs data requirements on a FHIR MeasureBundle, the compares the required
+ * Runs data requirements on a FHIR MeasureBundle, then compares the required
  * valuesets to the valusets included in the bundle. Returns an array of canonical urls of
  * missing required valuesets
  * @param mb { Object } a FHIR MeasureBundle uploaded by the user
