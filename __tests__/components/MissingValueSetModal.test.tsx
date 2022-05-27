@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import noMissingVSBundle from '../fixtures/bundles/EXM130Fixture.json';
-import missingVSBundle from '../fixtures/bundles/MissingVS.json';
+import missingVSBundle from '../fixtures/bundles/MissingVSBundle.json';
 
 describe('MissingValueSetModal', () => {
   it('does not appear when uploaded Measure Bundle is not missing valuesets', async () => {
@@ -25,7 +25,7 @@ describe('MissingValueSetModal', () => {
     const modalText = screen.queryByText("Hold on there, Cowboy. You're missing ValueSets!");
     expect(modalText).toBeNull();
   });
-  it.only('appears when uploaded Measure Bundle is missing valuesets', async () => {
+  it('appears when uploaded Measure Bundle is missing valuesets', async () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
       content: missingVSBundle as fhir4.Bundle
