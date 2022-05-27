@@ -35,7 +35,9 @@ export default function MissingValueSetModal() {
         <Text>The following required ValueSets are missing from the uploaded measure bundle:</Text>
         <List>
           {missingValueSets.map((vs, i) => (
-            <List.Item key={`item${i}`}>{`\t${vs}`}</List.Item>
+            <List.Item key={`item${i}`}>
+              <Text variant="link" component="a" href={vs} target="_blank">{`\t${vs}`}</Text>
+            </List.Item>
           ))}
         </List>
       </Alert>
