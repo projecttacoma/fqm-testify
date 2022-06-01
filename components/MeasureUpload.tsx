@@ -6,10 +6,9 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../state/atoms/measureBundle';
 import MissingValueSetModal from './MissingValueSetModal';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
-import { useEffect } from 'react';
 import { DateTime } from 'luxon';
 
-const DEFAULT_MEASUREMENT_PERIOD = {
+export const DEFAULT_MEASUREMENT_PERIOD = {
   start: DateTime.fromISO('2022-01-01').toJSDate(),
   end: DateTime.fromISO('2022-12-31').toJSDate()
 };
@@ -19,7 +18,6 @@ const DEFAULT_MEASUREMENT_PERIOD_DURATION = 1;
 export default function MeasureUpload() {
   const setMeasureBundle = useSetRecoilState(measureBundleState);
   const setMeasurementPeriod = useSetRecoilState(measurementPeriodState);
-  const measurementPeriod = useRecoilValue(measurementPeriodState);
   // Need to nest this function so it has access to hooks
   function extractMeasureBundle(file: File): void {
     const reader = new FileReader();
@@ -99,7 +97,14 @@ function DropzoneChildren() {
   );
 }
 
-function populateMeasurementPeriod(
+/**
+ * Takes in two date strings and populates a valid measurement period with JS Dates
+ * as start and end points
+ * @param startString{String} Signifies the date of measurement period start
+ * @param endString{String} Signifies the date of measurement period end
+ * @returns {Object} an object a JS Date from period start and end
+ */
+export function populateMeasurementPeriod(
   startString: string | undefined,
   endString: string | undefined
 ): { start: Date; end: Date } {
@@ -108,6 +113,7 @@ function populateMeasurementPeriod(
   if (startString) {
     const startDate = DateTime.fromISO(startString).toJSDate();
     measurementPeriod.start = startDate;
+    // Measurement period start and end are both defined
     if (endString) {
       measurementPeriod.end = DateTime.fromISO(endString).toJSDate();
       // If start is defined and end isn't, make the period last one year from the start

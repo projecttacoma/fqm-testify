@@ -9,7 +9,7 @@ export default function DateSelectors() {
     <Grid>
       <Grid.Col span={6}>
         <DatePicker
-          placeholder="Select date"
+          placeholder="Select start date"
           label="Measurement Period Start"
           value={period.start}
           onChange={start => setPeriod({ ...period, start })}
@@ -17,7 +17,7 @@ export default function DateSelectors() {
       </Grid.Col>
       <Grid.Col span={6}>
         <DatePicker
-          placeholder="Select date"
+          placeholder="Select end date"
           label="Measurement Period End"
           value={period.end}
           onChange={end => setPeriod({ ...period, end })}
