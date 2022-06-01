@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { AppShell, Grid, Header } from '@mantine/core';
 import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
+import DateSelectors from '../components/DateSelectors';
 
 const Home: NextPage = () => {
   return (
@@ -14,6 +15,9 @@ const Home: NextPage = () => {
         <Grid>
           <Grid.Col span={12}>
             <MeasureUpload />
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <DateSelectors />
           </Grid.Col>
         </Grid>
       </AppShell>
