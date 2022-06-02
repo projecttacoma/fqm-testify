@@ -1,8 +1,5 @@
 import { populateMeasurementPeriod, DEFAULT_MEASUREMENT_PERIOD } from '../../components/MeasureUpload';
-import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { DateTime } from 'luxon';
 
 const EXAMPLE_START_DATE = '2020-01-01';
