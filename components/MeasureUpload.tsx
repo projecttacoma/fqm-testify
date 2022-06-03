@@ -123,7 +123,7 @@ export function populateMeasurementPeriod(
       measurementPeriod.end = newEnd;
     }
 
-    // If end is defined and start isn't, make the period start one year the end
+    // If end is defined and start isn't, make the period start one year from the end
   } else if (endString) {
     const endDate = DateTime.fromISO(endString).toJSDate();
     measurementPeriod.end = endDate;
