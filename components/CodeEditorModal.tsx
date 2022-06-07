@@ -1,7 +1,10 @@
-import { Modal, useMantineColorScheme, Button, Center, Group } from '@mantine/core';
+import { Modal, useMantineColorScheme, Button, Center, Group, Text, Grid } from '@mantine/core';
 import CodeMirror from '@uiw/react-codemirror';
-import { json } from '@codemirror/lang-json';
+import { json, jsonParseLinter } from '@codemirror/lang-json';
+import { linter } from '@codemirror/lint';
 import { useState } from 'react';
+
+const jsonLinter = jsonParseLinter();
 
 export interface CodeEditorModalProps {
   open: boolean;
@@ -20,6 +23,7 @@ export default function CodeEditorModal({
 }: CodeEditorModalProps) {
   const { colorScheme } = useMantineColorScheme();
   const [currentValue, setCurrentValue] = useState(initialValue);
+  const [linterError, setLinterError] = useState<string | null>(null);
 
   return (
     <Modal
@@ -42,27 +46,46 @@ export default function CodeEditorModal({
           <CodeMirror
             data-testid="codemirror"
             value={initialValue}
-            extensions={[json()]}
+            extensions={[json(), linter(jsonLinter)]}
             theme={colorScheme}
-            onUpdate={v => setCurrentValue(v.state.toJSON().doc)} // Grabbing updates from the readonly editor state to avoid codemirror weirdness
+            onUpdate={v => {
+              const diagnosticMessages = jsonLinter(v.view).map(d => d.message);
+              console.log(diagnosticMessages);
+              if (diagnosticMessages.length === 0) {
+                setLinterError(null);
+              } else {
+                setLinterError(diagnosticMessages.join('\n'));
+              }
+
+              // Grabbing updates from the readonly editor state to avoid codemirror weirdness
+              setCurrentValue(v.state.toJSON().doc);
+            }}
           />
         )}
       </div>
-      <Center>
-        <Group>
-          <Button
-            onClick={() => {
-              onSave(currentValue);
-              onClose();
-            }}
-          >
-            Save
-          </Button>
-          <Button color="gray" onClick={onClose}>
-            Cancel
-          </Button>
-        </Group>
-      </Center>
+      <Grid>
+        <Grid.Col span={12}>
+          <Text color="red">{linterError}</Text>
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Center>
+            <Group>
+              <Button
+                data-testid="codemirror-save-button"
+                onClick={() => {
+                  onSave(currentValue);
+                }}
+                disabled={linterError != null}
+              >
+                Save
+              </Button>
+              <Button data-testid="codemirror-cancel-button" color="gray" onClick={onClose}>
+                Cancel
+              </Button>
+            </Group>
+          </Center>
+        </Grid.Col>
+      </Grid>
     </Modal>
   );
 }

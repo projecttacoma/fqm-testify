@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@codemirror/lang-json": "^0.20.0",
+    "@codemirror/lint": "^0.20.3",
     "@faker-js/faker": "^7.1.0",
     "@mantine/core": "^4.2.4",
     "@mantine/dates": "^4.2.6",

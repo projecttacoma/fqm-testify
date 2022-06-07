@@ -27,6 +27,8 @@ function PatientCreation() {
 
       setCurrentPatients(nextPatientState);
     }
+
+    closeModal();
   };
 
   const deletePatientTestCase = (id: string) => {
@@ -61,6 +63,11 @@ function PatientCreation() {
     setIsPatientModalOpen(true);
   };
 
+  const closeModal = () => {
+    setIsPatientModalOpen(false);
+    setCurrentPatient(null);
+  };
+
   return (
     <>
       <Center>
@@ -71,10 +78,7 @@ function PatientCreation() {
 
       <CodeEditorModal
         open={isPatientModalOpen}
-        onClose={() => {
-          setIsPatientModalOpen(false);
-          setCurrentPatient(null);
-        }}
+        onClose={closeModal}
         title="Edit Patient Resource"
         onSave={updatePatientTestCase}
         initialValue={getInitialPatientResource()}
