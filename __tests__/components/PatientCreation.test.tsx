@@ -58,7 +58,7 @@ describe('PatientCreation', () => {
     expect(modal).toBeInTheDocument();
   });
 
-  it('should not render test case list with empty state', async () => {
+  it('should not render test case list with empty state', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
     render(
@@ -74,7 +74,7 @@ describe('PatientCreation', () => {
     expect(testCaseList).not.toBeInTheDocument();
   });
 
-  it('should render test case list with populated state', async () => {
+  it('should render test case list with populated state', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         resourceType: 'Patient',
@@ -95,7 +95,7 @@ describe('PatientCreation', () => {
     expect(testPatientLabel).toBeInTheDocument();
   });
 
-  it('should delete patient when button is clicked', async () => {
+  it('should delete patient when button is clicked', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         resourceType: 'Patient',
