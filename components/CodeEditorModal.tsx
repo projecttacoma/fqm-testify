@@ -36,15 +36,16 @@ export default function CodeEditorModal({
       overflow="outside"
       styles={{
         body: {
-          height: '50vh'
+          height: '600px'
         }
       }}
       title={title}
     >
-      <div style={{ height: '90%', overflow: 'scroll' }}>
+      <div style={{ overflow: 'scroll' }}>
         {open && (
           <CodeMirror
             data-testid="codemirror"
+            height="500px"
             value={initialValue}
             extensions={[json(), linter(jsonLinter)]}
             theme={colorScheme}
