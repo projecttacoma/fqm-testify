@@ -51,7 +51,7 @@ export default function CodeEditorModal({
             theme={colorScheme}
             onUpdate={v => {
               const diagnosticMessages = jsonLinter(v.view).map(d => d.message);
-              console.log(diagnosticMessages);
+
               if (diagnosticMessages.length === 0) {
                 setLinterError(null);
               } else {
