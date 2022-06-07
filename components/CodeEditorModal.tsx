@@ -66,7 +66,7 @@ export default function CodeEditorModal({
       </div>
       <Grid>
         <Grid.Col span={12}>
-          <Text color="red">{linterError}</Text>
+          <Text color="red">{linterError}&nbsp;</Text>
         </Grid.Col>
         <Grid.Col span={12}>
           <Center>
