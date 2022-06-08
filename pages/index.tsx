@@ -4,12 +4,13 @@ import { AppShell, Grid, Header } from '@mantine/core';
 import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
 import DateSelectors from '../components/DateSelectors';
+import PatientCreation from '../components/PatientCreation';
 
 const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>FQM Testify: an ECQM Analysis Tool</title>
+        <title>FQM Testify: an eCQM Analysis Tool</title>
       </Head>
       <AppShell padding="md" header={<Header height={60}>{<AbacusHeader></AbacusHeader>}</Header>}>
         <Grid>
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
             <DateSelectors />
           </Grid.Col>
         </Grid>
+        <PatientCreation />
       </AppShell>
     </>
   );
