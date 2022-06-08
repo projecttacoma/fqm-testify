@@ -5,14 +5,7 @@
   },
   "ActivityDefinition": {
     "primaryCodePath": "topic",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "AdverseEvent": {
     "primaryCodePath": "event",
@@ -24,14 +17,7 @@
   },
   "Appointment": {
     "primaryCodePath": "serviceType",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Basic": {
     "primaryCodePath": "code",
@@ -43,25 +29,11 @@
   },
   "CarePlan": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "CareTeam": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "ChargeItem": {
     "primaryCodePath": "code",
@@ -81,25 +53,11 @@
   },
   "Communication": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "CommunicationRequest": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Composition": {
     "primaryCodePath": "type",
@@ -111,14 +69,7 @@
   },
   "Consent": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Coverage": {
     "primaryCodePath": "type",
@@ -139,27 +90,8 @@
   "DeviceRequest": {
     "primaryCodePath": "code",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Reference",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.Reference",
+      "FHIR.CodeableConcept"
     ]
   },
   "DeviceUseStatement": {
@@ -171,25 +103,11 @@
   },
   "Encounter": {
     "primaryCodePath": "type",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "EpisodeOfCare": {
     "primaryCodePath": "type",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "ExplanationOfBenefit": {
     "primaryCodePath": "type",
@@ -201,14 +119,7 @@
   },
   "Goal": {
     "primaryCodePath": "category",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Group": {
     "primaryCodePath": "code",
@@ -217,46 +128,14 @@
   "GuidanceResponse": {
     "primaryCodePath": "module",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "uri",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "canonical",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.uri",
+      "FHIR.canonical",
+      "FHIR.CodeableConcept"
     ]
   },
   "HealthcareService": {
     "primaryCodePath": "type",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Immunization": {
     "primaryCodePath": "vaccineCode",
@@ -264,14 +143,7 @@
   },
   "Library": {
     "primaryCodePath": "topic",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "List": {
     "primaryCodePath": "code",
@@ -279,25 +151,11 @@
   },
   "Location": {
     "primaryCodePath": "type",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Measure": {
     "primaryCodePath": "topic",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "MeasureReport": {
     "primaryCodePath": "measure.topic"
@@ -309,53 +167,15 @@
   "MedicationAdministration": {
     "primaryCodePath": "medication",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Reference",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.CodeableConcept",
+      "FHIR.Reference"
     ]
   },
   "MedicationDispense": {
     "primaryCodePath": "medication",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Reference",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.CodeableConcept",
+      "FHIR.Reference"
     ]
   },
   "MedicationKnowledge": {
@@ -365,79 +185,22 @@
   "MedicationRequest": {
     "primaryCodePath": "medication",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Reference",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.CodeableConcept",
+      "FHIR.Reference"
     ]
   },
   "MedicationStatement": {
     "primaryCodePath": "medication",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "CodeableConcept",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Reference",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.CodeableConcept",
+      "FHIR.Reference"
     ]
   },
   "MessageDefinition": {
     "primaryCodePath": "event",
     "primaryCodeType": [
-      {
-        "$": {
-          "xsi:type": "ChoiceTypeSpecifier"
-        },
-        "choice": [
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "Coding",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          },
-          {
-            "$": {
-              "namespace": "FHIR",
-              "name": "uri",
-              "xsi:type": "NamedTypeSpecifier"
-            }
-          }
-        ]
-      }
+      "FHIR.Coding",
+      "FHIR.uri"
     ]
   },
   "Observation": {
@@ -457,14 +220,7 @@
   },
   "PractitionerRole": {
     "primaryCodePath": "code",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "Procedure": {
     "primaryCodePath": "code",
@@ -476,14 +232,7 @@
   },
   "RelatedPerson": {
     "primaryCodePath": "relationship",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.CodeableConcept",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.CodeableConcept"
   },
   "RequestGroup": {
     "primaryCodePath": "code",
@@ -495,14 +244,7 @@
   },
   "SearchParameter": {
     "primaryCodePath": "target",
-    "primaryCodeType": [
-      {
-        "$": {
-          "elementType": "FHIR.ResourceType",
-          "xsi:type": "ListTypeSpecifier"
-        }
-      }
-    ]
+    "primaryCodeType": "FHIR.ResourceType"
   },
   "ServiceRequest": {
     "primaryCodePath": "code",

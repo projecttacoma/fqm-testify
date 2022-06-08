@@ -25,7 +25,25 @@ async function parse(xml) {
 
         if (primaryCodePath) {
           const element = di.element.find(elem => elem.$.name === primaryCodePath);
-          const primaryCodeType = element?.$.elementType || element?.elementTypeSpecifier
+          let primaryCodeType;
+          if (element?.$.elementType) {
+            primaryCodeType = element.$.elementType;
+          } else if (element?.elementTypeSpecifier) {
+            // length of element.elementTypeSpecifier is always 1, so we can index it at 0
+            if (element.elementTypeSpecifier[0].choice) {
+              // if choice attribute exists, save both options to an array for now
+              // TODO: explore which choice we want to use in each scenario
+              let choices = [];
+              element.elementTypeSpecifier[0].choice.forEach(c => {
+                const choiceNamespace = c.$.namespace;
+                const choiceName = c.$.name;
+                choices.push(`${choiceNamespace}.${choiceName}`);
+              });
+              primaryCodeType = choices;
+            } else {
+              primaryCodeType = element.elementTypeSpecifier[0].$.elementType;
+            }
+          }
           res[resourceType] ={primaryCodePath: primaryCodePath, primaryCodeType: primaryCodeType};
         }
     });
