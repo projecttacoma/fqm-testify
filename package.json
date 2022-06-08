@@ -7,6 +7,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
+    "parse-primaryCodePath": "node scripts/parsePrimaryCodePath.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",
@@ -36,7 +37,8 @@
     "react-dom": "18.1.0",
     "recoil": "^0.7.3-alpha.2",
     "tabler-icons-react": "^1.48.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
