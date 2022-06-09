@@ -5,6 +5,7 @@ import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
 import DateSelectors from '../components/DateSelectors';
 import PatientCreation from '../components/PatientCreation';
+import TestResources from '../components/TestResources';
 
 const Home: NextPage = () => {
   return (
@@ -19,6 +20,9 @@ const Home: NextPage = () => {
           </Grid.Col>
           <Grid.Col span={12}>
             <DateSelectors />
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <TestResources />
           </Grid.Col>
         </Grid>
         <PatientCreation />
