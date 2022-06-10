@@ -36,3 +36,13 @@ export function createPatientResourceString(birthDate: string): string {
 export function getPatientInfoString(patient: fhir4.Patient) {
   return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family} (DOB: ${patient.birthDate})`;
 }
+
+export function getDataRequirementFiltersString(dr: fhir4.DataRequirement) {
+  const valueSets = dr.codeFilter?.map(filter => {
+    return filter.valueSet;
+  });
+  if (valueSets) {
+    return `w/ ${valueSets?.join('\n')}`;
+  }
+  return '';
+}

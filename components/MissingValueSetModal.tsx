@@ -24,6 +24,7 @@ export default function MissingValueSetModal() {
 
   return (
     <Modal
+      zIndex={2}
       centered
       size="xl"
       withCloseButton={false}
