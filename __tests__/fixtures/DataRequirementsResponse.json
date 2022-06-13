@@ -1,0 +1,37 @@
+{
+  "results": {
+    "resourceType": "Library",
+    "type": {
+      "coding": [{ "code": "module-definition", "system": "http://terminology.hl7.org/CodeSystem/library-type" }]
+    },
+    "status": "draft",
+    "dataRequirement": [
+      {
+        "type": "Observation",
+        "codeFilter": [
+          {
+            "path": "code",
+            "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013"
+          },
+          {
+            "path": "status",
+            "code": [
+              {
+                "code": "final",
+                "system": "http://hl7.org/fhir/observation-status"
+              },
+              {
+                "code": "amended",
+                "system": "http://hl7.org/fhir/observation-status"
+              },
+              {
+                "code": "corrected",
+                "system": "http://hl7.org/fhir/observation-status"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

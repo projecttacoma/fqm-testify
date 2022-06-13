@@ -2,7 +2,7 @@ import { useRecoilValue } from 'recoil';
 import { useState, useEffect } from 'react';
 import { measureBundleState } from '../state/atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
-import { Affix, Button, Stack, Text } from '@mantine/core';
+import { Affix, Button, Stack, Text, useMantineTheme } from '@mantine/core';
 import { getDataRequirementFiltersString } from '../util/fhir';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 
@@ -10,6 +10,7 @@ export default function TestResourcesDisplay() {
   const [dataRequirements, setDataRequirements] = useState<fhir4.DataRequirement[] | null>(null);
   const measureBundle = useRecoilValue(measureBundleState);
   const currentPatients = useRecoilValue(patientTestCaseState);
+  const theme = useMantineTheme();
   useEffect(() => {
     if (measureBundle.content) {
       Calculator.calculateDataRequirements(measureBundle.content).then(requirements => {
@@ -24,19 +25,28 @@ export default function TestResourcesDisplay() {
     }
   }, [measureBundle]);
 
-  return measureBundle.content !== null && Object.keys(currentPatients).length > 0 ? (
+  return dataRequirements?.length && Object.keys(currentPatients).length ? (
     <Affix
+      data-testid="test-resource-affix"
       zIndex={1}
       position={{ bottom: 20, right: 20 }}
-      style={{ maxHeight: '50vh', overflow: 'scroll', width: '40vw', backgroundColor: 'white' }}
+      style={{
+        maxHeight: '55vh',
+        overflow: 'scroll',
+        width: '40vw',
+        backgroundColor: theme.colors.blue[6],
+        padding: 20,
+        borderRadius: 10
+      }}
     >
       <Stack>
         {dataRequirements?.map(dr => {
+          const displayString = getDataRequirementFiltersString(dr);
           return (
-            <Button key={dr.id} fullWidth variant="outline" style={{ height: 'auto', padding: 10 }}>
-              <div style={{ width: '100%' }}>
+            <Button key={displayString} fullWidth variant="default" style={{ height: 'auto', padding: 10 }}>
+              <div>
                 <Text>{dr.type}</Text>
-                <Text>{getDataRequirementFiltersString(dr)}</Text>
+                <Text>{displayString}</Text>
               </div>
             </Button>
           );
