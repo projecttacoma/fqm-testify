@@ -5,7 +5,7 @@ import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
 import DateSelectors from '../components/DateSelectors';
 import PatientCreation from '../components/PatientCreation';
-import TestResourcesDisplay from '../components/TestResources';
+import TestResourcesDisplay from '../components/TestResourcesDisplay';
 
 const Home: NextPage = () => {
   return (

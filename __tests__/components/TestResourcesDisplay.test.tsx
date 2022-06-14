@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import TestResourcesDisplay from '../../components/TestResources';
+import TestResourcesDisplay from '../../components/TestResourcesDisplay';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import noMissingVSBundle from '../fixtures/bundles/EXM130Fixture.json';
