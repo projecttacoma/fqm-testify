@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as xml2js from 'xml2js';
 
 const modelInfoPath = path.resolve(path.join(__dirname, '../fixtures/model-info/fhir-modelinfo-4.0.1.xml'));
-const outputPath = path.resolve(path.join(__dirname, '../util/parsed-primaryCodePaths.json'));
+const outputPath = path.resolve(path.join(__dirname, '../util/primaryCodePaths.ts'));
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 
 export interface primaryCodePathInfo {
@@ -83,13 +83,18 @@ export async function parse(xml: string) {
 
 parse(xmlStr)
   .then(data => {
-    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
+    fs.writeFileSync(
+      outputPath,
+      `
+      import { primaryCodePathInfo } from '../scripts/parsePrimaryCodePath';
+
+      export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = 
+        ${JSON.stringify(data, null, 2)};
+      `,
+      'utf8'
+    );
     console.log(`Wrote file to ${outputPath}`);
   })
   .catch(e => {
     console.error(e);
   });
-
-const PRIMARY_CODE_PATH_MAP = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
-
-export default PRIMARY_CODE_PATH_MAP;

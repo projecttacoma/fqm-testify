@@ -5,9 +5,9 @@
   "scripts": {
     "check": "npm run test && npm run lint && npm run prettier",
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "next build && npm run parse-primaryCodePath",
     "start": "next start -p 3000",
-    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts",
+    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",
