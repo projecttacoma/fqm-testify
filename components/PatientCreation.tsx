@@ -6,7 +6,6 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { createPatientResourceString, getPatientInfoString } from '../util/fhir';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
-import PRIMARY_CODE_PATH_MAP from '../util/primaryCodePath';
 
 function PatientCreation() {
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
@@ -41,7 +40,6 @@ function PatientCreation() {
   };
 
   const getInitialPatientResource = () => {
-    console.log(PRIMARY_CODE_PATH_MAP);
     if (isPatientModalOpen) {
       if (currentPatient) {
         return JSON.stringify(currentPatients[currentPatient], null, 2);
