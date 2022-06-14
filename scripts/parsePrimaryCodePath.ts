@@ -1,15 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml2js from 'xml2js';
 
 const modelInfoPath = path.resolve(path.join(__dirname, '../fixtures/model-info/fhir-modelinfo-4.0.1.xml'));
-const outputPath = path.resolve(path.join(__dirname, '../fixtures/model-info/parsed-primaryCodePaths.json'));
+const outputPath = path.resolve(path.join(__dirname, '../util/parsed-primaryCodePaths.json'));
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 
 interface primaryCodePathInfo {
   primaryCodePath: string;
   primaryCodeType?: string | string[];
   multipleCardinality: boolean;
+}
+
+interface elementChoice {
+  $: {
+    namespace: string;
+    name: string;
+    'xsi:type': string;
+  };
 }
 
 /**
@@ -41,7 +51,7 @@ async function parse(xml: string) {
             // xsi:type is ChoiceTypeSpecifier, so there are multiple possible types
             // save both options to an array
             const choices: string[] = [];
-            primaryCodePathElement.elementTypeSpecifier[0].choice.forEach((c: any) => {
+            primaryCodePathElement.elementTypeSpecifier[0].choice.forEach((c: elementChoice) => {
               const choiceNamespace = c.$.namespace;
               const choiceName = c.$.name;
               choices.push(`${choiceNamespace}.${choiceName}`);
@@ -72,11 +82,13 @@ async function parse(xml: string) {
 }
 
 parse(xmlStr)
-  .then(data => {
-    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
+.then(data => {
+  fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
 
-    console.log(`Wrote file to ${outputPath}`);
-  })
-  .catch(e => {
-    console.error(e);
-  });
+  console.log(`Wrote file to ${outputPath}`);
+})
+.catch(e => {
+  console.error(e);
+});
+
+export default parse;
