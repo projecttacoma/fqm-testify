@@ -61,3 +61,7 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
   }
   return '';
 }
+
+export function createFHIRResourceString(dr: fhir4.DataRequirement | null): string | void {
+  const id = uuidv4();
+}
