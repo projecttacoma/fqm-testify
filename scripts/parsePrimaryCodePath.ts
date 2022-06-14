@@ -8,7 +8,7 @@ const modelInfoPath = path.resolve(path.join(__dirname, '../fixtures/model-info/
 const outputPath = path.resolve(path.join(__dirname, '../util/parsed-primaryCodePaths.json'));
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 
-interface primaryCodePathInfo {
+export interface primaryCodePathInfo {
   primaryCodePath: string;
   primaryCodeType?: string | string[];
   multipleCardinality: boolean;
@@ -29,7 +29,7 @@ interface elementChoice {
  * @return object whose keys are resourceTypes and values correspond to
  * the resourceTypes' primaryCodePath
  */
-async function parse(xml: string) {
+export async function parse(xml: string) {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
 
@@ -82,13 +82,14 @@ async function parse(xml: string) {
 }
 
 parse(xmlStr)
-.then(data => {
-  fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
+  .then(data => {
+    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), 'utf8');
+    console.log(`Wrote file to ${outputPath}`);
+  })
+  .catch(e => {
+    console.error(e);
+  });
 
-  console.log(`Wrote file to ${outputPath}`);
-})
-.catch(e => {
-  console.error(e);
-});
+const PRIMARY_CODE_PATH_MAP = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
 
-export default parse;
+export default PRIMARY_CODE_PATH_MAP;
