@@ -29,9 +29,18 @@ export default function MeasureUpload() {
       } else if (measures?.length !== 1) {
         rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'");
       } else {
+        // Map the valueset urls to their name for later display
+        const valueSetsMap =
+          bundle.entry?.reduce((acc: any, e: fhir4.BundleEntry) => {
+            if (e.resource?.resourceType === 'ValueSet' && e.resource.url) {
+              acc[e.resource.url] = e.resource.name ?? e.resource.title ?? 'Name Missing';
+            }
+            return acc;
+          }, {}) || null;
         setMeasureBundle({
           name: file.name,
-          content: bundle
+          content: bundle,
+          valueSetsMap
         });
         const effectivePeriod = (measures[0].resource as fhir4.Measure).effectivePeriod;
 
@@ -53,7 +62,8 @@ export default function MeasureUpload() {
     });
     setMeasureBundle({
       name: '',
-      content: null
+      content: null,
+      valueSetsMap: null
     });
   }
   return (

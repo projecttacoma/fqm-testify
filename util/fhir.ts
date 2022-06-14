@@ -37,12 +37,25 @@ export function getPatientInfoString(patient: fhir4.Patient) {
   return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family} (DOB: ${patient.birthDate})`;
 }
 
-export function getDataRequirementFiltersString(dr: fhir4.DataRequirement) {
-  const valueSets = dr.codeFilter?.map(filter => {
-    return filter.valueSet;
-  });
+/**
+ * Identifies the valuesets referenced in a DataRequirement and constructs a string which displays
+ * those valuesets
+ * @param dr {Object} a fhir DataRequirement object
+ * @param valueSetsMap {Object} a mapping of valueset urls to valueset names and titles
+ * @returns {String} displaying the valuesets referenced by a DataRequirement
+ */
+export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetsMap: any): string {
+  const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
+    if (e.valueSet) {
+      acc.push(valueSetsMap[e.valueSet]);
+    }
+    if (e.path === 'code' && e.code) {
+      acc.push(...e.code.map(c => c.display ?? 'Un-named Code'));
+    }
+    return acc;
+  }, []);
   if (valueSets) {
-    return `w/ ${valueSets?.join('\n')}`;
+    return `${valueSets?.join('\n')}`;
   }
   return '';
 }

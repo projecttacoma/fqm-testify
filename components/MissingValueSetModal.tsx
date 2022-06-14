@@ -29,7 +29,7 @@ export default function MissingValueSetModal() {
       size="xl"
       withCloseButton={false}
       opened={missingValueSets.length > 0}
-      onClose={() => setMeasureBundle({ name: '', content: null })}
+      onClose={() => setMeasureBundle({ name: '', content: null, valueSetsMap: null })}
       styles={{
         modal: { padding: '0px !important', margin: 0 }
       }}

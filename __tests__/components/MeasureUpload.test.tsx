@@ -17,7 +17,8 @@ describe('MeasureUpload', () => {
   it('renders a dropzone with measure bundle name label when measure uploaded', async () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
-      content: testBundle as fhir4.Bundle
+      content: testBundle as fhir4.Bundle,
+      valueSetsMap: null
     });
     await act(async () => {
       render(

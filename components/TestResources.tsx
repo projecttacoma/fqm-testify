@@ -2,7 +2,7 @@ import { useRecoilValue } from 'recoil';
 import { useState, useEffect } from 'react';
 import { measureBundleState } from '../state/atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
-import { Affix, Button, Stack, Text, useMantineTheme } from '@mantine/core';
+import { Affix, Button, Stack, Text, Title, useMantineTheme } from '@mantine/core';
 import { getDataRequirementFiltersString } from '../util/fhir';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 
@@ -17,7 +17,10 @@ export default function TestResourcesDisplay() {
         const drs = requirements.results.dataRequirement;
         if (drs) {
           drs.sort((a, b) => {
-            return a.type + getDataRequirementFiltersString(a) > b.type + getDataRequirementFiltersString(b) ? 1 : -1;
+            return a.type + getDataRequirementFiltersString(a, measureBundle.valueSetsMap) >
+              b.type + getDataRequirementFiltersString(b, measureBundle.valueSetsMap)
+              ? 1
+              : -1;
           });
           setDataRequirements(drs);
         }
@@ -40,13 +43,14 @@ export default function TestResourcesDisplay() {
       }}
     >
       <Stack>
-        {dataRequirements?.map(dr => {
-          const displayString = getDataRequirementFiltersString(dr);
+        {dataRequirements.map((dr, i) => {
+          const key = `${dr.type}${i}`;
+          const displayString = getDataRequirementFiltersString(dr, measureBundle.valueSetsMap);
           return (
-            <Button key={displayString} fullWidth variant="default" style={{ height: 'auto', padding: 10 }}>
-              <div>
-                <Text>{dr.type}</Text>
-                <Text>{displayString}</Text>
+            <Button key={key} fullWidth variant="default" style={{ height: 'auto', padding: 10, overflow: 'hidden' }}>
+              <div style={{ overflow: 'hidden' }}>
+                <Title order={3}>{dr.type}</Title>
+                <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayString}</Text>
               </div>
             </Button>
           );
