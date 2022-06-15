@@ -12,8 +12,7 @@ import { DRCalculationOutput } from 'fqm-execution/build/types/Calculator';
 const PATIENT_TEST_CASE_POPULATED = { pid1: { resourceType: 'Patient' } as fhir4.Patient };
 const MEASURE_BUNDLE_POPULATED = {
   name: 'testName',
-  content: noMissingVSBundle as fhir4.Bundle,
-  valueSetsMap: { 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1013': 'test vs name' }
+  content: noMissingVSBundle as fhir4.Bundle
 };
 
 describe('TestResourcesDisplay', () => {
@@ -40,7 +39,7 @@ describe('TestResourcesDisplay', () => {
 
     const observationText = screen.getByText('Observation');
     expect(observationText).toBeInTheDocument();
-    const vsText = screen.getByText('test vs name');
+    const vsText = screen.getByText('FITDNA');
     expect(vsText).toBeInTheDocument();
   });
   test('Display does not appear when patientTestCaseState is not populated', async () => {
@@ -66,7 +65,7 @@ describe('TestResourcesDisplay', () => {
   });
   test('Display does not appear when measureBundleState is not populated', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
-    const MockMB = getMockRecoilState(measureBundleState, { name: '', content: null, valueSetsMap: null });
+    const MockMB = getMockRecoilState(measureBundleState, { name: '', content: null });
 
     jest
       .spyOn(Calculator, 'calculateDataRequirements')

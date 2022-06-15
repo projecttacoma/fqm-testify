@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
 import { generateRandomFirstName, generateRandomLastName } from './randomizer';
+import { ValueSetsMap } from '../state/selectors/valueSetsMap';
+import { DataRequirement, DataRequirementCodeFilter } from 'fhir/r3';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -44,10 +46,10 @@ export function getPatientInfoString(patient: fhir4.Patient) {
  * @param valueSetsMap {Object} a mapping of valueset urls to valueset names and titles
  * @returns {String} displaying the valuesets referenced by a DataRequirement
  */
-export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetsMap: any): string {
+export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetMap: ValueSetsMap): string {
   const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
     if (e.valueSet) {
-      acc.push(valueSetsMap[e.valueSet]);
+      acc.push(valueSetMap[e.valueSet]);
     }
     if (e.path === 'code' && e.code) {
       acc.push(...e.code.map(c => c.display ?? 'Un-named Code'));
