@@ -7,7 +7,7 @@
     "dev": "next dev -p 3000",
     "build": "next build && npm run parse-primaryCodePath",
     "start": "next start -p 3000",
-    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts",
+    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts --loglevel silent",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",

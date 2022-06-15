@@ -113,7 +113,7 @@ export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = {
   },
   DeviceRequest: {
     primaryCodePath: 'code',
-    primaryCodeType: ['FHIR.Reference', 'FHIR.CodeableConcept'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   DiagnosticReport: {
@@ -153,7 +153,7 @@ export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = {
   },
   GuidanceResponse: {
     primaryCodePath: 'module',
-    primaryCodeType: ['FHIR.uri', 'FHIR.canonical', 'FHIR.CodeableConcept'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   HealthcareService: {
@@ -193,12 +193,12 @@ export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = {
   },
   MedicationAdministration: {
     primaryCodePath: 'medication',
-    primaryCodeType: ['FHIR.CodeableConcept', 'FHIR.Reference'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   MedicationDispense: {
     primaryCodePath: 'medication',
-    primaryCodeType: ['FHIR.CodeableConcept', 'FHIR.Reference'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   MedicationKnowledge: {
@@ -208,17 +208,17 @@ export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = {
   },
   MedicationRequest: {
     primaryCodePath: 'medication',
-    primaryCodeType: ['FHIR.CodeableConcept', 'FHIR.Reference'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   MedicationStatement: {
     primaryCodePath: 'medication',
-    primaryCodeType: ['FHIR.CodeableConcept', 'FHIR.Reference'],
+    primaryCodeType: 'FHIR.CodeableConcept',
     multipleCardinality: false
   },
   MessageDefinition: {
     primaryCodePath: 'event',
-    primaryCodeType: ['FHIR.Coding', 'FHIR.uri'],
+    primaryCodeType: 'FHIR.Coding',
     multipleCardinality: false
   },
   Observation: {

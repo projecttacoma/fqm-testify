@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml2js from 'xml2js';
@@ -10,7 +9,7 @@ const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 
 export interface primaryCodePathInfo {
   primaryCodePath: string;
-  primaryCodeType?: string | string[];
+  primaryCodeType?: string;
   multipleCardinality: boolean;
 }
 
@@ -56,7 +55,18 @@ export async function parse(xml: string) {
               const choiceName = c.$.name;
               choices.push(`${choiceNamespace}.${choiceName}`);
             });
-            primaryCodeType = choices;
+
+            // apply heuristic for selecting primaryCodeType
+            if (choices.includes('FHIR.CodeableConcept')) {
+              primaryCodeType = 'FHIR.CodeableConcept';
+            } else if (choices.includes('FHIR.Coding')) {
+              primaryCodeType = 'FHIR.Coding';
+            } else if (choices.includes('FHIR.code')) {
+              primaryCodeType = 'FHIR.code';
+            } else {
+              primaryCodeType = choices[0];
+            }
+            
             // all choice types are 0..1 or 1..1 cardinality
             multipleCardinality = false;
           } else {
