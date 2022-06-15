@@ -66,7 +66,7 @@ export async function parse(xml: string) {
             } else {
               primaryCodeType = choices[0];
             }
-            
+
             // all choice types are 0..1 or 1..1 cardinality
             multipleCardinality = false;
           } else {
