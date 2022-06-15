@@ -49,7 +49,7 @@ export function getPatientInfoString(patient: fhir4.Patient) {
 export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetMap: ValueSetsMap): string {
   const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
     if (e.valueSet) {
-      acc.push(valueSetMap[e.valueSet]);
+      acc.push(`${valueSetMap[e.valueSet]} (${e.valueSet})`);
     }
     if (e.path === 'code' && e.code) {
       acc.push(...e.code.map(c => c.display ?? 'Un-named Code'));

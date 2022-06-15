@@ -61,14 +61,14 @@ describe('getDataRequirementFiltersString', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUE_SETS, VS_MAP)).toEqual('');
   });
   test('returns name of valueset when codefilter includes valueset', () => {
-    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_VALUE_SETS, VS_MAP)).toEqual('test vs name');
+    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_VALUE_SETS, VS_MAP)).toEqual('test vs name (testvs)');
   });
   test('returns display when code filter is of path code', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_CODE, VS_MAP)).toEqual('test display');
   });
   test('returns display and name when both code and valueset exist', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_CODE_AND_VALUESET, VS_MAP)).toEqual(
-      'test vs name\ntest display'
+      'test vs name (testvs)\ntest display'
     );
   });
 });

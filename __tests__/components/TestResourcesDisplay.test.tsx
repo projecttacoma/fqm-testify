@@ -39,7 +39,9 @@ describe('TestResourcesDisplay', () => {
 
     const observationText = screen.getByText('Observation');
     expect(observationText).toBeInTheDocument();
-    const vsText = screen.getByText('FITDNA');
+    const vsText = screen.getByText(
+      'FITDNA (http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1039)'
+    );
     expect(vsText).toBeInTheDocument();
   });
   test('Display does not appear when patientTestCaseState is not populated', async () => {

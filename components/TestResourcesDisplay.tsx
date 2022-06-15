@@ -28,7 +28,7 @@ export default function TestResourcesDisplay() {
         }
       });
     }
-  }, [measureBundle]);
+  }, [measureBundle, valueSetMap]);
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
     <Affix
