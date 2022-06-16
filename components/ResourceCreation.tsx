@@ -1,4 +1,6 @@
+import { Accordion, Button, Group } from '@mantine/core';
 import { useEffect } from 'react';
+import produce from 'immer';
 import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import CodeEditorModal from '../components/CodeEditorModal';
@@ -12,49 +14,114 @@ function ResourceCreation() {
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [currentResources, setCurrentResources] = useRecoilState(fhirResourceState);
 
+  const openModal = (resourceId?: string) => {
+    if (resourceId && Object.keys(currentResources).includes(resourceId)) {
+      setCurrentResource(resourceId);
+    } else {
+      setCurrentResource(null);
+    }
+
+    if (selectedDataRequirement.content) {
+      setIsResourceModalOpen(true);
+    }
+  };
+  
   useEffect(() => {
-    openModal();
+    if (selectedDataRequirement.content) {
+      setIsResourceModalOpen(true);
+    }
   }, [selectedDataRequirement]);
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const updateResource = (val: string) => {};
+  const updateResource = (val: string) => {
+    // TODO: Validate the incoming JSON as FHIR
+    const updatedResource = JSON.parse(val.trim()); //as fhir4.Resource
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const deleteResource = (id: string) => {};
+    if (updatedResource.id) {
+      const resourceId = updatedResource.id;
+
+      // Create a new state object using immer without needing to shallow clone the entire previous object
+      const nextResourceState = produce(currentResources, draftState => {
+        draftState[resourceId] = updatedResource;
+      });
+
+      setCurrentResources(nextResourceState);
+    }
+
+    closeModal();
+  };
+
+  const deleteResource = (id: string) => {
+    const nextResourceState = produce(currentResources, draftState => {
+      delete draftState[id];
+    })
+
+    setCurrentResources(nextResourceState);
+  };
 
   const getInitialResource = () => {
-    // check that a button has been selected
     if (isResourceModalOpen) {
       if (currentResource) {
         return JSON.stringify(currentResources[currentResource], null, 2);
       } else {
-        createFHIRResourceString(selectedDataRequirement.content);
-        // need to create test resource from selected data requirements button
-        // make a function in fhir.ts to accomplish this
+        console.log(selectedDataRequirement.content?.codeFilter);
+        console.log(selectedDataRequirement.content?.extension);
+        console.log(selectedDataRequirement.content?.type);
+
+        if (selectedDataRequirement.content) {
+           return createFHIRResourceString(selectedDataRequirement.content);
+        }
       }
     }
     return undefined;
   };
 
-  const openModal = () => {
-    if (selectedDataRequirement.content) {
-      setIsResourceModalOpen(true);
-    }
-  };
+  
 
   const closeModal = () => {
     setIsResourceModalOpen(false);
+    setCurrentResource(null);
   };
 
   return (
+    <>
     <CodeEditorModal
       open={isResourceModalOpen}
       onClose={closeModal}
       title="Edit FHIR Resource"
-      onSave={closeModal}
-      // initialValue={}
+      onSave={updateResource}
+      initialValue={getInitialResource()}
     />
+    {Object.keys(currentResources).length > 0 && (
+      <>
+      <h1>Test Case Resources:</h1>
+      <Accordion>
+        {Object.entries(currentResources).map(([id, resource]) => (
+          <Accordion.Item key={id} label={resource.resourceType}>
+            <Group>
+              <Button
+                onClick={() => {
+                  openModal(id);
+                }}
+              >
+                Edit FHIR Resource
+              </Button>
+              <Button
+                onClick={() => {
+                  deleteResource(id);
+                }}
+                color="red"
+              >
+                Delete Resource
+              </Button>
+            </Group>
+          </Accordion.Item>
+        ))}
+      </Accordion>
+      </>
+    )}
+    </>
   );
 }
 
 export default ResourceCreation;
+

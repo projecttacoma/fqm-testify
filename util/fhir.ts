@@ -62,6 +62,17 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
   return '';
 }
 
-export function createFHIRResourceString(dr: fhir4.DataRequirement | null): string | void {
+export function createFHIRResourceString(dr: fhir4.DataRequirement): string {
   const id = uuidv4();
+  // TODO: rebase and bring in parsed info from script
+  // for now, just hardcode the primaryCodePath and type
+  const primaryCodePath = {code: {'coding': []}};
+  // TODO: figure out if we can use fhir4.Resource ??
+  const resource: any = {
+    resourceType: dr.type,
+    id,
+    primaryCodePath
+  }
+  console.log(resource);
+  return JSON.stringify(resource, null, 2);
 }
