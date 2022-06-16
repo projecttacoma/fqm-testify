@@ -1,13 +1,14 @@
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import TestResourcesDisplay from '../../components/TestResourcesDisplay';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { measureBundleState } from '../../state/atoms/measureBundle';
-import noMissingVSBundle from '../fixtures/bundles/EXM130Fixture.json';
-import dataRequirementsResponse from '../fixtures/DataRequirementsResponse.json';
+import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import TestResourcesDisplay from '../../../components/ResourceCreation/TestResourcesDisplay';
+import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
+import noMissingVSBundle from '../../fixtures/bundles/EXM130Fixture.json';
+import dataRequirementsResponse from '../../fixtures/DataRequirementsResponse.json';
 import { Calculator } from 'fqm-execution';
 import { DRCalculationOutput } from 'fqm-execution/build/types/Calculator';
+import { Suspense } from 'react';
 
 const PATIENT_TEST_CASE_POPULATED = { pid1: { resourceType: 'Patient' } as fhir4.Patient };
 const MEASURE_BUNDLE_POPULATED = {
@@ -29,13 +30,15 @@ describe('TestResourcesDisplay', () => {
           <>
             <MockMB />
             <MockPatients />
-            <TestResourcesDisplay />
+            <Suspense>
+              <TestResourcesDisplay />
+            </Suspense>
           </>
         )
       );
     });
-    const affix = screen.getByTestId('test-resource-affix');
-    expect(affix).toBeInTheDocument();
+    const trp = screen.getByTestId('test-resource-panel');
+    expect(trp).toBeInTheDocument();
 
     const observationText = screen.getByText('Observation');
     expect(observationText).toBeInTheDocument();
@@ -57,13 +60,15 @@ describe('TestResourcesDisplay', () => {
           <>
             <MockMB />
             <MockPatients />
-            <TestResourcesDisplay />
+            <Suspense>
+              <TestResourcesDisplay />
+            </Suspense>
           </>
         )
       );
     });
-    const affix = screen.queryByTestId('test-resource-affix');
-    expect(affix).not.toBeInTheDocument();
+    const trp = screen.queryByTestId('test-resource-panel');
+    expect(trp).not.toBeInTheDocument();
   });
   test('Display does not appear when measureBundleState is not populated', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
@@ -78,12 +83,14 @@ describe('TestResourcesDisplay', () => {
           <>
             <MockMB />
             <MockPatients />
-            <TestResourcesDisplay />
+            <Suspense>
+              <TestResourcesDisplay />
+            </Suspense>
           </>
         )
       );
     });
-    const affix = screen.queryByTestId('test-resource-affix');
-    expect(affix).not.toBeInTheDocument();
+    const trp = screen.queryByTestId('test-resource-panel');
+    expect(trp).not.toBeInTheDocument();
   });
 });

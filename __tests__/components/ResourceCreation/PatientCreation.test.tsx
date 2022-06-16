@@ -1,25 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import PatientCreation from '../../components/PatientCreation';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import PatientCreation from '../../../components/ResourceCreation/PatientCreation';
+import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 
 describe('PatientCreation', () => {
-  it('should render create button', () => {
-    const MockPatients = getMockRecoilState(patientTestCaseState, {});
-
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <PatientCreation />
-        </>
-      )
-    );
-
-    const createButton = screen.getByText(/create test patient/i);
-    expect(createButton).toBeInTheDocument();
-  });
+  const DEFAULT_PROPS = {
+    closeModal: jest.fn(),
+    openModal: jest.fn()
+  };
 
   it('should not render modal by default', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
@@ -28,7 +17,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -37,21 +26,17 @@ describe('PatientCreation', () => {
     expect(modal).not.toBeInTheDocument();
   });
 
-  it('should render modal by when create button is clicked', () => {
+  it('should render modal by when isPatientModalOpen is true', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
     render(
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={true} currentPatient={null} />
         </>
       )
     );
-
-    const createButton = screen.getByText(/create test patient/i);
-
-    fireEvent.click(createButton);
 
     const modal = screen.getByTestId('code-editor-modal');
 
@@ -65,12 +50,12 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
 
-    const testCaseList = screen.queryByText(/test cases/i);
+    const testCaseList = screen.queryByTestId('patient-stack');
     expect(testCaseList).not.toBeInTheDocument();
   });
 
@@ -86,7 +71,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -107,7 +92,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -117,7 +102,7 @@ describe('PatientCreation', () => {
 
     fireEvent.click(deleteButton);
 
-    const testCaseList = screen.queryByText(/test cases/i);
+    const testCaseList = screen.queryByTestId('patient-stack');
     expect(testCaseList).not.toBeInTheDocument();
   });
 });

@@ -4,8 +4,7 @@ import { AppShell, Grid, Header } from '@mantine/core';
 import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
 import DateSelectors from '../components/DateSelectors';
-import PatientCreation from '../components/PatientCreation';
-import TestResourcesDisplay from '../components/TestResourcesDisplay';
+import ResourceCreationPanel from '../components/ResourceCreation/ResourceCreationPanel';
 
 const Home: NextPage = () => {
   return (
@@ -22,8 +21,7 @@ const Home: NextPage = () => {
             <DateSelectors />
           </Grid.Col>
         </Grid>
-        <PatientCreation />
-        <TestResourcesDisplay />
+        <ResourceCreationPanel />
       </AppShell>
     </>
   );
