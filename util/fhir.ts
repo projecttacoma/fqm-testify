@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import { generateRandomFirstName, generateRandomLastName } from './randomizer';
 import { ValueSetsMap } from '../state/selectors/valueSetsMap';
 import { DataRequirement, DataRequirementCodeFilter } from 'fhir/r3';
+import { parsedPrimaryCodePaths } from './primaryCodePaths';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -66,13 +67,16 @@ export function createFHIRResourceString(dr: fhir4.DataRequirement): string {
   const id = uuidv4();
   // TODO: rebase and bring in parsed info from script
   // for now, just hardcode the primaryCodePath and type
-  const primaryCodePath = {code: {'coding': []}};
+  const primaryCodePath = parsedPrimaryCodePaths[dr.type].primaryCodePath;
+  //const test: fhir4.CodeableConcept
   // TODO: figure out if we can use fhir4.Resource ??
   const resource: any = {
     resourceType: dr.type,
-    id,
-    primaryCodePath
-  }
+    id
+  };
+  // make a variable to be the value of the primaryCodePath
+  // based on what the primaryCodeType is
+  resource[primaryCodePath] = 'test';
   console.log(resource);
   return JSON.stringify(resource, null, 2);
 }
