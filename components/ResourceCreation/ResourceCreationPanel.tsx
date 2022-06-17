@@ -1,6 +1,7 @@
 import { Button, Center, Grid, Loader } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
@@ -11,6 +12,7 @@ export default function ResourceCreationPanel() {
   const [currentPatient, setCurrentPatient] = useState<string | null>(null);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const currentPatients = useRecoilValue(patientTestCaseState);
+  const measureBundle = useRecoilValue(measureBundleState);
 
   const openModal = (patientId?: string) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -33,7 +35,7 @@ export default function ResourceCreationPanel() {
         </div>
       </Center>
       <Grid>
-        {selectedPatient !== null && (
+        {selectedPatient !== null && measureBundle.content && (
           <Grid.Col span={4}>
             <Suspense
               fallback={
@@ -46,7 +48,7 @@ export default function ResourceCreationPanel() {
             </Suspense>
           </Grid.Col>
         )}
-        <Grid.Col span={selectedPatient !== null ? 8 : 12}>
+        <Grid.Col span={selectedPatient !== null && measureBundle.content ? 8 : 12}>
           <PatientCreation {...{ openModal, closeModal, isPatientModalOpen, currentPatient }} />
         </Grid.Col>
       </Grid>
