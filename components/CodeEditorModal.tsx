@@ -27,6 +27,7 @@ export default function CodeEditorModal({
 
   return (
     <Modal
+      zIndex={2}
       data-testid="code-editor-modal"
       centered
       size="xl"

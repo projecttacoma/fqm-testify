@@ -36,8 +36,8 @@ export default function MissingValueSetModal() {
       <Alert icon={<AlertCircle size={16} />} title="Hold on there, Cowboy. You're missing ValueSets!" color="red">
         <Text>The following required ValueSets are missing from the uploaded measure bundle:</Text>
         <List>
-          {missingValueSets.map((vs, i) => (
-            <List.Item key={`item${i}`}>
+          {missingValueSets.map(vs => (
+            <List.Item key={vs}>
               <Text variant="link" component="a" href={vs} target="_blank">{`\t${vs}`}</Text>
             </List.Item>
           ))}
@@ -49,7 +49,7 @@ export default function MissingValueSetModal() {
 
 /**
  * Runs data requirements on a FHIR MeasureBundle, then compares the required
- * valuesets to the valusets included in the bundle. Returns an array of canonical urls of
+ * valuesets to the valuesets included in the bundle. Returns an array of canonical urls of
  * missing required valuesets
  * @param mb { Object } a FHIR MeasureBundle uploaded by the user
  * @returns { Array } an array of canonical urls of missing valuesets
