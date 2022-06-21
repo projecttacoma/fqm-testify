@@ -1,4 +1,4 @@
-import { Button, Center, Collapse, Group, Stack, Text } from '@mantine/core';
+import { Button, Center, Collapse, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -8,15 +8,16 @@ import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { ChevronRight, ChevronDown } from 'tabler-icons-react';
 import React from 'react';
+import TestResourceCreation from './TestResourceCreation';
 
 interface PatientCreationProps {
-  openModal: (patientId?: string) => void;
-  closeModal: () => void;
+  openPatientModal: (patientId?: string) => void;
+  closePatientModal: () => void;
   isPatientModalOpen: boolean;
   currentPatient: string | null;
 }
 
-function PatientCreation({ openModal, closeModal, isPatientModalOpen, currentPatient }: PatientCreationProps) {
+function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOpen, currentPatient }: PatientCreationProps) {
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -36,7 +37,7 @@ function PatientCreation({ openModal, closeModal, isPatientModalOpen, currentPat
       setCurrentPatients(nextPatientState);
     }
 
-    closeModal();
+    closePatientModal();
   };
 
   const deletePatientTestCase = (id: string) => {
@@ -72,7 +73,7 @@ function PatientCreation({ openModal, closeModal, isPatientModalOpen, currentPat
     <>
       <CodeEditorModal
         open={isPatientModalOpen}
-        onClose={closeModal}
+        onClose={closePatientModal}
         title="Edit Patient Resource"
         onSave={updatePatientTestCase}
         initialValue={getInitialPatientResource()}
@@ -102,7 +103,7 @@ function PatientCreation({ openModal, closeModal, isPatientModalOpen, currentPat
                     <Group>
                       <Button
                         onClick={() => {
-                          openModal(id);
+                          openPatientModal(id);
                         }}
                       >
                         Edit Patient
@@ -117,7 +118,7 @@ function PatientCreation({ openModal, closeModal, isPatientModalOpen, currentPat
                       </Button>
                     </Group>
                   </Center>
-                  <Text>TODO: Add view of data elements associated with test case</Text>
+                  <TestResourceCreation {...{selectedPatient}}/>
                 </Collapse>
               </div>
             ))}

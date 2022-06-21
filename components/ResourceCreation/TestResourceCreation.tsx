@@ -1,20 +1,29 @@
-import { Accordion, Button, Group } from '@mantine/core';
-import { useEffect } from 'react';
+import { Button, Group, Paper, Text } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import produce from 'immer';
-import { useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import CodeEditorModal from '../components/CodeEditorModal';
-import { fhirResourceState } from '../state/atoms/fhirResource';
-import { selectedDataRequirementState } from '../state/atoms/selectedDataRequirement';
-import { createFHIRResourceString } from '../util/fhir';
+import CodeEditorModal from '../CodeEditorModal';
+import { fhirResourceState } from '../../state/atoms/fhirResource';
+import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
+import { createFHIRResourceString } from '../../util/fhir';
 
-function ResourceCreation() {
+interface ResourceCreationProps {
+  selectedPatient: string | null
+}
+
+function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
+  const [currentResources, setCurrentResources] = useRecoilState(fhirResourceState);
+  const [currentResource, setCurrentResource] = useState<string | null>(null);
   const selectedDataRequirement = useRecoilValue(selectedDataRequirementState);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
-  const [currentResource, setCurrentResource] = useState<string | null>(null);
-  const [currentResources, setCurrentResources] = useRecoilState(fhirResourceState);
 
-  const openModal = (resourceId?: string) => {
+  useEffect(() => {
+    if (selectedDataRequirement.content) {
+      setIsResourceModalOpen(true);
+    }
+  }, [selectedDataRequirement, setIsResourceModalOpen]);
+
+  const openResourceModal = (resourceId?: string) => {
     if (resourceId && Object.keys(currentResources).includes(resourceId)) {
       setCurrentResource(resourceId);
     } else {
@@ -25,12 +34,10 @@ function ResourceCreation() {
       setIsResourceModalOpen(true);
     }
   };
-  
-  useEffect(() => {
-    if (selectedDataRequirement.content) {
-      setIsResourceModalOpen(true);
-    }
-  }, [selectedDataRequirement]);
+  const closeResourceModal = () => {
+    setIsResourceModalOpen(false);
+    setCurrentResource(null);
+  };
 
   const updateResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -41,13 +48,13 @@ function ResourceCreation() {
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       const nextResourceState = produce(currentResources, draftState => {
-        draftState[resourceId] = updatedResource;
+        draftState[resourceId] = {selectedPatient, resource: updatedResource};
       });
 
       setCurrentResources(nextResourceState);
     }
 
-    closeModal();
+    closeResourceModal();
   };
 
   const deleteResource = (id: string) => {
@@ -75,32 +82,25 @@ function ResourceCreation() {
     return undefined;
   };
 
-  
-
-  const closeModal = () => {
-    setIsResourceModalOpen(false);
-    setCurrentResource(null);
-  };
-
   return (
     <>
     <CodeEditorModal
       open={isResourceModalOpen}
-      onClose={closeModal}
+      onClose={closeResourceModal}
       title="Edit FHIR Resource"
       onSave={updateResource}
       initialValue={getInitialResource()}
     />
-    {Object.keys(currentResources).length > 0 && (
+    {(Object.keys(currentResources).length > 0 && selectedPatient) && (
       <>
-      <h1>Test Case Resources:</h1>
-      <Accordion>
+      <h3>Test Case Resources:</h3>
         {Object.entries(currentResources).map(([id, resource]) => (
-          <Accordion.Item key={id} label={resource.resourceType}>
+          <Paper key={id} withBorder p="md">
             <Group>
+              <Text>{resource.resource.resourceType}</Text>
               <Button
                 onClick={() => {
-                  openModal(id);
+                  openResourceModal(id);
                 }}
               >
                 Edit FHIR Resource
@@ -114,14 +114,13 @@ function ResourceCreation() {
                 Delete Resource
               </Button>
             </Group>
-          </Accordion.Item>
+          </Paper>
         ))}
-      </Accordion>
       </>
     )}
     </>
   );
 }
 
-export default ResourceCreation;
+export default TestResourceCreation;
 
