@@ -14,11 +14,13 @@ interface ResourceCreationProps {
 function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
   const [currentResources, setCurrentResources] = useRecoilState(fhirResourceState);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
-  const selectedDataRequirement = useRecoilValue(selectedDataRequirementState);
+  const [selectedDataRequirement, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
 
   useEffect(() => {
+    setIsResourceModalOpen(false);
     if (selectedDataRequirement.content) {
+      // openResourceModal();
       setIsResourceModalOpen(true);
     }
   }, [selectedDataRequirement, setIsResourceModalOpen]);
@@ -30,13 +32,15 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
       setCurrentResource(null);
     }
 
-    if (selectedDataRequirement.content) {
+    if (currentResource || selectedDataRequirement.content) {
       setIsResourceModalOpen(true);
     }
+    
   };
   const closeResourceModal = () => {
     setIsResourceModalOpen(false);
     setCurrentResource(null);
+    setSelectedDataRequirement({name: '', content: null});
   };
 
   const updateResource = (val: string) => {
@@ -53,7 +57,6 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
 
       setCurrentResources(nextResourceState);
     }
-
     closeResourceModal();
   };
 
@@ -68,12 +71,8 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
   const getInitialResource = () => {
     if (isResourceModalOpen) {
       if (currentResource) {
-        return JSON.stringify(currentResources[currentResource], null, 2);
+        return JSON.stringify(currentResources[currentResource].resource, null, 2);
       } else {
-        console.log(selectedDataRequirement.content?.codeFilter);
-        console.log(selectedDataRequirement.content?.extension);
-        console.log(selectedDataRequirement.content?.type);
-
         if (selectedDataRequirement.content) {
            return createFHIRResourceString(selectedDataRequirement.content);
         }
@@ -94,7 +93,7 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
     {(Object.keys(currentResources).length > 0 && selectedPatient) && (
       <>
       <h3>Test Case Resources:</h3>
-        {Object.entries(currentResources).map(([id, resource]) => (
+        {Object.entries(currentResources).filter(r => r[1].selectedPatient === selectedPatient).map(([id, resource]) => (
           <Paper key={id} withBorder p="md">
             <Group>
               <Text>{resource.resource.resourceType}</Text>

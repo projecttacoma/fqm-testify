@@ -77,6 +77,5 @@ export function createFHIRResourceString(dr: fhir4.DataRequirement): string {
   // make a variable to be the value of the primaryCodePath
   // based on what the primaryCodeType is
   resource[primaryCodePath] = 'test';
-  console.log(resource);
   return JSON.stringify(resource, null, 2);
 }
