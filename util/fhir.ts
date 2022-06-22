@@ -4,6 +4,7 @@ import { generateRandomFirstName, generateRandomLastName } from './randomizer';
 import { ValueSetsMap } from '../state/selectors/valueSetsMap';
 import { DataRequirement, DataRequirementCodeFilter } from 'fhir/r3';
 import { parsedPrimaryCodePaths } from './primaryCodePaths';
+import _ from 'lodash';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -63,19 +64,61 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
   return '';
 }
 
-export function createFHIRResourceString(dr: fhir4.DataRequirement): string {
+export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bundle | null): string {
+  console.log(dr);
   const id = uuidv4();
-  // TODO: rebase and bring in parsed info from script
-  // for now, just hardcode the primaryCodePath and type
-  const primaryCodePath = parsedPrimaryCodePaths[dr.type].primaryCodePath;
-  //const test: fhir4.CodeableConcept
-  // TODO: figure out if we can use fhir4.Resource ??
   const resource: any = {
     resourceType: dr.type,
     id
   };
-  // make a variable to be the value of the primaryCodePath
-  // based on what the primaryCodeType is
-  resource[primaryCodePath] = 'test';
+
+  // resource data retrieved from the data requirements
+  // TODO: this is wrong
+  dr.codeFilter?.forEach(cf => {
+    if (!cf.valueSet && cf.path) {
+      resource[cf.path] = cf.code
+    }
+  })
+
+  // resource data retrieved from parsed primary code path script
+  const vsUrl = dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet;
+  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === "ValueSet" && r.resource?.url === vsUrl)[0].resource as fhir4.ValueSet;
+  const include = _.sample(vsResource?.compose?.include);
+  // from the random include, get the random code and display from concept, and then optionally
+  // pair it with the include.system and include.version if needed
+  const codeDisplay = _.sample(include?.concept)
+  const primaryCodePath = parsedPrimaryCodePaths[dr.type].primaryCodePath;
+  const primaryCodeType = parsedPrimaryCodePaths[dr.type].primaryCodeType;
+
+  let value;
+  if (primaryCodeType === 'FHIR.CodeableConcept') {
+    value = {
+      coding: {
+        system: include?.system,
+        version: include?.version,
+        code: codeDisplay?.code,
+        display: codeDisplay?.display
+      },
+      text: ''
+    };
+  } else if (primaryCodeType === 'FHIR.Coding') {
+    value = {
+      system: include?.system,
+      version: include?.version,
+      code: codeDisplay?.code,
+      display: codeDisplay?.display
+    };
+  } else if (primaryCodeType === 'FHIR.code') {
+    value = codeDisplay?.code;
+  } else {
+    value = null;
+  }
+
+  // TODO simplify this
+  if (parsedPrimaryCodePaths[dr.type].multipleCardinality) {
+    resource[primaryCodePath] = [value];
+  } else {
+    resource[primaryCodePath] = value;
+  }
   return JSON.stringify(resource, null, 2);
 }

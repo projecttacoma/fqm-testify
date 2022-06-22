@@ -4,6 +4,7 @@ import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import CodeEditorModal from '../CodeEditorModal';
 import { fhirResourceState } from '../../state/atoms/fhirResource';
+import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { createFHIRResourceString } from '../../util/fhir';
 
@@ -16,6 +17,7 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [selectedDataRequirement, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
+  const measureBundle = useRecoilValue(measureBundleState);
 
   useEffect(() => {
     setIsResourceModalOpen(false);
@@ -74,7 +76,7 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
         return JSON.stringify(currentResources[currentResource].resource, null, 2);
       } else {
         if (selectedDataRequirement.content) {
-           return createFHIRResourceString(selectedDataRequirement.content);
+           return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content);
         }
       }
     }
