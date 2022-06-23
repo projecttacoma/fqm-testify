@@ -1,82 +1,94 @@
 import { Button, Group, Paper, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import CodeEditorModal from '../CodeEditorModal';
-import { fhirResourceState } from '../../state/atoms/fhirResource';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
+import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString } from '../../util/fhir';
+import { selectedPatientState } from '../../state/atoms/selectedPatient';
 
-interface ResourceCreationProps {
-  selectedPatient: string | null
-}
-
-function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
-  const [currentResources, setCurrentResources] = useRecoilState(fhirResourceState);
+function TestResourceCreation() {
+  const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [selectedDataRequirement, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const measureBundle = useRecoilValue(measureBundleState);
+  const selectedPatient = useRecoilValue(selectedPatientState);
 
-  useEffect(() => {
-    setIsResourceModalOpen(false);
-    if (selectedDataRequirement.content) {
-      // openResourceModal();
-      setIsResourceModalOpen(true);
-    }
-  }, [selectedDataRequirement, setIsResourceModalOpen]);
-
-  const openResourceModal = (resourceId?: string) => {
-    if (resourceId && Object.keys(currentResources).includes(resourceId)) {
+  const openResourceModal = useCallback((resourceId?: string) => {
+    if (resourceId && selectedPatient 
+      && currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0) {
       setCurrentResource(resourceId);
     } else {
       setCurrentResource(null);
     }
+    setIsResourceModalOpen(true);
+  }, [currentTestCases, selectedPatient]);
 
-    if (currentResource || selectedDataRequirement.content) {
-      setIsResourceModalOpen(true);
+  useEffect(() => {
+    //setIsResourceModalOpen(false);
+    if (selectedDataRequirement.content) {
+      openResourceModal();
+      //setIsResourceModalOpen(true);
     }
-    
-  };
+  }, [openResourceModal, selectedDataRequirement]);
+
+  
   const closeResourceModal = () => {
     setIsResourceModalOpen(false);
     setCurrentResource(null);
-    setSelectedDataRequirement({name: '', content: null});
+    setSelectedDataRequirement({ name: '', content: null });
   };
 
   const updateResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
-    const updatedResource = JSON.parse(val.trim()); //as fhir4.Resource
+    const updatedResource = JSON.parse(val.trim()) as fhir4.Resource; 
 
     if (updatedResource.id) {
       const resourceId = updatedResource.id;
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      const nextResourceState = produce(currentResources, draftState => {
-        draftState[resourceId] = {selectedPatient, resource: updatedResource};
-      });
-
-      setCurrentResources(nextResourceState);
+      if (selectedPatient) {
+        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+        let nextResourceState;
+        if (resourceIndexToUpdate < 0) {
+          // add new resource
+          nextResourceState = produce(currentTestCases, draftState => {
+            draftState[selectedPatient].resources.push(updatedResource);
+          });
+        } else {
+          // update existing resource
+          nextResourceState = produce(currentTestCases, draftState => {
+            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+          });
+        }
+        setCurrentTestCases(nextResourceState);
+      }
     }
     closeResourceModal();
   };
 
-  const deleteResource = (id: string) => {
-    const nextResourceState = produce(currentResources, draftState => {
-      delete draftState[id];
-    })
-
-    setCurrentResources(nextResourceState);
+  const deleteResource = (id?: string) => {
+    if (id && selectedPatient) {
+      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+      if (resourceIndexToDelete >= 0) {
+        const nextResourceState = produce(currentTestCases, draftState => {
+          draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
+        });
+        setCurrentTestCases(nextResourceState);
+      }  
+    } 
   };
 
   const getInitialResource = () => {
     if (isResourceModalOpen) {
-      if (currentResource) {
-        return JSON.stringify(currentResources[currentResource].resource, null, 2);
+      if (currentResource && selectedPatient) {
+        return JSON.stringify(currentTestCases[selectedPatient].resources.filter(r => r.id === currentResource)[0], null, 2);
       } else {
-        if (selectedDataRequirement.content) {
-           return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content);
+        if (selectedDataRequirement.content && measureBundle.content) {
+          return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content);
         }
       }
     }
@@ -85,43 +97,44 @@ function TestResourceCreation({ selectedPatient }: ResourceCreationProps) {
 
   return (
     <>
-    <CodeEditorModal
-      open={isResourceModalOpen}
-      onClose={closeResourceModal}
-      title="Edit FHIR Resource"
-      onSave={updateResource}
-      initialValue={getInitialResource()}
-    />
-    {(Object.keys(currentResources).length > 0 && selectedPatient) && (
-      <>
-      <h3>Test Case Resources:</h3>
-        {Object.entries(currentResources).filter(r => r[1].selectedPatient === selectedPatient).map(([id, resource]) => (
-          <Paper key={id} withBorder p="md">
-            <Group>
-              <Text>{resource.resource.resourceType}</Text>
-              <Button
-                onClick={() => {
-                  openResourceModal(id);
-                }}
-              >
-                Edit FHIR Resource
-              </Button>
-              <Button
-                onClick={() => {
-                  deleteResource(id);
-                }}
-                color="red"
-              >
-                Delete Resource
-              </Button>
-            </Group>
-          </Paper>
-        ))}
-      </>
-    )}
+      <CodeEditorModal
+        open={isResourceModalOpen}
+        onClose={closeResourceModal}
+        title="Edit FHIR Resource"
+        onSave={updateResource}
+        initialValue={getInitialResource()}
+      />
+      {selectedPatient && currentTestCases[selectedPatient].resources.length > 0 && (
+        <>
+          <h3>Test Case Resources:</h3>
+          {currentTestCases[selectedPatient].resources
+            //.filter(r => r[1].selectedPatient === selectedPatient)
+            .map((resource, idx) => (
+              <Paper key={resource.id} withBorder p="md">
+                <Group>
+                  <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
+                  <Button
+                    onClick={() => {
+                      openResourceModal(resource.id);
+                    }}
+                  >
+                    Edit FHIR Resource
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      deleteResource(resource.id);
+                    }}
+                    color="red"
+                  >
+                    Delete Resource
+                  </Button>
+                </Group>
+              </Paper>
+            ))}
+        </>
+      )}
     </>
   );
 }
 
 export default TestResourceCreation;
-

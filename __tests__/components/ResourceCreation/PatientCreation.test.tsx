@@ -6,8 +6,8 @@ import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 
 describe('PatientCreation', () => {
   const DEFAULT_PROPS = {
-    closeModal: jest.fn(),
-    openModal: jest.fn()
+    closePatientModal: jest.fn(),
+    openPatientModal: jest.fn()
   };
 
   it('should not render modal by default', () => {
@@ -62,8 +62,11 @@ describe('PatientCreation', () => {
   it('should render test case list with populated state', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
-        resourceType: 'Patient',
-        name: [{ given: ['Test123'], family: 'Patient456' }]
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        resources: []
       }
     });
 
@@ -83,8 +86,11 @@ describe('PatientCreation', () => {
   it('should delete patient when button is clicked', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
-        resourceType: 'Patient',
-        name: [{ given: ['Test123'], family: 'Patient456' }]
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        resources: []
       }
     });
 

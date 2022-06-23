@@ -25,7 +25,15 @@ export default function TestResourcesDisplay() {
           const key = `${dr.type}${i}`;
           const displayString = getDataRequirementFiltersString(dr, valueSetMap);
           return (
-            <Button key={key} onClick={()=> {setSelectedDataRequirement({name: displayString, content: dr})}}fullWidth variant="default" style={{ height: 'auto', padding: 10, overflow: 'hidden' }}>
+            <Button
+              key={key}
+              onClick={() => {
+                setSelectedDataRequirement({ name: displayString, content: dr });
+              }}
+              fullWidth
+              variant="default"
+              style={{ height: 'auto', padding: 10, overflow: 'hidden' }}
+            >
               <div style={{ overflow: 'hidden' }}>
                 <Title order={3}>{dr.type}</Title>
                 <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayString}</Text>

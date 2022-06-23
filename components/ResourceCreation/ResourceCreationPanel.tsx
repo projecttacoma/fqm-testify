@@ -2,7 +2,6 @@ import { Button, Center, Grid, Loader } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { fhirResourceState } from '../../state/atoms/fhirResource';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';

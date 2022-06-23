@@ -17,7 +17,12 @@ interface PatientCreationProps {
   currentPatient: string | null;
 }
 
-function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOpen, currentPatient }: PatientCreationProps) {
+function PatientCreation({
+  openPatientModal,
+  closePatientModal,
+  isPatientModalOpen,
+  currentPatient
+}: PatientCreationProps) {
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -31,7 +36,7 @@ function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOp
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = pt;
+        draftState[patientId] = {patient: pt, resources: []};
       });
 
       setCurrentPatients(nextPatientState);
@@ -82,7 +87,7 @@ function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOp
       {Object.keys(currentPatients).length > 0 && (
         <>
           <Stack data-testid="patient-stack">
-            {Object.entries(currentPatients).map(([id, patient]) => (
+            {Object.entries(currentPatients).map(([id, testCase]) => (
               <div key={id}>
                 <Button
                   variant="default"
@@ -95,7 +100,7 @@ function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOp
                     }
                   }}
                 >
-                  {getPatientInfoString(patient)}
+                  {getPatientInfoString(testCase.patient)}
                 </Button>
 
                 <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
@@ -118,7 +123,7 @@ function PatientCreation({ openPatientModal, closePatientModal, isPatientModalOp
                       </Button>
                     </Group>
                   </Center>
-                  <TestResourceCreation {...{selectedPatient}}/>
+                  <TestResourceCreation />
                 </Collapse>
               </div>
             ))}

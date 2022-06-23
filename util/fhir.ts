@@ -64,61 +64,69 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
   return '';
 }
 
-export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bundle | null): string {
-  console.log(dr);
-  const id = uuidv4();
+/**
+ * Creates incomplete FHIR resource with generated ID, information populated from the provided data requirements,
+ * and code information populated from a randomly selected expanded ValueSet (obtained from the given measure bundle)
+ * @param dr FHIR DataRequirement object
+ * @param mb FHIR measure bundle
+ * @returns {String} incomplete FHIR resource that will appear as initial value in code editor
+ */
+export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bundle): string {
   const resource: any = {
     resourceType: dr.type,
-    id
+    id: uuidv4()
   };
 
-  // resource data retrieved from the data requirements
-  // TODO: this is wrong
+  // TODO: see if this is feasible in all cases?
+  // resource properties retrieved from data requirements
   dr.codeFilter?.forEach(cf => {
-    if (!cf.valueSet && cf.path) {
-      resource[cf.path] = cf.code
+    if (!cf.valueSet && cf.path && cf.code) {
+      resource[cf.path] = cf.code[0].code;
     }
-  })
+  });
 
-  // resource data retrieved from parsed primary code path script
+  // resource properties retrieved from parsed primary code path script
   const vsUrl = dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet;
-  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === "ValueSet" && r.resource?.url === vsUrl)[0].resource as fhir4.ValueSet;
-  const include = _.sample(vsResource?.compose?.include);
-  // from the random include, get the random code and display from concept, and then optionally
-  // pair it with the include.system and include.version if needed
-  const codeDisplay = _.sample(include?.concept)
+  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vsUrl)[0]
+    .resource as fhir4.ValueSet;
+
+  // assume ValueSet resource will either contain compose or expansion
+  let system, version, display, code;
+  if (vsResource?.compose) {
+    // randomly select ValueSetComposeInclude to add to resource
+    const include = _.sample(vsResource.compose.include);
+    // randomly select concept from ValueSetComposeInclude to add to resource
+    const codeAndDisplay = _.sample(include?.concept);
+    ({ system, version } = include || {});
+    ({ code, display } = codeAndDisplay || {});
+  } else if (vsResource?.expansion?.contains) {
+    const contains = _.sample(vsResource.expansion.contains);
+    ({ system, version, code, display } = contains || {});
+  }
+
   const primaryCodePath = parsedPrimaryCodePaths[dr.type].primaryCodePath;
   const primaryCodeType = parsedPrimaryCodePaths[dr.type].primaryCodeType;
 
-  let value;
+  const coding = {
+    system,
+    version,
+    code,
+    display
+  };
+
+  let codeData;
   if (primaryCodeType === 'FHIR.CodeableConcept') {
-    value = {
-      coding: {
-        system: include?.system,
-        version: include?.version,
-        code: codeDisplay?.code,
-        display: codeDisplay?.display
-      },
-      text: ''
+    codeData = {
+      coding: coding
     };
   } else if (primaryCodeType === 'FHIR.Coding') {
-    value = {
-      system: include?.system,
-      version: include?.version,
-      code: codeDisplay?.code,
-      display: codeDisplay?.display
-    };
+    codeData = coding;
   } else if (primaryCodeType === 'FHIR.code') {
-    value = codeDisplay?.code;
+    codeData = code;
   } else {
-    value = null;
+    codeData = null;
   }
 
-  // TODO simplify this
-  if (parsedPrimaryCodePaths[dr.type].multipleCardinality) {
-    resource[primaryCodePath] = [value];
-  } else {
-    resource[primaryCodePath] = value;
-  }
+  resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
   return JSON.stringify(resource, null, 2);
 }
