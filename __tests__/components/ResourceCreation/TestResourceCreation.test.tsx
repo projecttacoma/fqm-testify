@@ -7,7 +7,6 @@ import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { selectedDataRequirementState } from '../../../state/atoms/selectedDataRequirement';
 
 describe('TestResourceCreation', () => {
-
   it('should not render modal by default', () => {
     const MockResources = getMockRecoilState(patientTestCaseState, {
       'example-test-case': {
@@ -45,7 +44,7 @@ describe('TestResourceCreation', () => {
       codeFilter: [],
       dateFilter: []
     };
-    
+
     const MockResources = getMockRecoilState(patientTestCaseState, {
       'example-test-case': {
         patient: {
@@ -76,17 +75,19 @@ describe('TestResourceCreation', () => {
     expect(modal).toBeInTheDocument();
   });
 
-  it('should render modal when Edit Resource button is clicked', () => {    
+  it('should render modal when Edit Resource button is clicked', () => {
     const MockResources = getMockRecoilState(patientTestCaseState, {
       'example-test-case': {
         patient: {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
-        resources: [{
-          resourceType: 'Procedure',
-          id: 'test-id'
-        }]
+        resources: [
+          {
+            resourceType: 'Procedure',
+            id: 'test-id'
+          }
+        ]
       }
     });
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');
@@ -106,7 +107,7 @@ describe('TestResourceCreation', () => {
 
     const modal = screen.getByTestId('code-editor-modal');
     expect(modal).toBeInTheDocument();
-  })
+  });
 
   it('should not render test resources for selected patient when list is empty', () => {
     const MockResources = getMockRecoilState(patientTestCaseState, {
@@ -141,10 +142,12 @@ describe('TestResourceCreation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
-        resources: [{
-          resourceType: 'Procedure',
-          id: 'test-id'
-        }]
+        resources: [
+          {
+            resourceType: 'Procedure',
+            id: 'test-id'
+          }
+        ]
       }
     });
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');
@@ -170,10 +173,12 @@ describe('TestResourceCreation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
-        resources: [{
-          resourceType: 'Procedure',
-          id: 'test-id'
-        }]
+        resources: [
+          {
+            resourceType: 'Procedure',
+            id: 'test-id'
+          }
+        ]
       }
     });
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');

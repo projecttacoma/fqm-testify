@@ -132,12 +132,14 @@ const TEST_MEASURE_BUNDLE_WITH_EXPANSION: fhir4.Bundle = {
         url: 'testvs',
         expansion: {
           timestamp: '2017-01-01T00:00:00.000Z',
-          contains: [{
-            system: 'test-system',
-            version: 'test-version',
-            code: '123',
-            display: 'test display'
-          }]
+          contains: [
+            {
+              system: 'test-system',
+              version: 'test-version',
+              code: '123',
+              display: 'test display'
+            }
+          ]
         }
       }
     }

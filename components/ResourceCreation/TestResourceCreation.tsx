@@ -17,25 +17,28 @@ function TestResourceCreation() {
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
 
-  const openResourceModal = useCallback((resourceId?: string) => {
-    if (resourceId && selectedPatient 
-      && currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0) {
-      setCurrentResource(resourceId);
-    } else {
-      setCurrentResource(null);
-    }
-    setIsResourceModalOpen(true);
-  }, [currentTestCases, selectedPatient]);
+  const openResourceModal = useCallback(
+    (resourceId?: string) => {
+      if (
+        resourceId &&
+        selectedPatient &&
+        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+      ) {
+        setCurrentResource(resourceId);
+      } else {
+        setCurrentResource(null);
+      }
+      setIsResourceModalOpen(true);
+    },
+    [currentTestCases, selectedPatient]
+  );
 
   useEffect(() => {
-    //setIsResourceModalOpen(false);
     if (selectedDataRequirement.content) {
       openResourceModal();
-      //setIsResourceModalOpen(true);
     }
   }, [openResourceModal, selectedDataRequirement]);
 
-  
   const closeResourceModal = () => {
     setIsResourceModalOpen(false);
     setCurrentResource(null);
@@ -43,8 +46,7 @@ function TestResourceCreation() {
   };
 
   const updateResource = (val: string) => {
-    // TODO: Validate the incoming JSON as FHIR
-    const updatedResource = JSON.parse(val.trim()) as fhir4.Resource; 
+    const updatedResource = JSON.parse(val.trim());
 
     if (updatedResource.id) {
       const resourceId = updatedResource.id;
@@ -78,14 +80,18 @@ function TestResourceCreation() {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
         });
         setCurrentTestCases(nextResourceState);
-      }  
-    } 
+      }
+    }
   };
 
   const getInitialResource = () => {
     if (isResourceModalOpen) {
       if (currentResource && selectedPatient) {
-        return JSON.stringify(currentTestCases[selectedPatient].resources.filter(r => r.id === currentResource)[0], null, 2);
+        return JSON.stringify(
+          currentTestCases[selectedPatient].resources.filter(r => r.id === currentResource)[0],
+          null,
+          2
+        );
       } else {
         if (selectedDataRequirement.content && measureBundle.content) {
           return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content);
@@ -107,30 +113,28 @@ function TestResourceCreation() {
       {selectedPatient && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
           <h3>Test Case Resources:</h3>
-          {currentTestCases[selectedPatient].resources
-            //.filter(r => r[1].selectedPatient === selectedPatient)
-            .map((resource, idx) => (
-              <Paper key={resource.id} withBorder p="md">
-                <Group>
-                  <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
-                  <Button
-                    onClick={() => {
-                      openResourceModal(resource.id);
-                    }}
-                  >
-                    Edit FHIR Resource
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      deleteResource(resource.id);
-                    }}
-                    color="red"
-                  >
-                    Delete Resource
-                  </Button>
-                </Group>
-              </Paper>
-            ))}
+          {currentTestCases[selectedPatient].resources.map((resource, idx) => (
+            <Paper key={resource.id} withBorder p="md">
+              <Group>
+                <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
+                <Button
+                  onClick={() => {
+                    openResourceModal(resource.id);
+                  }}
+                >
+                  Edit FHIR Resource
+                </Button>
+                <Button
+                  onClick={() => {
+                    deleteResource(resource.id);
+                  }}
+                  color="red"
+                >
+                  Delete Resource
+                </Button>
+              </Group>
+            </Paper>
+          ))}
         </>
       )}
     </>

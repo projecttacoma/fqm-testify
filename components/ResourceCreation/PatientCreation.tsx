@@ -36,7 +36,7 @@ function PatientCreation({
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = {patient: pt, resources: []};
+        draftState[patientId] = { patient: pt, resources: [] };
       });
 
       setCurrentPatients(nextPatientState);

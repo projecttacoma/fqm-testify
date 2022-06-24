@@ -77,7 +77,6 @@ export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bu
     id: uuidv4()
   };
 
-  // TODO: see if this is feasible in all cases?
   // resource properties retrieved from data requirements
   dr.codeFilter?.forEach(cf => {
     if (!cf.valueSet && cf.path && cf.code) {
@@ -100,6 +99,7 @@ export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bu
     ({ system, version } = include || {});
     ({ code, display } = codeAndDisplay || {});
   } else if (vsResource?.expansion?.contains) {
+    // randomly select ValueSetExpansionContains to add to resource
     const contains = _.sample(vsResource.expansion.contains);
     ({ system, version, code, display } = contains || {});
   }

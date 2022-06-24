@@ -1,12 +1,10 @@
 import { Button, Center, Grid, Loader } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
-import TestResourceCreation from './TestResourceCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
 
 export default function ResourceCreationPanel() {

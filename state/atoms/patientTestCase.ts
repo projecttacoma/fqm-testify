@@ -2,8 +2,8 @@ import { atom } from 'recoil';
 
 export interface TestCases {
   [patientId: string]: {
-    patient: fhir4.Patient,
-    resources: fhir4.Resource[]
+    patient: fhir4.Patient;
+    resources: fhir4.Resource[];
   };
 }
 

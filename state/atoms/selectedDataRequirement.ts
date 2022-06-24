@@ -7,7 +7,7 @@ interface dataRequirementStateType {
 
 /**
  * Atom tracking and controlling the value of the selected data requirement
- * from the list of data requirements for a given test case
+ * from the list of data elements for a given test case
  */
 export const selectedDataRequirementState = atom<dataRequirementStateType>({
   key: 'selectedDataRequirementState',
