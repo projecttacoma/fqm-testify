@@ -34,10 +34,10 @@ function TestResourceCreation() {
   );
 
   useEffect(() => {
-    if (selectedDataRequirement.content) {
+    if (selectedDataRequirement.content && !currentResource) {
       openResourceModal();
     }
-  }, [openResourceModal, selectedDataRequirement]);
+  }, [openResourceModal, selectedDataRequirement, currentResource]);
 
   const closeResourceModal = () => {
     setIsResourceModalOpen(false);

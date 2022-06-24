@@ -123,7 +123,8 @@ function PatientCreation({
                       </Button>
                     </Group>
                   </Center>
-                  <TestResourceCreation />
+
+                  {selectedPatient === id && <TestResourceCreation />}
                 </Collapse>
               </div>
             ))}
