@@ -1,9 +1,10 @@
 import { atom } from 'recoil';
 
-// TODO: We might evolve this interface to determine how best to store
-// FHIR data associated with this patient
 export interface TestCases {
-  [patientId: string]: fhir4.Patient;
+  [patientId: string]: {
+    patient: fhir4.Patient;
+    resources: fhir4.Resource[];
+  };
 }
 
 export const patientTestCaseState = atom<TestCases>({
