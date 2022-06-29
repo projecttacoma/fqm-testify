@@ -71,7 +71,7 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const modal = screen.getByTestId('code-editor-modal');
+    const modal = screen.getByRole('dialog', { name: 'Edit FHIR Resource' });
     expect(modal).toBeInTheDocument();
   });
 
@@ -164,6 +164,15 @@ describe('TestResourceCreation', () => {
 
     const resourceInfo = screen.getByText(/test case resources/i);
     expect(resourceInfo).toBeInTheDocument();
+
+    const procedureResource = screen.getByText(/1. Procedure/i);
+    expect(procedureResource).toBeInTheDocument();
+
+    const editResourceButton = screen.getByRole('button', { name: 'Edit FHIR Resource' });
+    expect(editResourceButton).toBeInTheDocument();
+
+    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource'});
+    expect(deleteResourceButton).toBeInTheDocument();
   });
 
   it('should delete resource when button is clicked', () => {
@@ -193,10 +202,10 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const deleteButton = screen.getByText(/delete resource/i) as HTMLButtonElement;
-    expect(deleteButton).toBeInTheDocument();
+    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource'});
+    expect(deleteResourceButton).toBeInTheDocument();
 
-    fireEvent.click(deleteButton);
+    fireEvent.click(deleteResourceButton);
 
     const resourceInfo = screen.queryByText(/test case resources/i);
     expect(resourceInfo).not.toBeInTheDocument();
