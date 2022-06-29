@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-interface dataRequirementStateType {
+interface DataRequirementStateType {
   name: string;
   content: fhir4.DataRequirement | null;
 }

@@ -102,10 +102,10 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const editResourceButton = screen.getByText(/edit fhir resource/i);
+    const editResourceButton = screen.getByRole('button', { name: 'Edit FHIR Resource' });
     fireEvent.click(editResourceButton);
 
-    const modal = screen.getByTestId('code-editor-modal');
+    const modal = screen.getByRole('dialog', { name: 'Edit FHIR Resource' });
     expect(modal).toBeInTheDocument();
   });
 
