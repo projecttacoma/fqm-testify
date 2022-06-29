@@ -171,7 +171,7 @@ describe('TestResourceCreation', () => {
     const editResourceButton = screen.getByRole('button', { name: 'Edit FHIR Resource' });
     expect(editResourceButton).toBeInTheDocument();
 
-    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource'});
+    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource' });
     expect(deleteResourceButton).toBeInTheDocument();
   });
 
@@ -202,7 +202,7 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource'});
+    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource' });
     expect(deleteResourceButton).toBeInTheDocument();
 
     fireEvent.click(deleteResourceButton);
