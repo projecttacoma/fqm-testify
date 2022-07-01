@@ -3,7 +3,7 @@ import { atom } from 'recoil';
 export interface TestCases {
   [patientId: string]: {
     patient: fhir4.Patient;
-    resources: fhir4.Resource[];
+    resources: fhir4.FhirResource[];
   };
 }
 

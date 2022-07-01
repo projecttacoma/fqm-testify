@@ -85,7 +85,9 @@ describe('TestResourceCreation', () => {
         resources: [
           {
             resourceType: 'Procedure',
-            id: 'test-id'
+            id: 'test-id',
+            status: 'completed',
+            subject: {}
           }
         ]
       }
@@ -145,7 +147,9 @@ describe('TestResourceCreation', () => {
         resources: [
           {
             resourceType: 'Procedure',
-            id: 'test-id'
+            id: 'test-id',
+            status: 'completed',
+            subject: {}
           }
         ]
       }
@@ -185,7 +189,9 @@ describe('TestResourceCreation', () => {
         resources: [
           {
             resourceType: 'Procedure',
-            id: 'test-id'
+            id: 'test-id',
+            status: 'completed',
+            subject: {}
           }
         ]
       }

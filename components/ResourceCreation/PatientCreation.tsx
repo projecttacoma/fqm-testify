@@ -3,12 +3,18 @@ import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { createPatientResourceString, getPatientInfoString } from '../../util/fhir';
+import {
+  createPatientResourceString,
+  getPatientInfoString,
+  getPatientNameString,
+  createPatientBundleString
+} from '../../util/fhir';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { ChevronRight, ChevronDown } from 'tabler-icons-react';
+import { ChevronRight, ChevronDown, Download, Edit, Trash } from 'tabler-icons-react';
 import React from 'react';
 import TestResourceCreation from './TestResourceCreation';
+import { download } from '../../util/downloadUtil';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -51,6 +57,13 @@ function PatientCreation({
     });
 
     setCurrentPatients(nextPatientState);
+  };
+
+  const exportPatientTestCase = (id: string) => {
+    const bundleString: string = createPatientBundleString(currentPatients[id].patient, currentPatients[id].resources);
+    const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
+	// create and use hidden temporary download link in document
+    download(filename, bundleString);
   };
 
   const getInitialPatientResource = () => {
@@ -104,25 +117,37 @@ function PatientCreation({
                 </Button>
 
                 <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
-                  <Center>
-                    <Group>
-                      <Button
-                        onClick={() => {
-                          openPatientModal(id);
-                        }}
-                      >
-                        Edit Patient
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          deletePatientTestCase(id);
-                        }}
-                        color="red"
-                      >
-                        Delete Patient
-                      </Button>
-                    </Group>
-                  </Center>
+                  <Group>
+                    <Button
+                      data-testid="export-patient-button"
+                      aria-label={'Export Patient'}
+                      onClick={() => {
+                        exportPatientTestCase(id);
+                      }}
+                    >
+                      <Download />
+                    </Button>
+                    <Button
+                      data-testid="edit-patient-button"
+                      aria-label={'Edit Patient'}
+                      onClick={() => {
+                        openPatientModal(id);
+                      }}
+                      color="gray"
+                    >
+                      <Edit />
+                    </Button>
+                    <Button
+                      data-testid="delete-patient-button"
+                      aria-label={'Delete Patient'}
+                      onClick={() => {
+                        deletePatientTestCase(id);
+                      }}
+                      color="red"
+                    >
+                      <Trash />
+                    </Button>
+                  </Group>
 
                   {selectedPatient === id && <TestResourceCreation />}
                 </Collapse>

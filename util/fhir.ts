@@ -38,7 +38,11 @@ export function createPatientResourceString(birthDate: string): string {
 }
 
 export function getPatientInfoString(patient: fhir4.Patient) {
-  return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family} (DOB: ${patient.birthDate})`;
+  return `${getPatientNameString(patient)} (DOB: ${patient.birthDate})`;
+}
+
+export function getPatientNameString(patient: fhir4.Patient) {
+  return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family}`;
 }
 
 /**
@@ -62,6 +66,33 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
     return `${valueSets?.join('\n')}`;
   }
   return '';
+}
+
+/**
+ * Creates a string representing a patient bundle resource. Creates using a patient resource and
+ * an array of the patient's associated resources
+ * @param {Object} patient FHIR Patient object
+ * @param {Array} resources array of FHIR resources associated with the patient
+ * @returns {String} representation of a FHIR patient bundle resource
+ */
+export function createPatientBundleString(patient: fhir4.Patient, resources: fhir4.FhirResource[]): string {
+  const bundle: fhir4.Bundle = {
+    type: 'transaction',
+    resourceType: 'Bundle',
+    id: uuidv4(),
+    entry: [
+      {
+        resource: patient
+      }
+    ]
+  };
+  resources.forEach(resource => {
+    const entry: fhir4.BundleEntry = {
+      resource: resource
+    };
+    bundle.entry?.push(entry);
+  });
+  return JSON.stringify(bundle, null, 2);
 }
 
 /**
