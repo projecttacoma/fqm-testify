@@ -62,7 +62,7 @@ function PatientCreation({
   const exportPatientTestCase = (id: string) => {
     const bundleString: string = createPatientBundleString(currentPatients[id].patient, currentPatients[id].resources);
     const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
-	// create and use hidden temporary download link in document
+    // create and use hidden temporary download link in document
     download(filename, bundleString);
   };
 
