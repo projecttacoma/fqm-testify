@@ -82,13 +82,21 @@ export function createPatientBundleString(patient: fhir4.Patient, resources: fhi
     id: uuidv4(),
     entry: [
       {
-        resource: patient
+        resource: patient,
+        request: {
+          method: 'PUT',
+          url: `Patient/${patient.id}`
+        }
       }
     ]
   };
   resources.forEach(resource => {
     const entry: fhir4.BundleEntry = {
-      resource: resource
+      resource: resource,
+      request: {
+        method: 'PUT',
+        url: `${resource.resourceType}/${resource.id}`
+      }
     };
     bundle.entry?.push(entry);
   });

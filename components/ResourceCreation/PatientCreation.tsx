@@ -1,4 +1,4 @@
-import { Button, Center, Collapse, Group, Stack } from '@mantine/core';
+import { Button, Collapse, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
