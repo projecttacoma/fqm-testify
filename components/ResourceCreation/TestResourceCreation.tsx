@@ -121,6 +121,7 @@ function TestResourceCreation() {
                   onClick={() => {
                     openResourceModal(resource.id);
                   }}
+                  color="gray"
                 >
                   Edit FHIR Resource
                 </Button>
