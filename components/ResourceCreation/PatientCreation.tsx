@@ -42,7 +42,7 @@ function PatientCreation({
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = { patient: pt, resources: [] };
+        draftState[patientId] = { patient: pt, resources: currentPatients[patientId]?.resources ?? [] };
       });
 
       setCurrentPatients(nextPatientState);
@@ -73,7 +73,7 @@ function PatientCreation({
   const getInitialPatientResource = () => {
     if (isPatientModalOpen) {
       if (currentPatient) {
-        return JSON.stringify(currentPatients[currentPatient], null, 2);
+        return JSON.stringify(currentPatients[currentPatient].patient, null, 2);
       } else {
         // Default to age 21 at time of measurement period, if specified
         const birthDate = measurementPeriod.start ? new Date(measurementPeriod.start) : new Date();
