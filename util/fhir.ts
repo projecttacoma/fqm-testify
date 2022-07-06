@@ -75,7 +75,7 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
  * @param {Array} resources array of FHIR resources associated with the patient
  * @returns {String} representation of a FHIR patient bundle resource
  */
-export function createPatientBundleString(patient: fhir4.Patient, resources: fhir4.FhirResource[]): string {
+export function createPatientBundle(patient: fhir4.Patient, resources: fhir4.FhirResource[]): fhir4.Bundle {
   const bundle: fhir4.Bundle = {
     type: 'transaction',
     resourceType: 'Bundle',
@@ -100,7 +100,7 @@ export function createPatientBundleString(patient: fhir4.Patient, resources: fhi
     };
     bundle.entry?.push(entry);
   });
-  return JSON.stringify(bundle, null, 2);
+  return bundle;
 }
 
 /**

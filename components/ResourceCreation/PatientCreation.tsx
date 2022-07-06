@@ -7,7 +7,7 @@ import {
   createPatientResourceString,
   getPatientInfoString,
   getPatientNameString,
-  createPatientBundleString
+  createPatientBundle
 } from '../../util/fhir';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -60,7 +60,11 @@ function PatientCreation({
   };
 
   const exportPatientTestCase = (id: string) => {
-    const bundleString: string = createPatientBundleString(currentPatients[id].patient, currentPatients[id].resources);
+    const bundleString: string = JSON.stringify(
+      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+      null,
+      2
+    );
     const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
     // create and use hidden temporary download link in document
     download(filename, bundleString);
