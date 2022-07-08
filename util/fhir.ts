@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
 import { generateRandomFirstName, generateRandomLastName } from './randomizer';
 import { ValueSetsMap } from '../state/selectors/valueSetsMap';
-import { DataRequirement, DataRequirementCodeFilter } from 'fhir/r3';
 import { parsedPrimaryCodePaths } from './primaryCodePaths';
 import _ from 'lodash';
+import { ReferencesMap } from './referencesMap';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -110,7 +110,11 @@ export function createPatientBundle(patient: fhir4.Patient, resources: fhir4.Fhi
  * @param mb FHIR measure bundle
  * @returns {String} incomplete FHIR resource that will appear as initial value in code editor
  */
-export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bundle): string {
+export function createFHIRResourceString(
+  dr: fhir4.DataRequirement,
+  mb: fhir4.Bundle,
+  patientId: string | null
+): string {
   const resource: any = {
     resourceType: dr.type,
     id: uuidv4()
@@ -167,5 +171,14 @@ export function createFHIRResourceString(dr: fhir4.DataRequirement, mb: fhir4.Bu
   }
 
   resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
+
+  // determine if we should add a reference to the patient
+  if (ReferencesMap[dr.type] && patientId) {
+    // only add if subject is in the list
+    if (ReferencesMap[dr.type].includes('subject')) {
+      resource.subject = { reference: `Patient/${patientId}` };
+    }
+  }
+
   return JSON.stringify(resource, null, 2);
 }

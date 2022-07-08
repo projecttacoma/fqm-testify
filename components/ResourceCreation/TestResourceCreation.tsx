@@ -94,7 +94,7 @@ function TestResourceCreation() {
         );
       } else {
         if (selectedDataRequirement.content && measureBundle.content) {
-          return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content);
+          return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content, selectedPatient);
         }
       }
     }
