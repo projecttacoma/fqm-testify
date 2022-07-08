@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Loader } from '@mantine/core';
+import { Button, Center, Grid, Loader, Group } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useRecoilValue } from 'recoil';
@@ -6,6 +6,10 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
+import { Download } from 'tabler-icons-react';
+import { createPatientBundle, getPatientNameString } from '../../util/fhir';
+import JSZip from 'jszip';
+import { downloadZip } from '../../util/downloadUtil';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -28,12 +32,40 @@ export default function ResourceCreationPanel() {
     setCurrentPatient(null);
   };
 
+  const exportAllPatients = () => {
+    // Build zip file
+    const zip = new JSZip();
+    const measureBundleFolder = zip.folder(`${measureBundle.name.replace('.json', '')}-Test-Cases`);
+    Object.keys(currentPatients).forEach(id => {
+      const bundleString: string = JSON.stringify(
+        createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+        null,
+        2
+      );
+      const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
+      measureBundleFolder?.file(filename, bundleString);
+    });
+    downloadZip(zip, `${measureBundle.name.replace('.json', '')}-Test-Cases.zip`);
+  };
+
   return (
     <>
       <Center>
-        <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-          <Button onClick={() => openPatientModal()}>Create Test Patient</Button>
-        </div>
+        <Group>
+          <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+            <Button onClick={() => openPatientModal()}>Create Patient</Button>
+          </div>
+
+          <Button
+            data-testid="export-all-patients-button"
+            aria-label={'Download All Patients'}
+            disabled={!(Object.keys(currentPatients).length > 0)}
+            onClick={exportAllPatients}
+          >
+            <Download />
+            Download All Patients
+          </Button>
+        </Group>
       </Center>
       <Grid>
         {selectedPatient !== null && measureBundle.content && (
