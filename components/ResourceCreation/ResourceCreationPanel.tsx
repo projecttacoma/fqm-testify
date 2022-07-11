@@ -1,22 +1,27 @@
 import JSZip from 'jszip';
-import { Button, Center, Grid, Loader, Group } from '@mantine/core';
+import { Button, Center, Grid, Group, Loader } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
+import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
-import { Download } from 'tabler-icons-react';
+import { Download, Upload } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
 import { showNotification } from '@mantine/notifications';
+import ImportModal from './ImportModal';
+import { bundleToTestCase } from '../../util/import';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [currentPatient, setCurrentPatient] = useState<string | null>(null);
+
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const currentPatients = useRecoilValue(patientTestCaseState);
+  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
 
   const openPatientModal = (patientId?: string) => {
@@ -28,6 +33,7 @@ export default function ResourceCreationPanel() {
 
     setIsPatientModalOpen(true);
   };
+
   const closePatientModal = () => {
     setIsPatientModalOpen(false);
     setCurrentPatient(null);
@@ -59,13 +65,64 @@ export default function ResourceCreationPanel() {
     }
   };
 
+  const readFileContent = (file: File) => {
+    const reader = new FileReader();
+
+    return new Promise<string>((resolve, reject) => {
+      // Set the native promise rejection for the FileReader to properly catch errors
+      reader.onerror = reject;
+
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+
+      reader.readAsText(file);
+    });
+  };
+
+  const handleSubmittedImport = (files: File[]) => {
+    const filePromises = files.map(readFileContent);
+
+    // TODO (MATT/ELSA): need to change this to fail safely when a promise rejects. It shouldn't halt the import
+    Promise.all(filePromises)
+      .then(allFileContent => {
+        const nextPatientState = produce(currentPatients, draftState => {
+          allFileContent.forEach(bundleStr => {
+            // TODO (MATT/ELSA): Add more error checking for if resource is actually a bundle
+            const bundle = JSON.parse(bundleStr) as fhir4.Bundle;
+
+            const testCase = bundleToTestCase(bundle);
+
+            if (!testCase.patient.id) {
+              throw new Error('Could not find id on patient resource');
+            }
+
+            draftState[testCase.patient.id] = testCase;
+          });
+        });
+
+        // TODO (MATT/ELSA): Show notification with success information
+        setCurrentPatients(nextPatientState);
+      })
+      .catch(err => {
+        // TODO (MATT/ELSA): Show notification with proper error message
+      });
+  };
+
   return (
     <>
+      <ImportModal
+        open={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSubmit={handleSubmittedImport}
+      />
       <Center>
-        <Group>
-          <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-            <Button onClick={() => openPatientModal()}>Create Patient</Button>
-          </div>
+        <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+          <Button onClick={() => openPatientModal()}>Create Test Patient</Button>
+          <Button onClick={() => setIsImportModalOpen(true)} color="gray">
+            <Upload />
+            &nbsp;Import Test Case(s)
+          </Button>
           <Button
             aria-label={'Download All Patients'}
             disabled={Object.keys(currentPatients).length === 0}

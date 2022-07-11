@@ -1,0 +1,99 @@
+import { Modal, Button, Center, Group, Grid, Text } from '@mantine/core';
+import { Dropzone } from '@mantine/dropzone';
+import { IconFileCheck, IconFileImport } from '@tabler/icons';
+import { useState } from 'react';
+import zip from 'jszip';
+
+export interface ImportModalProps {
+  open: boolean;
+  onClose: () => void;
+  onImportSubmit: (files: File[]) => void;
+}
+
+export default function ImportModal({ open, onClose, onImportSubmit }: ImportModalProps) {
+  const [files, setFiles] = useState<File[]>([]);
+
+  const closeAndReset = () => {
+    setFiles([]);
+    onClose();
+  };
+
+  const handleDrop = (uploadedFiles: File[]) => {
+    // TODO (MATT/ELSA): Handle error cases for combo of zips and json, multiple zips
+    // TODO (MATT/ELSA): ask about if we should unzip on drop or on submit
+    if (uploadedFiles.length === 1 && uploadedFiles[0].type === 'application/zip') {
+      zip
+        .loadAsync(uploadedFiles[0])
+        .then(data => {
+          return Promise.all(
+            Object.entries(data.files).map(async ([fname, finfo]) => {
+              const blob = await finfo.async('blob');
+              return new File([blob], fname);
+            })
+          );
+        })
+        .then(resolvedFiles => {
+          setFiles(resolvedFiles);
+        });
+    } else {
+      setFiles(uploadedFiles);
+    }
+  };
+
+  return (
+    <Modal
+      zIndex={2}
+      centered
+      size="xl"
+      withCloseButton={true}
+      opened={open}
+      onClose={closeAndReset}
+      overflow="outside"
+      styles={{
+        body: {
+          height: '600px'
+        }
+      }}
+      title="Import Test Case(s)"
+    >
+      <Grid>
+        <Grid.Col span={12}>
+          <Dropzone onDrop={handleDrop} accept={['.json', '.zip']} multiple={true}>
+            {() => (
+              <Grid justify="center">
+                <Grid.Col span={12}>
+                  <Center>{files.length === 0 ? <IconFileImport size={80} /> : <IconFileCheck size={80} />}</Center>
+                </Grid.Col>
+                <Grid.Col>
+                  <Center>
+                    <Text size="xl" inline>
+                      {files.length === 0
+                        ? 'Upload FHIR Bundle(s) or a .zip of FHIR Bundles'
+                        : files.map(f => f.name).join(', ')}
+                    </Text>
+                  </Center>
+                </Grid.Col>
+              </Grid>
+            )}
+          </Dropzone>
+          <Center>
+            <Group>
+              <Button
+                onClick={() => {
+                  onImportSubmit(files);
+                  closeAndReset();
+                }}
+                disabled={files.length === 0}
+              >
+                Import
+              </Button>
+              <Button color="gray" onClick={closeAndReset}>
+                Cancel
+              </Button>
+            </Group>
+          </Center>
+        </Grid.Col>
+      </Grid>
+    </Modal>
+  );
+}

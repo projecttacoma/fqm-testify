@@ -103,4 +103,5 @@ describe('ResourceCreationPanel', () => {
     fireEvent.click(button);
     expect(downloadZip).toBeCalledTimes(1);
   });
+  // TODO (MATT/ELSA): Add test case for new button
 });
