@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import { Button, Center, Grid, Loader, Group } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -8,7 +9,6 @@ import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
 import { Download } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
-import JSZip from 'jszip';
 import { downloadZip } from '../../util/downloadUtil';
 
 export default function ResourceCreationPanel() {
@@ -44,6 +44,7 @@ export default function ResourceCreationPanel() {
         2
       );
       const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
+      // create file for each bundleString
       measureBundleFolder?.file(filename, bundleString);
     });
     downloadZip(zip, `${measureBundle.name.replace('.json', '')}-test-cases-${dateCreated.toISOString()}.zip`);
@@ -56,7 +57,6 @@ export default function ResourceCreationPanel() {
           <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
             <Button onClick={() => openPatientModal()}>Create Patient</Button>
           </div>
-
           <Button
             data-testid="export-all-patients-button"
             aria-label={'Download All Patients'}
