@@ -35,7 +35,8 @@ export default function ResourceCreationPanel() {
   const exportAllPatients = () => {
     // Build zip file
     const zip = new JSZip();
-    const measureBundleFolder = zip.folder(`${measureBundle.name.replace('.json', '')}-Test-Cases`);
+    const dateCreated = new Date();
+    const measureBundleFolder = zip.folder(`${measureBundle.name.replace('.json', '')}-test-cases`);
     Object.keys(currentPatients).forEach(id => {
       const bundleString: string = JSON.stringify(
         createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
@@ -45,7 +46,7 @@ export default function ResourceCreationPanel() {
       const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
       measureBundleFolder?.file(filename, bundleString);
     });
-    downloadZip(zip, `${measureBundle.name.replace('.json', '')}-Test-Cases.zip`);
+    downloadZip(zip, `${measureBundle.name.replace('.json', '')}-test-cases-${dateCreated.toISOString()}.zip`);
   };
 
   return (
