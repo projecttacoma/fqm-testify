@@ -93,6 +93,18 @@ const ACTIVITYDEFINITION_DATA_REQUIREMENT = {
   ]
 };
 
+// example data requirement for resource type with `subject` not used as the patient reference
+const COVERAGE_DATA_REQUIREMENT = {
+  type: 'Coverage',
+  status: 'active',
+  codeFilter: [
+    {
+      path: 'type',
+      valueSet: 'testvs'
+    }
+  ]
+};
+
 const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
   resourceType: 'Bundle',
   type: 'transaction',
@@ -226,6 +238,14 @@ describe('createFHIRResourceString', () => {
     );
     expect(typeof JSON.parse(createdResource).code).toBe('object');
     expect(JSON.parse(createdResource).subject).toEqual({
+      reference: 'Patient/Patient1'
+    });
+  });
+
+  test('returns populated FHIR resource where subject is not the patient reference', () => {
+    const createdResource = createFHIRResourceString(COVERAGE_DATA_REQUIREMENT, TEST_MEASURE_BUNDLE, 'Patient1');
+    expect(typeof JSON.parse(createdResource).type).toBe('object');
+    expect(JSON.parse(createdResource).beneficiary).toEqual({
       reference: 'Patient/Patient1'
     });
   });

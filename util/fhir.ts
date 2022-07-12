@@ -174,9 +174,11 @@ export function createFHIRResourceString(
 
   // determine if we should add a reference to the patient
   if (ReferencesMap[dr.type] && patientId) {
-    // only add if subject is in the list
+    // add if subject is in the list otherwise add it on the first one
     if (ReferencesMap[dr.type].includes('subject')) {
       resource.subject = { reference: `Patient/${patientId}` };
+    } else {
+      resource[ReferencesMap[dr.type][0]] = { reference: `Patient/${patientId}` };
     }
   }
 

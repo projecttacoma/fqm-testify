@@ -5,7 +5,7 @@
 export const ReferencesMap: Record<string, string[]> = {
   Account: ['subject'],
   AdverseEvent: ['subject'],
-  AllergyIntolerance: ['asserter', 'patient', 'recorder'],
+  AllergyIntolerance: ['patient', 'asserter', 'recorder'],
   Appointment: ['participant.actor'],
   AppointmentResponse: ['actor'],
   AuditEvent: ['agent.who'],
