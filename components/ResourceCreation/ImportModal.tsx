@@ -60,11 +60,6 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
       opened={open}
       onClose={closeAndReset}
       overflow="outside"
-      styles={{
-        body: {
-          height: '600px'
-        }
-      }}
       title="Import Test Case(s)"
     >
       <Grid>
@@ -88,7 +83,11 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
             )}
           </Dropzone>
           <Center>
-            <Group>
+            <Group
+              style={{
+                paddingTop: '12px'
+              }}
+            >
               <Button
                 onClick={() => {
                   onImportSubmit(files);
