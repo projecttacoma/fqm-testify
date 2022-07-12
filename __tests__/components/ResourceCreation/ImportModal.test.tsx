@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import ImportModal, { ImportModalProps } from '../../../components/ResourceCreation/ImportModal';
 
 describe('ImportModal', () => {
@@ -27,8 +27,7 @@ describe('ImportModal', () => {
     expect(modal).not.toBeInTheDocument();
   });
 
-  // TODO (Matt): look at disabledness
-  it.skip('should call onImportSubmit when import button is clicked', () => {
+  it('should call onImportSubmit when import button is clicked', async () => {
     const testImportModalProps: ImportModalProps = {
       open: true,
       onClose: jest.fn(),
@@ -39,6 +38,26 @@ describe('ImportModal', () => {
 
     const submitButton = screen.getByRole('button', { name: 'Import' });
     expect(submitButton).toBeInTheDocument();
+    expect(submitButton).toBeDisabled();
+
+    const dropzone = screen.getByTestId('import-dropzone');
+    expect(dropzone).toBeInTheDocument();
+
+    const fileUploadInput = dropzone.querySelector('input') as HTMLInputElement;
+    expect(fileUploadInput).toBeInTheDocument();
+
+    const file = new File(['{}'], 'test.json', { type: 'application/json' });
+
+    // Simulate a file upload via the input component directly
+    await act(async () => {
+      fireEvent.change(fileUploadInput, {
+        target: {
+          files: [file]
+        }
+      });
+    });
+
+    expect(submitButton).not.toBeDisabled();
 
     fireEvent.click(submitButton);
 

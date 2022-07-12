@@ -66,10 +66,10 @@ export default function ResourceCreationPanel() {
     }
   };
 
-  const readFileContent = (file: File) => {
+  const readFileContent = (file: File): Promise<{ fileName: string; fileContent: string }> => {
     const reader = new FileReader();
 
-    return new Promise<{ fileName: string; fileContent: string }>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // Set the native promise rejection for the FileReader to properly catch errors
       reader.onerror = reject;
 
@@ -98,7 +98,8 @@ export default function ResourceCreationPanel() {
         const successNotifications: NotificationProps[] = [];
         const nextPatientState = produce(currentPatients, draftState => {
           allFileContent.forEach(({ fileName, fileContent }) => {
-            let resource: any;
+            // Cast to FhirResource to safely access resourceType if no error is thrown during parse
+            let resource = {} as fhir4.FhirResource;
             try {
               resource = JSON.parse(fileContent);
             } catch (e) {
@@ -123,6 +124,7 @@ export default function ResourceCreationPanel() {
 
             draftState[testCase.patient.id] = testCase;
 
+            // Add to total successes to be shown at the end once all import finished
             successNotifications.push({
               id: `${fileName}-success`,
               message: `Successfully imported ${fileName}`,

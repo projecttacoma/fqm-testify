@@ -37,6 +37,8 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
           setFiles(resolvedFiles);
         });
     } else if (uploadedFiles.length > 1 && uploadedFiles.some(f => f.type === 'application/zip')) {
+      // If we reach this else case, the user must have uploaded multiple files where at least one of them is a zip
+      // treat this as an error
       showNotification({
         id: 'invalid-zip-upload',
         icon: <IconAlertCircle />,
@@ -67,7 +69,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
     >
       <Grid>
         <Grid.Col span={12}>
-          <Dropzone onDrop={handleDrop} accept={['.json', '.zip']} multiple={true}>
+          <Dropzone data-testid="import-dropzone" onDrop={handleDrop} accept={['.json', '.zip']} multiple={true}>
             {() => (
               <Grid justify="center">
                 <Grid.Col span={12}>
