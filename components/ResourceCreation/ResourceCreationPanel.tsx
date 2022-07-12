@@ -10,6 +10,7 @@ import TestResourcesDisplay from './TestResourcesDisplay';
 import { Download } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
+import { showNotification } from '@mantine/notifications';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -36,18 +37,27 @@ export default function ResourceCreationPanel() {
     // Build zip file
     const zip = new JSZip();
     const dateCreated = new Date();
-    const measureBundleFolder = zip.folder(`${measureBundle.name.replace('.json', '')}-test-cases`);
-    Object.keys(currentPatients).forEach(id => {
-      const bundleString: string = JSON.stringify(
-        createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
-        null,
-        2
-      );
-      const filename = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
-      // create file for each bundleString
-      measureBundleFolder?.file(filename, bundleString);
-    });
-    downloadZip(zip, `${measureBundle.name.replace('.json', '')}-test-cases-${dateCreated.toISOString()}.zip`);
+    const fileNameString = `${measureBundle.name.replace('.json', '')}-test-cases`;
+    const measureBundleFolder = zip.folder(fileNameString);
+    if (measureBundleFolder) {
+      Object.keys(currentPatients).forEach(id => {
+        const bundleString: string = JSON.stringify(
+          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+          null,
+          2
+        );
+        const testCaseFileName = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
+        // create file for each bundleString
+        measureBundleFolder.file(testCaseFileName, bundleString);
+      });
+      downloadZip(zip, `${fileNameString}-${dateCreated.toISOString()}.zip`);
+    }
+    else {
+      showNotification({
+        title: 'Measure Bundle Folder Creation Failed',
+        message: 'Could not successfully create zip folder for downloading all patients'
+    })
+    }
   };
 
   return (
@@ -58,9 +68,8 @@ export default function ResourceCreationPanel() {
             <Button onClick={() => openPatientModal()}>Create Patient</Button>
           </div>
           <Button
-            data-testid="export-all-patients-button"
             aria-label={'Download All Patients'}
-            disabled={!(Object.keys(currentPatients).length > 0)}
+            disabled={(Object.keys(currentPatients).length === 0)}
             onClick={exportAllPatients}
           >
             <Download />

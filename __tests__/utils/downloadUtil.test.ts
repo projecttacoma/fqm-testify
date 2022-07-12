@@ -30,11 +30,9 @@ describe('downloadUtil testing', () => {
     const testZip = new JSZip();
     const zipName = 'test-zip';
 
-    downloadZip(testZip, zipName);
+    await downloadZip(testZip, zipName);
 
-    setTimeout(() => {
-      expect(FileSaver.saveAs).toHaveBeenCalledTimes(1);
-      expect(FileSaver.saveAs).toHaveBeenCalledWith(expect.any(Blob), zipName);
-    }, 100);
+    expect(FileSaver.saveAs).toHaveBeenCalledTimes(1);
+    expect(FileSaver.saveAs).toHaveBeenCalledWith(expect.any(Blob), zipName);
   });
 });

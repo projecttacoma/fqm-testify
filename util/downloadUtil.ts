@@ -23,9 +23,8 @@ export const download = (filename: string, fileContents: string) => {
   });
 };
 
-export const downloadZip = (zip: JSZip, fileName: string) => {
+export const downloadZip = async (zip: JSZip, fileName: string) => {
   // Create a blob of zip and save
-  zip.generateAsync({ type: 'blob' }).then(blob => {
-    FileSaver.saveAs(blob, fileName);
-  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  FileSaver.saveAs(blob, fileName);
 };

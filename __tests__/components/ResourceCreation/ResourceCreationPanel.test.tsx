@@ -20,7 +20,7 @@ describe('ResourceCreationPanel', () => {
       )
     );
 
-    const button = screen.getByText(/Create Patient/i);
+    const button = screen.getByRole('button', { name: 'Create Patient' });
     expect(button).toBeInTheDocument();
   });
 
@@ -77,7 +77,7 @@ describe('ResourceCreationPanel', () => {
     expect(button).not.toBeDisabled();
   });
 
-  it('should call downloadZip function when download all patients button is clicked', async () => {
+  it('should call downloadZip function when download all patients button is clicked', () => {
     const MockCurrentPatients = getMockRecoilState(patientTestCaseState, {
       'example-test-case1': {
         patient: {
