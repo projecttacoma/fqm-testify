@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { Button, Center, Grid, Group, Loader } from '@mantine/core';
-import React, { Suspense, useState } from 'react';
+import React, { ReactNode, Suspense, useState } from 'react';
 import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -8,13 +8,13 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
-import { CircleCheck, Download, Upload } from 'tabler-icons-react';
+import { Download } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
 import ImportModal from './ImportModal';
 import { bundleToTestCase } from '../../util/import';
-import { IconAlertCircle } from '@tabler/icons';
-import { NotificationProps, showNotification } from '@mantine/notifications';
+import { IconAlertCircle, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
+import { showNotification } from '@mantine/notifications';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -81,7 +81,7 @@ export default function ResourceCreationPanel() {
     });
   };
 
-  const showError = (message: string) => {
+  const showError = (message: string | ReactNode) => {
     showNotification({
       icon: <IconAlertCircle />,
       title: 'Import error',
@@ -93,9 +93,10 @@ export default function ResourceCreationPanel() {
   const handleSubmittedImport = (files: File[]) => {
     const filePromises = files.map(readFileContent);
 
+    let successCount = 0,
+      failureCount = 0;
     Promise.all(filePromises)
       .then(allFileContent => {
-        const successNotifications: NotificationProps[] = [];
         const nextPatientState = produce(currentPatients, draftState => {
           allFileContent.forEach(({ fileName, fileContent }) => {
             // Cast to FhirResource to safely access resourceType if no error is thrown during parse
@@ -104,13 +105,23 @@ export default function ResourceCreationPanel() {
               resource = JSON.parse(fileContent);
             } catch (e) {
               if (e instanceof Error) {
-                showError(e.message);
+                failureCount += 1;
+                showError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
                 return;
               }
             }
 
             if (resource.resourceType !== 'Bundle') {
-              showError(`${fileName} is not a FHIR Bundle`);
+              failureCount += 1;
+              showError(
+                <>
+                  <strong>{fileName}</strong> is not a FHIR Bundle
+                </>
+              );
               return;
             }
 
@@ -118,29 +129,24 @@ export default function ResourceCreationPanel() {
             const testCase = bundleToTestCase(bundle);
 
             if (!testCase.patient.id) {
-              showError('Could not find id on patient resource');
+              failureCount += 1;
+              showError(
+                <>
+                  <strong>{fileName}</strong>: Could not find id on patient resource
+                </>
+              );
               return;
             }
 
             draftState[testCase.patient.id] = testCase;
-
-            // Add to total successes to be shown at the end once all import finished
-            successNotifications.push({
-              id: `${fileName}-success`,
-              message: `Successfully imported ${fileName}`,
-              icon: <CircleCheck />,
-              color: 'green'
-            });
+            successCount += 1;
           });
         });
 
         setCurrentPatients(nextPatientState);
-
-        successNotifications.forEach(notif => {
-          showNotification(notif);
-        });
       })
       .catch(err => {
+        failureCount += 1;
         // If this catch block happens, the FileReader couldn't read any files. For now, we're stopping import at this
         // Other error cases (i.e. invalid JSON, invalid Bundle) will fail safely
         showNotification({
@@ -149,6 +155,15 @@ export default function ResourceCreationPanel() {
           title: 'Import error',
           message: err.message,
           color: 'red'
+        });
+      })
+      .finally(() => {
+        showNotification({
+          id: 'import-info',
+          icon: <IconInfoCircle />,
+          title: 'Import Results',
+          message: `Success: ${successCount}\nFailed: ${failureCount}`,
+          color: 'blue'
         });
       });
   };
@@ -162,9 +177,12 @@ export default function ResourceCreationPanel() {
       />
       <Center>
         <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-          <Button onClick={() => openPatientModal()}>Create Test Patient</Button>
+          <Button onClick={() => openPatientModal()}>
+            <IconUserPlus />
+            &nbsp;Create Test Patient
+          </Button>
           <Button onClick={() => setIsImportModalOpen(true)} color="gray">
-            <Upload />
+            <IconFileUpload />
             &nbsp;Import Test Case(s)
           </Button>
           <Button

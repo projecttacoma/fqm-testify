@@ -1,7 +1,7 @@
-import { Modal, Button, Center, Group, Grid, Text } from '@mantine/core';
+import { Modal, Button, Center, Group, Grid, Text, Collapse, ScrollArea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { Dropzone } from '@mantine/dropzone';
-import { IconAlertCircle, IconFileCheck, IconFileImport } from '@tabler/icons';
+import { IconAlertCircle, IconCaretDown, IconCaretRight, IconFileCheck, IconFileImport } from '@tabler/icons';
 import { useState } from 'react';
 import zip from 'jszip';
 
@@ -13,9 +13,15 @@ export interface ImportModalProps {
 
 export default function ImportModal({ open, onClose, onImportSubmit }: ImportModalProps) {
   const [files, setFiles] = useState<File[]>([]);
+  const [fileDisplay, setFileDisplay] = useState<string | null>(null);
+  const [showZipFileExpansion, setShowZipFileExpansion] = useState(false);
+  const [isZipInfoExpanded, setIsZipInfoExpanded] = useState(false);
 
   const closeAndReset = () => {
     setFiles([]);
+    setFileDisplay(null);
+    setIsZipInfoExpanded(false);
+    setShowZipFileExpansion(false);
     onClose();
   };
 
@@ -27,14 +33,18 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
           return Promise.all(
             // Iterate through unzipped files and read their contents into a new JS File object
             // Required for passing the proper information back to the parent component
-            Object.entries(data.files).map(async ([fname, finfo]) => {
-              const blob = await finfo.async('blob');
-              return new File([blob], fname);
-            })
+            Object.entries(data.files)
+              .filter(f => f[1].dir !== true) // ignore root directory of .zip
+              .map(async ([fname, finfo]) => {
+                const blob = await finfo.async('blob');
+                return new File([blob], fname);
+              })
           );
         })
         .then(resolvedFiles => {
+          setFileDisplay(`${uploadedFiles[0].name} containing ${resolvedFiles.length} Bundle(s)`);
           setFiles(resolvedFiles);
+          setShowZipFileExpansion(true);
         });
     } else if (uploadedFiles.length > 1 && uploadedFiles.some(f => f.type === 'application/zip')) {
       // If we reach this else case, the user must have uploaded multiple files where at least one of them is a zip
@@ -46,8 +56,11 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
         message: 'Please only upload one or more JSON files or only one zip file',
         color: 'red'
       });
+      setShowZipFileExpansion(false);
     } else {
       setFiles(uploadedFiles);
+      setFileDisplay(uploadedFiles.map(f => f.name).join(', '));
+      setShowZipFileExpansion(false);
     }
   };
 
@@ -73,15 +86,42 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
                 <Grid.Col>
                   <Center>
                     <Text size="xl" inline>
-                      {files.length === 0
-                        ? 'Upload FHIR Bundle(s) or a .zip of FHIR Bundles'
-                        : files.map(f => f.name).join(', ')}
+                      {fileDisplay ?? 'Upload FHIR Bundle(s) or a .zip of FHIR Bundles'}
                     </Text>
                   </Center>
                 </Grid.Col>
               </Grid>
             )}
           </Dropzone>
+          {showZipFileExpansion && (
+            <>
+              <Button
+                variant="subtle"
+                color="gray"
+                onClick={() => setIsZipInfoExpanded(!isZipInfoExpanded)}
+                fullWidth
+                styles={{
+                  inner: {
+                    justifyContent: 'flex-start'
+                  }
+                }}
+              >
+                {isZipInfoExpanded ? <IconCaretDown /> : <IconCaretRight />}Show Contained Bundles
+              </Button>
+              <Collapse in={isZipInfoExpanded}>
+                <ScrollArea style={{ height: 200 }}>
+                  {files.map(f => {
+                    const baseName = f.name.substring(f.name.lastIndexOf('/') + 1);
+                    return (
+                      <Text key={f.name} style={{ paddingLeft: '18px' }} color="gray" size="sm">
+                        {baseName}
+                      </Text>
+                    );
+                  })}
+                </ScrollArea>
+              </Collapse>
+            </>
+          )}
           <Center>
             <Group
               style={{
