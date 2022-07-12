@@ -8,12 +8,13 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
-import { Download, Upload } from 'tabler-icons-react';
+import { CircleCheck, Download, Upload } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
-import { showNotification } from '@mantine/notifications';
 import ImportModal from './ImportModal';
 import { bundleToTestCase } from '../../util/import';
+import { IconAlertCircle } from '@tabler/icons';
+import { NotificationProps, showNotification } from '@mantine/notifications';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -68,44 +69,85 @@ export default function ResourceCreationPanel() {
   const readFileContent = (file: File) => {
     const reader = new FileReader();
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<{ fileName: string; fileContent: string }>((resolve, reject) => {
       // Set the native promise rejection for the FileReader to properly catch errors
       reader.onerror = reject;
 
       reader.onload = () => {
-        resolve(reader.result as string);
+        resolve({ fileName: file.name, fileContent: reader.result as string });
       };
 
       reader.readAsText(file);
     });
   };
 
+  const showError = (message: string) => {
+    showNotification({
+      icon: <IconAlertCircle />,
+      title: 'Import error',
+      message,
+      color: 'red'
+    });
+  };
+
   const handleSubmittedImport = (files: File[]) => {
     const filePromises = files.map(readFileContent);
 
-    // TODO (MATT/ELSA): need to change this to fail safely when a promise rejects. It shouldn't halt the import
     Promise.all(filePromises)
       .then(allFileContent => {
+        const successNotifications: NotificationProps[] = [];
         const nextPatientState = produce(currentPatients, draftState => {
-          allFileContent.forEach(bundleStr => {
-            // TODO (MATT/ELSA): Add more error checking for if resource is actually a bundle
-            const bundle = JSON.parse(bundleStr) as fhir4.Bundle;
+          allFileContent.forEach(({ fileName, fileContent }) => {
+            let resource: any;
+            try {
+              resource = JSON.parse(fileContent);
+            } catch (e) {
+              if (e instanceof Error) {
+                showError(e.message);
+                return;
+              }
+            }
 
+            if (resource.resourceType !== 'Bundle') {
+              showError(`${fileName} is not a FHIR Bundle`);
+              return;
+            }
+
+            const bundle = resource as fhir4.Bundle;
             const testCase = bundleToTestCase(bundle);
 
             if (!testCase.patient.id) {
-              throw new Error('Could not find id on patient resource');
+              showError('Could not find id on patient resource');
+              return;
             }
 
             draftState[testCase.patient.id] = testCase;
+
+            successNotifications.push({
+              id: `${fileName}-success`,
+              message: `Successfully imported ${fileName}`,
+              icon: <CircleCheck />,
+              color: 'green'
+            });
           });
         });
 
-        // TODO (MATT/ELSA): Show notification with success information
         setCurrentPatients(nextPatientState);
+
+        successNotifications.forEach(notif => {
+          showNotification(notif);
+        });
       })
       .catch(err => {
-        // TODO (MATT/ELSA): Show notification with proper error message
+        // If this catch block happens, the FileReader couldn't read any files. For now, we're stopping import at this
+        // Other error cases (i.e. invalid JSON, invalid Bundle) will fail safely
+        showNotification({
+          id: 'import-error',
+          icon: <IconAlertCircle />,
+          title: 'Import error',
+          message: err.message,
+          color: 'red'
+        });
       });
   };
 

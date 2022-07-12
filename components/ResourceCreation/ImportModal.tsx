@@ -1,6 +1,7 @@
 import { Modal, Button, Center, Group, Grid, Text } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { Dropzone } from '@mantine/dropzone';
-import { IconFileCheck, IconFileImport } from '@tabler/icons';
+import { IconAlertCircle, IconFileCheck, IconFileImport } from '@tabler/icons';
 import { useState } from 'react';
 import zip from 'jszip';
 
@@ -19,13 +20,13 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
   };
 
   const handleDrop = (uploadedFiles: File[]) => {
-    // TODO (MATT/ELSA): Handle error cases for combo of zips and json, multiple zips
-    // TODO (MATT/ELSA): ask about if we should unzip on drop or on submit
     if (uploadedFiles.length === 1 && uploadedFiles[0].type === 'application/zip') {
       zip
         .loadAsync(uploadedFiles[0])
         .then(data => {
           return Promise.all(
+            // Iterate through unzipped files and read their contents into a new JS File object
+            // Required for passing the proper information back to the parent component
             Object.entries(data.files).map(async ([fname, finfo]) => {
               const blob = await finfo.async('blob');
               return new File([blob], fname);
@@ -35,6 +36,14 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
         .then(resolvedFiles => {
           setFiles(resolvedFiles);
         });
+    } else if (uploadedFiles.length > 1 && uploadedFiles.some(f => f.type === 'application/zip')) {
+      showNotification({
+        id: 'invalid-zip-upload',
+        icon: <IconAlertCircle />,
+        title: 'Invalid Zip Upload',
+        message: 'Please only upload one or more JSON files or only one zip file',
+        color: 'red'
+      });
     } else {
       setFiles(uploadedFiles);
     }
