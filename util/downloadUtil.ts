@@ -1,3 +1,6 @@
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
+
 /**
  * Creates a temporary download link in the document to download a file with the
  * passed in filename and fileContents
@@ -18,4 +21,10 @@ export const download = (filename: string, fileContents: string) => {
     link.click();
     document.body.removeChild(link);
   });
+};
+
+export const downloadZip = async (zip: JSZip, fileName: string) => {
+  // Create a blob of zip and save
+  const blob = await zip.generateAsync({ type: 'blob' });
+  FileSaver.saveAs(blob, fileName);
 };
