@@ -104,4 +104,16 @@ describe('ResourceCreationPanel', () => {
     expect(downloadZip).toBeCalledTimes(1);
   });
   // TODO (MATT/ELSA): Add test case for new button
+  it('should render a import test cases(s) button', () => {
+    render(
+      mantineRecoilWrap(
+        <>
+          <ResourceCreationPanel />
+        </>
+      )
+    );
+
+    const button = screen.getByRole('button', { name: 'Import Test Case(s)' });
+    expect(button).toBeInTheDocument();
+  });
 });
