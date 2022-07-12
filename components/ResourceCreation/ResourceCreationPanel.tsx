@@ -51,12 +51,11 @@ export default function ResourceCreationPanel() {
         measureBundleFolder.file(testCaseFileName, bundleString);
       });
       downloadZip(zip, `${fileNameString}-${dateCreated.toISOString()}.zip`);
-    }
-    else {
+    } else {
       showNotification({
         title: 'Measure Bundle Folder Creation Failed',
         message: 'Could not successfully create zip folder for downloading all patients'
-    })
+      });
     }
   };
 
@@ -69,7 +68,7 @@ export default function ResourceCreationPanel() {
           </div>
           <Button
             aria-label={'Download All Patients'}
-            disabled={(Object.keys(currentPatients).length === 0)}
+            disabled={Object.keys(currentPatients).length === 0}
             onClick={exportAllPatients}
           >
             <Download />
