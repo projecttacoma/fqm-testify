@@ -8,12 +8,11 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
-import { Download } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
 import ImportModal from './ImportModal';
 import { bundleToTestCase } from '../../util/import';
-import { IconAlertCircle, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
+import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
 
 export default function ResourceCreationPanel() {
@@ -177,21 +176,22 @@ export default function ResourceCreationPanel() {
       />
       <Center>
         <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-          <Button onClick={() => openPatientModal()}>
+          <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
             <IconUserPlus />
             &nbsp;Create Test Patient
           </Button>
-          <Button onClick={() => setIsImportModalOpen(true)} color="gray">
+          <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} color="gray">
             <IconFileUpload />
-            &nbsp;Import Test Case(s)
+            &nbsp;Import Test Patient(s)
           </Button>
           <Button
-            aria-label={'Download All Patients'}
+            aria-label="Download All Patients"
             disabled={Object.keys(currentPatients).length === 0}
             onClick={exportAllPatients}
+            color="gray"
           >
-            <Download />
-            Download All Patients
+            <IconFileDownload />
+            &nbsp;Download All Patients
           </Button>
         </Group>
       </Center>

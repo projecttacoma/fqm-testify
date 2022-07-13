@@ -20,7 +20,7 @@ describe('ResourceCreationPanel', () => {
       )
     );
 
-    const button = screen.getByRole('button', { name: 'Create Patient' });
+    const button = screen.getByRole('button', { name: 'Create Test Patient' });
     expect(button).toBeInTheDocument();
   });
 
@@ -103,7 +103,7 @@ describe('ResourceCreationPanel', () => {
     fireEvent.click(button);
     expect(downloadZip).toBeCalledTimes(1);
   });
-  // TODO (MATT/ELSA): Add test case for new button
+
   it('should render a import test cases(s) button', () => {
     render(
       mantineRecoilWrap(
@@ -113,7 +113,7 @@ describe('ResourceCreationPanel', () => {
       )
     );
 
-    const button = screen.getByRole('button', { name: 'Import Test Case(s)' }); // TODO(MATT) ???????
+    const button = screen.getByRole('button', { name: 'Import Test Patient(s)' });
     expect(button).toBeInTheDocument();
   });
 });

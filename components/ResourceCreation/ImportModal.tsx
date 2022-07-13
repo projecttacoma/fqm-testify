@@ -3,7 +3,7 @@ import { showNotification } from '@mantine/notifications';
 import { Dropzone } from '@mantine/dropzone';
 import { IconAlertCircle, IconCaretDown, IconCaretRight, IconFileCheck, IconFileImport } from '@tabler/icons';
 import { useState } from 'react';
-import zip from 'jszip';
+import JSZip from 'jszip';
 
 export interface ImportModalProps {
   open: boolean;
@@ -27,8 +27,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
 
   const handleDrop = (uploadedFiles: File[]) => {
     if (uploadedFiles.length === 1 && uploadedFiles[0].type === 'application/zip') {
-      zip
-        .loadAsync(uploadedFiles[0])
+      JSZip.loadAsync(uploadedFiles[0])
         .then(data => {
           return Promise.all(
             // Iterate through unzipped files and read their contents into a new JS File object
