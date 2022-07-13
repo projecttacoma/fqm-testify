@@ -104,7 +104,7 @@ describe('ResourceCreationPanel', () => {
     expect(downloadZip).toBeCalledTimes(1);
   });
 
-  it('should render a import test cases(s) button', () => {
+  it('should render an import test cases(s) button', () => {
     render(
       mantineRecoilWrap(
         <>
