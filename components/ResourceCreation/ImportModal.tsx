@@ -13,7 +13,7 @@ export interface ImportModalProps {
 
 export default function ImportModal({ open, onClose, onImportSubmit }: ImportModalProps) {
   const [files, setFiles] = useState<File[]>([]);
-  const [fileDisplay, setFileDisplay] = useState<string | null>(null);
+  const [fileDisplay, setFileDisplay] = useState<string | string[] | null>(null);
   const [showZipFileExpansion, setShowZipFileExpansion] = useState(false);
   const [isZipInfoExpanded, setIsZipInfoExpanded] = useState(false);
 
@@ -58,9 +58,33 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
       setShowZipFileExpansion(false);
     } else {
       setFiles(uploadedFiles);
-      setFileDisplay(uploadedFiles.map(f => f.name).join(', '));
+      setFileDisplay(uploadedFiles.map(f => f.name));
       setShowZipFileExpansion(false);
     }
+  };
+
+  const renderFileDisplay = () => {
+    if (Array.isArray(fileDisplay)) {
+      return (
+        <div>
+          {fileDisplay.map(fname => (
+            <Text size={fileDisplay.length > 10 ? 'sm' : 'lg'} key={fname}>
+              {fname}
+            </Text>
+          ))}
+        </div>
+      );
+    } else if (fileDisplay != null) {
+      <Text size="xl" inline>
+        {fileDisplay}
+      </Text>;
+    }
+
+    return (
+      <Text size="xl" inline>
+        Upload FHIR Bundle(s) or a .zip of FHIR Bundles
+      </Text>
+    );
   };
 
   return (
@@ -83,11 +107,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
                   <Center>{files.length === 0 ? <IconFileImport size={80} /> : <IconFileCheck size={80} />}</Center>
                 </Grid.Col>
                 <Grid.Col>
-                  <Center>
-                    <Text size="xl" inline>
-                      {fileDisplay ?? 'Upload FHIR Bundle(s) or a .zip of FHIR Bundles'}
-                    </Text>
-                  </Center>
+                  <Center>{renderFileDisplay()}</Center>
                 </Grid.Col>
               </Grid>
             )}
