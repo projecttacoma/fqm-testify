@@ -4,7 +4,7 @@ import React, { ReactNode, Suspense, useState } from 'react';
 import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCase, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
@@ -80,7 +80,7 @@ export default function ResourceCreationPanel() {
     });
   };
 
-  const showError = (message: string | ReactNode) => {
+  const showImportError = (message: string | ReactNode) => {
     showNotification({
       icon: <IconAlertCircle />,
       title: 'Import error',
@@ -105,7 +105,7 @@ export default function ResourceCreationPanel() {
             } catch (e) {
               if (e instanceof Error) {
                 failureCount += 1;
-                showError(
+                showImportError(
                   <>
                     <strong>{fileName}</strong>: {e.message}
                   </>
@@ -116,7 +116,7 @@ export default function ResourceCreationPanel() {
 
             if (resource.resourceType !== 'Bundle') {
               failureCount += 1;
-              showError(
+              showImportError(
                 <>
                   <strong>{fileName}</strong> is not a FHIR Bundle
                 </>
@@ -125,11 +125,25 @@ export default function ResourceCreationPanel() {
             }
 
             const bundle = resource as fhir4.Bundle;
-            const testCase = bundleToTestCase(bundle);
+            let testCase = {} as TestCaseInfo;
+
+            try {
+              testCase = bundleToTestCase(bundle);
+            } catch (e) {
+              if (e instanceof Error) {
+                failureCount += 1;
+                showImportError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
+                return;
+              }
+            }
 
             if (!testCase.patient.id) {
               failureCount += 1;
-              showError(
+              showImportError(
                 <>
                   <strong>{fileName}</strong>: Could not find id on patient resource
                 </>
