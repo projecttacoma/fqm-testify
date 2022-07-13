@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import TestResourcesDisplay from '../../../components/ResourceCreation/TestResourcesDisplay';
-import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import noMissingVSBundle from '../../fixtures/bundles/EXM130Fixture.json';
 import dataRequirementsResponse from '../../fixtures/DataRequirementsResponse.json';
@@ -10,7 +10,9 @@ import { Calculator } from 'fqm-execution';
 import { DRCalculationOutput } from 'fqm-execution/build/types/Calculator';
 import { Suspense } from 'react';
 
-const PATIENT_TEST_CASE_POPULATED = { pid1: { resourceType: 'Patient' } as fhir4.Patient };
+const PATIENT_TEST_CASE_POPULATED: TestCase = {
+  pid1: { patient: { resourceType: 'Patient' } as fhir4.Patient, resources: [] }
+};
 const MEASURE_BUNDLE_POPULATED = {
   name: 'testName',
   content: noMissingVSBundle as fhir4.Bundle
