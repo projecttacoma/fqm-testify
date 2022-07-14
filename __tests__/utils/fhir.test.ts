@@ -93,6 +93,18 @@ const ACTIVITYDEFINITION_DATA_REQUIREMENT = {
   ]
 };
 
+// example data requirement for resource type with `subject` not used as the patient reference
+const COVERAGE_DATA_REQUIREMENT = {
+  type: 'Coverage',
+  status: 'active',
+  codeFilter: [
+    {
+      path: 'type',
+      valueSet: 'testvs'
+    }
+  ]
+};
+
 const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
   resourceType: 'Bundle',
   type: 'transaction',
@@ -167,7 +179,8 @@ describe('createFHIRResourceString', () => {
   test('returns populated FHIR resource for primaryCodeType FHIR.CodeableConcept', () => {
     const createdResource = createFHIRResourceString(
       OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET,
-      TEST_MEASURE_BUNDLE
+      TEST_MEASURE_BUNDLE,
+      'Patient1'
     );
     expect(JSON.parse(createdResource).code).toEqual({
       coding: {
@@ -177,38 +190,71 @@ describe('createFHIRResourceString', () => {
         display: 'test display'
       }
     });
+    expect(JSON.parse(createdResource).subject).toEqual({
+      reference: 'Patient/Patient1'
+    });
   });
+
   test('returns populated FHIR resource for primaryCodeType FHIR.Coding', () => {
-    const createdResource = createFHIRResourceString(MESSAGEDEFINITION_DATA_REQUIREMENT, TEST_MEASURE_BUNDLE);
+    const createdResource = createFHIRResourceString(
+      MESSAGEDEFINITION_DATA_REQUIREMENT,
+      TEST_MEASURE_BUNDLE,
+      'Patient1'
+    );
     expect(JSON.parse(createdResource).event).toEqual({
       system: 'test-system',
       version: 'test-version',
       code: '123',
       display: 'test display'
     });
+    expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
+
   test('returns populated FHIR resource for primaryCodeType FHIR.code', () => {
-    const createdResource = createFHIRResourceString(OPERATIONDEFINITION_DATA_REQUIREMENT, TEST_MEASURE_BUNDLE);
+    const createdResource = createFHIRResourceString(
+      OPERATIONDEFINITION_DATA_REQUIREMENT,
+      TEST_MEASURE_BUNDLE,
+      'Patient1'
+    );
     expect(JSON.parse(createdResource).code).toEqual('123');
+    expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
 
   test('returns populated FHIR resource where primaryCodePath us 0..* or 1..* (multiple cardinality)', () => {
-    const createdResource = createFHIRResourceString(ACTIVITYDEFINITION_DATA_REQUIREMENT, TEST_MEASURE_BUNDLE);
-    expect(Array.isArray(JSON.parse(createdResource).topic));
+    const createdResource = createFHIRResourceString(
+      ACTIVITYDEFINITION_DATA_REQUIREMENT,
+      TEST_MEASURE_BUNDLE,
+      'Patient1'
+    );
+    expect(Array.isArray(JSON.parse(createdResource).topic)).toBe(true);
+    expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
 
   test('returns populated FHIR resource where primaryCodePath is 0..1 or 1..1', () => {
     const createdResource = createFHIRResourceString(
       OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET,
-      TEST_MEASURE_BUNDLE
+      TEST_MEASURE_BUNDLE,
+      'Patient1'
     );
     expect(typeof JSON.parse(createdResource).code).toBe('object');
+    expect(JSON.parse(createdResource).subject).toEqual({
+      reference: 'Patient/Patient1'
+    });
+  });
+
+  test('returns populated FHIR resource where subject is not the patient reference', () => {
+    const createdResource = createFHIRResourceString(COVERAGE_DATA_REQUIREMENT, TEST_MEASURE_BUNDLE, 'Patient1');
+    expect(typeof JSON.parse(createdResource).type).toBe('object');
+    expect(JSON.parse(createdResource).beneficiary).toEqual({
+      reference: 'Patient/Patient1'
+    });
   });
 
   test('properly retrieves system/version/code/display when valueset has expansion', () => {
     const createdResource = createFHIRResourceString(
       OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET,
-      TEST_MEASURE_BUNDLE_WITH_EXPANSION
+      TEST_MEASURE_BUNDLE_WITH_EXPANSION,
+      'Patient1'
     );
     expect(JSON.parse(createdResource).code).toEqual({
       coding: {
@@ -217,6 +263,9 @@ describe('createFHIRResourceString', () => {
         code: '123',
         display: 'test display'
       }
+    });
+    expect(JSON.parse(createdResource).subject).toEqual({
+      reference: 'Patient/Patient1'
     });
   });
 });
