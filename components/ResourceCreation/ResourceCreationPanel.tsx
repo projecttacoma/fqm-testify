@@ -4,7 +4,7 @@ import React, { ReactNode, Suspense, useState } from 'react';
 import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { patientTestCaseState, TestCase, TestCaseInfo } from '../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
