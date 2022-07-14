@@ -20,7 +20,7 @@ describe('ResourceCreationPanel', () => {
       )
     );
 
-    const button = screen.getByRole('button', { name: 'Create Patient' });
+    const button = screen.getByRole('button', { name: 'Create Test Patient' });
     expect(button).toBeInTheDocument();
   });
 
@@ -102,5 +102,18 @@ describe('ResourceCreationPanel', () => {
 
     fireEvent.click(button);
     expect(downloadZip).toBeCalledTimes(1);
+  });
+
+  it('should render an import test cases(s) button', () => {
+    render(
+      mantineRecoilWrap(
+        <>
+          <ResourceCreationPanel />
+        </>
+      )
+    );
+
+    const button = screen.getByRole('button', { name: 'Import Test Patient(s)' });
+    expect(button).toBeInTheDocument();
   });
 });

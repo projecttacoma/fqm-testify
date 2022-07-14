@@ -1,13 +1,15 @@
 import { atom } from 'recoil';
 
-export interface TestCases {
-  [patientId: string]: {
-    patient: fhir4.Patient;
-    resources: fhir4.FhirResource[];
-  };
+export interface TestCaseInfo {
+  patient: fhir4.Patient;
+  resources: fhir4.FhirResource[];
 }
 
-export const patientTestCaseState = atom<TestCases>({
+export interface TestCase {
+  [patientId: string]: TestCaseInfo;
+}
+
+export const patientTestCaseState = atom<TestCase>({
   key: 'patientTestCaseState',
   default: {}
 });

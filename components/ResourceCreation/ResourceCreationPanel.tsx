@@ -1,22 +1,27 @@
 import JSZip from 'jszip';
-import { Button, Center, Grid, Loader, Group } from '@mantine/core';
-import React, { Suspense, useState } from 'react';
+import { Button, Center, Grid, Group, Loader } from '@mantine/core';
+import React, { ReactNode, Suspense, useState } from 'react';
+import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { useRecoilValue } from 'recoil';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import PatientCreation from './PatientCreation';
 import TestResourcesDisplay from './TestResourcesDisplay';
-import { Download } from 'tabler-icons-react';
 import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 import { downloadZip } from '../../util/downloadUtil';
+import ImportModal from './ImportModal';
+import { bundleToTestCase } from '../../util/import';
+import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
 
 export default function ResourceCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [currentPatient, setCurrentPatient] = useState<string | null>(null);
+
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const currentPatients = useRecoilValue(patientTestCaseState);
+  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
 
   const openPatientModal = (patientId?: string) => {
@@ -28,6 +33,7 @@ export default function ResourceCreationPanel() {
 
     setIsPatientModalOpen(true);
   };
+
   const closePatientModal = () => {
     setIsPatientModalOpen(false);
     setCurrentPatient(null);
@@ -59,20 +65,147 @@ export default function ResourceCreationPanel() {
     }
   };
 
+  const readFileContent = (file: File): Promise<{ fileName: string; fileContent: string }> => {
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      // Set the native promise rejection for the FileReader to properly catch errors
+      reader.onerror = reject;
+
+      reader.onload = () => {
+        resolve({ fileName: file.name, fileContent: reader.result as string });
+      };
+
+      reader.readAsText(file);
+    });
+  };
+
+  const showImportError = (message: string | ReactNode) => {
+    showNotification({
+      icon: <IconAlertCircle />,
+      title: 'Import error',
+      message,
+      color: 'red'
+    });
+  };
+
+  const handleSubmittedImport = (files: File[]) => {
+    const filePromises = files.map(readFileContent);
+
+    let successCount = 0,
+      failureCount = 0;
+    Promise.all(filePromises)
+      .then(allFileContent => {
+        const nextPatientState = produce(currentPatients, draftState => {
+          allFileContent.forEach(({ fileName, fileContent }) => {
+            // Cast to FhirResource to safely access resourceType if no error is thrown during parse
+            let resource = {} as fhir4.FhirResource;
+            try {
+              resource = JSON.parse(fileContent);
+            } catch (e) {
+              if (e instanceof Error) {
+                failureCount += 1;
+                showImportError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
+                return;
+              }
+            }
+
+            if (resource.resourceType !== 'Bundle') {
+              failureCount += 1;
+              showImportError(
+                <>
+                  <strong>{fileName}</strong> is not a FHIR Bundle
+                </>
+              );
+              return;
+            }
+
+            const bundle = resource as fhir4.Bundle;
+            let testCase = {} as TestCaseInfo;
+
+            try {
+              testCase = bundleToTestCase(bundle);
+            } catch (e) {
+              if (e instanceof Error) {
+                failureCount += 1;
+                showImportError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
+                return;
+              }
+            }
+
+            if (!testCase.patient.id) {
+              failureCount += 1;
+              showImportError(
+                <>
+                  <strong>{fileName}</strong>: Could not find id on patient resource
+                </>
+              );
+              return;
+            }
+
+            draftState[testCase.patient.id] = testCase;
+            successCount += 1;
+          });
+        });
+
+        setCurrentPatients(nextPatientState);
+      })
+      .catch(err => {
+        failureCount += 1;
+        // If this catch block happens, the FileReader couldn't read any files. For now, we're stopping import at this
+        // Other error cases (i.e. invalid JSON, invalid Bundle) will fail safely
+        showNotification({
+          id: 'import-error',
+          icon: <IconAlertCircle />,
+          title: 'Import error',
+          message: err.message,
+          color: 'red'
+        });
+      })
+      .finally(() => {
+        showNotification({
+          id: 'import-info',
+          icon: <IconInfoCircle />,
+          title: 'Import Results',
+          message: `Success: ${successCount}\nFailed: ${failureCount}`,
+          color: 'blue'
+        });
+      });
+  };
+
   return (
     <>
+      <ImportModal
+        open={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSubmit={handleSubmittedImport}
+      />
       <Center>
-        <Group>
-          <div style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-            <Button onClick={() => openPatientModal()}>Create Patient</Button>
-          </div>
+        <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+          <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
+            <IconUserPlus />
+            &nbsp;Create Test Patient
+          </Button>
+          <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} color="gray">
+            <IconFileUpload />
+            &nbsp;Import Test Patient(s)
+          </Button>
           <Button
-            aria-label={'Download All Patients'}
+            aria-label="Download All Patients"
             disabled={Object.keys(currentPatients).length === 0}
             onClick={exportAllPatients}
+            color="gray"
           >
-            <Download />
-            Download All Patients
+            <IconFileDownload />
+            &nbsp;Download All Patients
           </Button>
         </Group>
       </Center>
