@@ -49,7 +49,7 @@ npm run test
 
 ## Usage
 
-FQM-Testify is a React-based web application for analyzing FHIR Electronic Clinical Quality Measures (eCQMs)through the creation of test patients and resources.
+FQM-Testify is a React-based web application for analyzing FHIR Electronic Clinical Quality Measures (eCQMs)through the creation of test FHIR Patients and resources.
 
 ### Creating a Test Case
 
