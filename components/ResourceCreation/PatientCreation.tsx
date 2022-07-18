@@ -146,6 +146,7 @@ function PatientCreation({
                       aria-label={'Delete Patient'}
                       onClick={() => {
                         deletePatientTestCase(id);
+                        setSelectedPatient(null);
                       }}
                       color="red"
                     >
