@@ -49,15 +49,15 @@ npm run test
 
 ## Usage
 
-FQM-Testify is a React-based web application for analyzing FHIR Electronic Clinical Quality Measures (eCQMs)through the creation of test FHIR Patients and resources.
+FQM-Testify is a React-based web application for analyzing FHIR Electronic Clinical Quality Measures (eCQMs) through the creation of test FHIR Patients and resources.
 
 ### Creating a Test Case
 
 For instructions on starting the app, check [here](README.md#L20). After starting up the app, begin by uploading a FHIR Measure Bundle from your local machine. The measurement period start and end pickers will update to reflect the effectivePeriod of the Measure resource in the uploaded bundle.
 
-Test patients can be added to the app by clicking on either the "Create Test Patient" button, or the "Import Test Patient(s) button. The former will open a code editor modal with a pre-populated, randomly-generated FHIR Patient.
+Test patients can be added to the app by clicking on either the "Create Test Patient" button, or the "Import Test Patient(s)" button. The former will open a code editor modal with a pre-populated, randomly-generated FHIR Patient. The latter will open a file dropzone which accepts JSON files of FHIR Patient Bundles and .zip files composed of FHIR Patient Bundles.
 
-FQM-Testify will only let you create non-patient test resources after at least one patient is created in or imported to the app. Once a Measure Bundle is uploaded and a Patient is created, FQM-Testify will generate a list of non-patient resources based on the FHIR dataRequirements of the uploaded measure (dataRequirements calculations and all other FHIR eCQM calculation in the app is done using [fqm-execution](https://github.com/projecttacoma/fqm-execution)). New non-patient resources can be created by clicking on a test patient, then clicking on a non-patient resource from the generated list. This will open a code editor modal pre-populated with an appropriate test resource that references the selected patient. Non-patient resources can be examined, edited, and deleted by clicking on the Patient resource they are associated with.
+FQM-Testify will only let you create non-patient test resources after at least one patient is created in or imported to the app. Once a Measure Bundle is uploaded and a Patient is created, FQM-Testify will generate a list of non-patient resource templates based on the FHIR dataRequirements of the uploaded measure (dataRequirements calculations and all other FHIR eCQM calculation in the app is done using [fqm-execution](https://github.com/projecttacoma/fqm-execution)). New non-patient resources can be created by clicking on a test patient, then clicking on a non-patient resource from the generated list. This will open a code editor modal pre-populated with an appropriate test resource that references the selected patient. Non-patient resources can be examined, edited, and deleted by clicking on the Patient resource they are associated with.
 
 ### Exporting a Test Case
 
