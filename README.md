@@ -8,6 +8,14 @@ Tooling for analysis of Electronic Clinical Quality Measures (eCQMS).
   - [Local Installation](#local-installation)
   - [Testing](#testing)
 
+- [Usage](#usage)
+
+  - [Adding Test Cases](#adding-test-cases)
+    - [Creating a Test Patient](#creating-a-test-patient)
+    - [Importing a Patient Bundle](#importing-a-patient-bundle)
+    - [Creating Non-Patient Test Resources](#creating-non-patient-test-resources)
+  - [Exporting a Test Case](#exporting-a-test-case)
+
 - [License](#license)
 
 ## Installation
@@ -51,11 +59,19 @@ npm run test
 
 FQM-Testify is a React-based web application for analyzing FHIR-based electronic clinical quality measures (eCQMs) through the creation of test FHIR Patients and other FHIR resources.
 
-### Creating a Test Case
+### Adding Test Cases
 
-After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle.
+After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle. There are two methods for adding test Patients to the server: in-app Patient creation and Patient Bundle import.
 
-Test patients can be added to the app by clicking on either the "Create Test Patient" button, or the "Import Test Patient(s)" button. The former will open a code editor modal with a pre-populated, randomly-generated FHIR Patient. The latter will open a file dropzone which accepts JSON files of FHIR Patient Bundles and .zip files composed of FHIR Patient Bundles.
+#### Creating a Test Patient
+
+Test patients can be created in the app by clicking on the "Create Test Patient" button, which will open a code editor modal with a pre-populated, randomly-generated FHIR Patient.
+
+#### Importing a Patient Bundle
+
+Test cases can be imported by clicking the "Import Test Patient(s)" button, which will open a file dropzone which accepts JSON files of FHIR Patient Bundles and .zip files composed of FHIR Patient Bundles. Patient Bundles may contain additional test resources, which will be loaded into FQM-Testify as well.
+
+#### Creating Non-Patient Test Resources
 
 FQM-Testify allows the user to create non-Patient FHIR resources after at least one Patient resource is created in or imported to the app. Once a Measure Bundle is uploaded and a Patient is created, FQM-Testify will generate a list of non-Patient resource templates based on the FHIR `dataRequirements` of the uploaded measure (`dataRequirements` calculations and all other FHIR eCQM calculation in the app is done using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution)). New non-Patient resources can be created by clicking on a test patient, then clicking on a non-Patient resource from the generated list. This will open a code editor modal pre-populated with an appropriate test resource that references the selected patient. Non-Patient resources can be examined, edited, and deleted by clicking on the Patient resource they are associated with.
 
