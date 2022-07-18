@@ -49,11 +49,11 @@ npm run test
 
 ## Usage
 
-FQM-Testify is a React-based web application for analyzing FHIR Electronic Clinical Quality Measures (eCQMs) through the creation of test FHIR Patients and resources.
+FQM-Testify is a React-based web application for analyzing FHIR-based electronic clinical quality measures (eCQMs) through the creation of test FHIR Patients and other FHIR resources.
 
 ### Creating a Test Case
 
-For instructions on starting the app, check [here](README.md#L20). After starting up the app, begin by uploading a FHIR Measure Bundle from your local machine. The measurement period start and end pickers will update to reflect the effectivePeriod of the Measure resource in the uploaded bundle.
+After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle.
 
 Test patients can be added to the app by clicking on either the "Create Test Patient" button, or the "Import Test Patient(s)" button. The former will open a code editor modal with a pre-populated, randomly-generated FHIR Patient. The latter will open a file dropzone which accepts JSON files of FHIR Patient Bundles and .zip files composed of FHIR Patient Bundles.
 
@@ -61,7 +61,7 @@ FQM-Testify will only let you create non-patient test resources after at least o
 
 ### Exporting a Test Case
 
-FQM-Testify allows for exporting of all test cases by clicking the "Download All Patients" button, which generates and downloads a zip file with a subdirectory for each Patient, containing a Patient Bundle including the Patient and all resources which reference the Patient. Individual Patient Bundles can be downloaded as well by clicking on the a Patient entry and selecting the download button.
+FQM-Testify allows for exporting of all test cases by clicking the "Download All Patients" button, which generates and downloads a zip file with a subdirectory for each Patient, containing a Patient Bundle including the patient and all resources which reference the patient. Individual Patient Bundles can be downloaded as well by clicking on the patient entry and selecting the download button.
 
 ## License
 
