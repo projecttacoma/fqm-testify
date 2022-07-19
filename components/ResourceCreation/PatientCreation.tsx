@@ -1,4 +1,4 @@
-import { Button, Collapse, Group, Stack } from '@mantine/core';
+import { Button, Collapse, Group, Modal, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -12,9 +12,10 @@ import {
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { ChevronRight, ChevronDown, Download, Edit, Trash } from 'tabler-icons-react';
-import React from 'react';
+import React, { useState } from 'react';
 import TestResourceCreation from './TestResourceCreation';
 import { download } from '../../util/downloadUtil';
+import ConfirmationModal from '../ConfirmationModal';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -32,6 +33,7 @@ function PatientCreation({
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -51,12 +53,23 @@ function PatientCreation({
     closePatientModal();
   };
 
+  const openConfirmationModal = () => {
+    setIsConfirmationModalOpen(true);
+  };
+
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+  };
+
   const deletePatientTestCase = (id: string) => {
     const nextPatientState = produce(currentPatients, draftState => {
       delete draftState[id];
     });
 
     setCurrentPatients(nextPatientState);
+    // Set the selected patient to null because the selected patient will not longer exist after it is deleted
+    setSelectedPatient(null);
+    closeConfirmationModal();
   };
 
   const exportPatientTestCase = (id: string) => {
@@ -100,7 +113,12 @@ function PatientCreation({
         onSave={updatePatientTestCase}
         initialValue={getInitialPatientResource()}
       />
-
+      <ConfirmationModal
+        open={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+        title="Confirm Patient Deletion"
+        onSave={deletePatientTestCase}
+      ></ConfirmationModal>
       {Object.keys(currentPatients).length > 0 && (
         <>
           <Stack data-testid="patient-stack">
@@ -119,7 +137,6 @@ function PatientCreation({
                 >
                   {getPatientInfoString(testCase.patient)}
                 </Button>
-
                 <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
                   <Group>
                     <Button
@@ -145,9 +162,7 @@ function PatientCreation({
                       data-testid="delete-patient-button"
                       aria-label={'Delete Patient'}
                       onClick={() => {
-                        deletePatientTestCase(id);
-                        // Set the selected patient to null because the selected patient will no longer exist after it is deleted
-                        setSelectedPatient(null);
+                        openConfirmationModal();
                       }}
                       color="red"
                     >
