@@ -146,6 +146,8 @@ function PatientCreation({
                       aria-label={'Delete Patient'}
                       onClick={() => {
                         deletePatientTestCase(id);
+                        // Set the selected patient to null because the selected patient will no longer exist after it is deleted
+                        setSelectedPatient(null);
                       }}
                       color="red"
                     >
