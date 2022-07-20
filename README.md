@@ -61,7 +61,7 @@ FQM-Testify is a React-based web application for analyzing FHIR-based electronic
 
 ### Adding Test Cases
 
-After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle. There are two methods for adding test Patients to the server: in-app Patient creation and Patient Bundle import.
+After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle. There are two methods for adding test Patients to the test case: in-app Patient creation and Patient Bundle import.
 
 #### Creating a Test Patient
 
