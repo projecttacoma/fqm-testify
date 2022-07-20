@@ -75,9 +75,11 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
         </div>
       );
     } else if (fileDisplay != null) {
-      <Text size="xl" inline>
-        {fileDisplay}
-      </Text>;
+      return (
+        <Text size="xl" inline>
+          {fileDisplay}
+        </Text>
+      );
     }
 
     return (
