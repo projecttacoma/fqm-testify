@@ -128,7 +128,7 @@ function PatientCreation({
         onClose={closeConfirmationModal}
         title={getConfirmationModalText(selectedPatient)}
         onConfirm={() => deletePatientTestCase(selectedPatient)}
-      ></ConfirmationModal>
+     />
       {Object.keys(currentPatients).length > 0 && (
         <>
           <Stack data-testid="patient-stack">
