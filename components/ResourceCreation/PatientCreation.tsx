@@ -1,4 +1,4 @@
-import { Button, Collapse, Group, Modal, Stack } from '@mantine/core';
+import { Button, Collapse, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -61,15 +61,16 @@ function PatientCreation({
     setIsConfirmationModalOpen(false);
   };
 
-  const deletePatientTestCase = (id: string) => {
-    const nextPatientState = produce(currentPatients, draftState => {
-      delete draftState[id];
-    });
-
-    setCurrentPatients(nextPatientState);
-    // Set the selected patient to null because the selected patient will not longer exist after it is deleted
-    setSelectedPatient(null);
-    closeConfirmationModal();
+  const deletePatientTestCase = (id: string | null) => {
+    if (id !== null) {
+      const nextPatientState = produce(currentPatients, draftState => {
+        delete draftState[id];
+      });
+      setCurrentPatients(nextPatientState);
+      // Set the selected patient to null because the selected patient will not longer exist after it is deleted
+      setSelectedPatient(null);
+      closeConfirmationModal();
+    }
   };
 
   const exportPatientTestCase = (id: string) => {
@@ -104,6 +105,15 @@ function PatientCreation({
       setSelectedPatient(patientId);
     }
   };
+
+  const getConfirmationModalText = (patientId: string | null) => {
+    let patientName;
+    if (patientId !== null) {
+      const patient = currentPatients[patientId].patient;
+      patientName = getPatientNameString(patient);
+    }
+    return `Are you sure you want to delete ${patientName || 'this patient'}?`;
+  };
   return (
     <>
       <CodeEditorModal
@@ -116,8 +126,8 @@ function PatientCreation({
       <ConfirmationModal
         open={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
-        title="Confirm Patient Deletion"
-        onSave={deletePatientTestCase}
+        title={getConfirmationModalText(selectedPatient)}
+        onConfirm={() => deletePatientTestCase(selectedPatient)}
       ></ConfirmationModal>
       {Object.keys(currentPatients).length > 0 && (
         <>
@@ -161,9 +171,7 @@ function PatientCreation({
                     <Button
                       data-testid="delete-patient-button"
                       aria-label={'Delete Patient'}
-                      onClick={() => {
-                        openConfirmationModal();
-                      }}
+                      onClick={openConfirmationModal}
                       color="red"
                     >
                       <Trash />
