@@ -88,7 +88,7 @@ describe('PatientCreation', () => {
     expect(testPatientLabel).toBeInTheDocument();
   });
 
-  it('should delete patient when button is clicked', () => {
+  it('should render confirmation modal when delete button is clicked', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -113,8 +113,8 @@ describe('PatientCreation', () => {
 
     fireEvent.click(deleteButton);
 
-    const testCaseList = screen.queryByTestId('patient-stack');
-    expect(testCaseList).not.toBeInTheDocument();
+    const confirmationModal = screen.getByRole('dialog');
+    expect(confirmationModal).toBeInTheDocument();
   });
 
   it('should have download function called when download patient button is clicked', async () => {

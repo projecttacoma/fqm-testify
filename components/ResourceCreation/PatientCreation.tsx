@@ -12,9 +12,10 @@ import {
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { ChevronRight, ChevronDown, Download, Edit, Trash } from 'tabler-icons-react';
-import React from 'react';
+import React, { useState } from 'react';
 import TestResourceCreation from './TestResourceCreation';
 import { download } from '../../util/downloadUtil';
+import ConfirmationModal from '../ConfirmationModal';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -32,6 +33,7 @@ function PatientCreation({
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -51,12 +53,24 @@ function PatientCreation({
     closePatientModal();
   };
 
-  const deletePatientTestCase = (id: string) => {
-    const nextPatientState = produce(currentPatients, draftState => {
-      delete draftState[id];
-    });
+  const openConfirmationModal = () => {
+    setIsConfirmationModalOpen(true);
+  };
 
-    setCurrentPatients(nextPatientState);
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+  };
+
+  const deletePatientTestCase = (id: string | null) => {
+    if (id !== null) {
+      const nextPatientState = produce(currentPatients, draftState => {
+        delete draftState[id];
+      });
+      setCurrentPatients(nextPatientState);
+      // Set the selected patient to null because the selected patient will not longer exist after it is deleted
+      setSelectedPatient(null);
+      closeConfirmationModal();
+    }
   };
 
   const exportPatientTestCase = (id: string) => {
@@ -91,6 +105,15 @@ function PatientCreation({
       setSelectedPatient(patientId);
     }
   };
+
+  const getConfirmationModalText = (patientId: string | null) => {
+    let patientName;
+    if (patientId !== null) {
+      const patient = currentPatients[patientId].patient;
+      patientName = getPatientNameString(patient);
+    }
+    return `Are you sure you want to delete ${patientName || 'this patient'}?`;
+  };
   return (
     <>
       <CodeEditorModal
@@ -100,7 +123,12 @@ function PatientCreation({
         onSave={updatePatientTestCase}
         initialValue={getInitialPatientResource()}
       />
-
+      <ConfirmationModal
+        open={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+        title={getConfirmationModalText(selectedPatient)}
+        onConfirm={() => deletePatientTestCase(selectedPatient)}
+      />
       {Object.keys(currentPatients).length > 0 && (
         <>
           <Stack data-testid="patient-stack">
@@ -119,7 +147,6 @@ function PatientCreation({
                 >
                   {getPatientInfoString(testCase.patient)}
                 </Button>
-
                 <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
                   <Group>
                     <Button
@@ -144,11 +171,7 @@ function PatientCreation({
                     <Button
                       data-testid="delete-patient-button"
                       aria-label={'Delete Patient'}
-                      onClick={() => {
-                        deletePatientTestCase(id);
-                        // Set the selected patient to null because the selected patient will no longer exist after it is deleted
-                        setSelectedPatient(null);
-                      }}
+                      onClick={openConfirmationModal}
                       color="red"
                     >
                       <Trash />
