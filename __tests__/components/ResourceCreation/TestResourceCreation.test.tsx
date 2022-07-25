@@ -104,7 +104,7 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const editResourceButton = screen.getByRole('button', { name: 'Edit FHIR Resource' });
+    const editResourceButton = screen.getByTestId('edit-resource-button') as HTMLButtonElement;
     fireEvent.click(editResourceButton);
 
     const modal = screen.getByRole('dialog', { name: 'Edit FHIR Resource' });
@@ -172,10 +172,10 @@ describe('TestResourceCreation', () => {
     const procedureResource = screen.getByText(/1. Procedure/i);
     expect(procedureResource).toBeInTheDocument();
 
-    const editResourceButton = screen.getByRole('button', { name: 'Edit FHIR Resource' });
+    const editResourceButton = screen.getByTestId('edit-resource-button') as HTMLButtonElement;
     expect(editResourceButton).toBeInTheDocument();
 
-    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource' });
+    const deleteResourceButton = screen.getByTestId('delete-resource-button') as HTMLButtonElement;
     expect(deleteResourceButton).toBeInTheDocument();
   });
 
@@ -208,7 +208,7 @@ describe('TestResourceCreation', () => {
       )
     );
 
-    const deleteResourceButton = screen.getByRole('button', { name: 'Delete Resource' });
+    const deleteResourceButton = screen.getByTestId('delete-resource-button') as HTMLButtonElement;
     expect(deleteResourceButton).toBeInTheDocument();
 
     fireEvent.click(deleteResourceButton);
