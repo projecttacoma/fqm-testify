@@ -1,4 +1,4 @@
-import { Button, Group, Paper, Text } from '@mantine/core';
+import { Button, Grid, Group, Paper, Text } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -8,6 +8,7 @@ import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequ
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
+import { Edit, Trash } from 'tabler-icons-react';
 
 function TestResourceCreation() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -101,6 +102,8 @@ function TestResourceCreation() {
     return undefined;
   };
 
+  const alternatingColor = ['#e3e3e3', '#ffffff'];
+
   return (
     <>
       <CodeEditorModal
@@ -114,26 +117,37 @@ function TestResourceCreation() {
         <>
           <h3>Test Case Resources:</h3>
           {currentTestCases[selectedPatient].resources.map((resource, idx) => (
-            <Paper key={resource.id} withBorder p="md">
-              <Group>
-                <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
-                <Button
-                  onClick={() => {
-                    openResourceModal(resource.id);
-                  }}
-                  color="gray"
-                >
-                  Edit FHIR Resource
-                </Button>
-                <Button
-                  onClick={() => {
-                    deleteResource(resource.id);
-                  }}
-                  color="red"
-                >
-                  Delete Resource
-                </Button>
-              </Group>
+            <Paper
+              key={resource.id}
+              withBorder
+              p="md"
+              sx={{ backgroundColor: alternatingColor[idx % alternatingColor.length] }}
+            >
+              <Grid justify="space-between">
+                <Group>
+                  <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
+                </Group>
+                <Group>
+                  <Button
+                    onClick={() => {
+                      openResourceModal(resource.id);
+                    }}
+                    color="gray"
+                    data-testid="edit-resource-button"
+                  >
+                    <Edit />
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      deleteResource(resource.id);
+                    }}
+                    color="red"
+                    data-testid="delete-resource-button"
+                  >
+                    <Trash />
+                  </Button>
+                </Group>
+              </Grid>
             </Paper>
           ))}
         </>
