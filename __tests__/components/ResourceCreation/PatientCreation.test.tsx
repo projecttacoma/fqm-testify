@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import PatientCreation from '../../../components/ResourceCreation/PatientCreation';
@@ -6,14 +6,18 @@ import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { download } from '../../../util/downloadUtil';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
-import testBundle from '../../fixtures/bundles/MockMeasureBundle.json';
 import MeasureUpload from '../../../components/MeasureUpload';
 import { Calculator } from 'fqm-execution';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
 }));
+
+const MOCK_MEASURE_BUNDLE: fhir4.Bundle = {
+  resourceType: 'Bundle',
+  type: 'collection',
+  entry: []
+};
 
 const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
   resourceType: 'MeasureReport',
@@ -199,7 +203,7 @@ describe('PatientCreation', () => {
 
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
-      content: testBundle as fhir4.Bundle
+      content: MOCK_MEASURE_BUNDLE
     });
 
     // Mock calculate data requirements because of the changing state
@@ -215,32 +219,34 @@ describe('PatientCreation', () => {
       results: [MOCK_MEASURE_REPORT]
     });
 
-    await act(async () => {
-      render(
-        mantineRecoilWrap(
-          <>
-            <MockPatients />
-            <MockSelectedPatient />
-            <MockMB />
-            <MeasureUpload />
-            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
-          </>
-        )
-      );
-    });
+    render(
+      mantineRecoilWrap(
+        <>
+          <MockPatients />
+          <MockSelectedPatient />
+          <MockMB />
+          <MeasureUpload />
+          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+        </>
+      )
+    );
 
-    const calculateButton = screen.getByTestId('calculate-button') as HTMLButtonElement;
+    const calculateButton = screen.getByRole('button', { name: 'Calculate' }) as HTMLButtonElement;
     expect(calculateButton).toBeInTheDocument();
 
-    const toggleShowCalculationButton = screen.queryByTestId('toggle-show-calculation-button') as HTMLButtonElement;
+    const toggleShowCalculationButton = screen.queryByRole('button', {
+      name: 'Show Logic Highlighting'
+    }) as HTMLButtonElement;
     expect(toggleShowCalculationButton).not.toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(calculateButton);
     });
 
-    await waitFor(() => {
-      const toggleShowCalculationButton = screen.getByTestId('toggle-show-calculation-button') as HTMLButtonElement;
+    waitFor(() => {
+      const toggleShowCalculationButton = screen.getByRole('button', {
+        name: 'Hide Logic Highlighting'
+      }) as HTMLButtonElement;
       expect(toggleShowCalculationButton).toBeInTheDocument();
       const textDiv = screen.getByText('test123');
       expect(textDiv).toBeInTheDocument();

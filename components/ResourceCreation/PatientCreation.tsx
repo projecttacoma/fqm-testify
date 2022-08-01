@@ -19,6 +19,8 @@ import ConfirmationModal from '../ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { Calculator, CalculatorTypes } from 'fqm-execution';
 import parse from 'html-react-parser';
+import { showNotification } from '@mantine/notifications';
+import { IconAlertCircle } from '@tabler/icons';
 
 const useStyles = createStyles(() => ({
   highlightedMarkup: {
@@ -54,7 +56,14 @@ function PatientCreation({
     try {
       await calculate(id);
     } catch (error) {
-      console.log(error);
+      if (error instanceof Error) {
+        showNotification({
+          icon: <IconAlertCircle />,
+          title: 'Calculation Error',
+          message: error.message,
+          color: 'red'
+        });
+      }
     }
   };
 
@@ -62,6 +71,7 @@ function PatientCreation({
   const calculate = async (id: string | null) => {
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: true,
+      // TODO: Flip this to true once a new fqm-execution version is released/dependency is updated
       calculateSDEs: false,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
@@ -69,10 +79,7 @@ function PatientCreation({
     };
 
     if (id && measureBundle.content) {
-      const patientBundle = createPatientBundle(
-        currentPatients[id].patient,
-        currentPatients[id].resources
-      ) as fhir4.Bundle;
+      const patientBundle = createPatientBundle(currentPatients[id].patient, currentPatients[id].resources);
 
       const mrResults = await Calculator.calculateMeasureReports(measureBundle.content, [patientBundle], options);
       const [measureReport] = mrResults.results as fhir4.MeasureReport[];
@@ -239,7 +246,7 @@ function PatientCreation({
                         onClick={() => setShowCalculation(o => !o)}
                         color="gray"
                       >
-                        {showCalculation === true ? `Hide Results` : `Show Results`}
+                        {showCalculation === true ? `Hide Logic Highlighting` : `Show Logic Highlighting`}
                       </Button>
                     )}
                   </Group>
