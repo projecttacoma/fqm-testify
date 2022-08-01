@@ -3,7 +3,6 @@ import PopulationCalculation from '../../components/PopulationCalculation';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
-import testBundle from '../fixtures/bundles/EXM130Fixture.json';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../components/MeasureUpload';
@@ -24,6 +23,11 @@ const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
   }
 };
 
+const MOCK_BUNDLE: fhir4.Bundle = {
+  resourceType: 'Bundle',
+  type: 'collection'
+};
+
 describe('PopulationCalculation', () => {
   it('should not render Calculate button by default', () => {
     render(
@@ -41,7 +45,7 @@ describe('PopulationCalculation', () => {
   it('should render Calculate button when measure bundle is present and at least one patient created', () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
-      content: testBundle as fhir4.Bundle
+      content: MOCK_BUNDLE
     });
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
@@ -92,7 +96,7 @@ describe('PopulationCalculation', () => {
 
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
-      content: testBundle as fhir4.Bundle
+      content: MOCK_BUNDLE
     });
 
     // Mock calculate data requirements because of the changing state
