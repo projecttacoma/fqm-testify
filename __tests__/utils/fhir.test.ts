@@ -183,12 +183,14 @@ describe('createFHIRResourceString', () => {
       'Patient1'
     );
     expect(JSON.parse(createdResource).code).toEqual({
-      coding: {
-        system: 'test-system',
-        version: 'test-version',
-        code: '123',
-        display: 'test display'
-      }
+      coding: [
+        {
+          system: 'test-system',
+          version: 'test-version',
+          code: '123',
+          display: 'test display'
+        }
+      ]
     });
     expect(JSON.parse(createdResource).subject).toEqual({
       reference: 'Patient/Patient1'
@@ -257,12 +259,14 @@ describe('createFHIRResourceString', () => {
       'Patient1'
     );
     expect(JSON.parse(createdResource).code).toEqual({
-      coding: {
-        system: 'test-system',
-        version: 'test-version',
-        code: '123',
-        display: 'test display'
-      }
+      coding: [
+        {
+          system: 'test-system',
+          version: 'test-version',
+          code: '123',
+          display: 'test display'
+        }
+      ]
     });
     expect(JSON.parse(createdResource).subject).toEqual({
       reference: 'Patient/Patient1'

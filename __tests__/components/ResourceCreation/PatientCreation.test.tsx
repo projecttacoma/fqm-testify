@@ -4,10 +4,31 @@ import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers
 import PatientCreation from '../../../components/ResourceCreation/PatientCreation';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { download } from '../../../util/downloadUtil';
+import { selectedPatientState } from '../../../state/atoms/selectedPatient';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
+import testBundle from '../../fixtures/bundles/MockMeasureBundle.json';
+import MeasureUpload from '../../../components/MeasureUpload';
+import { Calculator } from 'fqm-execution';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
 }));
+
+const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
+  resourceType: 'MeasureReport',
+  type: 'individual',
+  status: 'complete',
+  measure: '',
+  period: {
+    start: '',
+    end: ''
+  },
+  text: {
+    div: 'test123',
+    status: 'additional'
+  }
+};
 
 describe('PatientCreation', () => {
   const DEFAULT_PROPS = {
@@ -99,10 +120,13 @@ describe('PatientCreation', () => {
       }
     });
 
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
+
     render(
       mantineRecoilWrap(
         <>
           <MockPatients />
+          <MockSelectedPatient />
           <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
@@ -150,6 +174,76 @@ describe('PatientCreation', () => {
     fireEvent.click(exportButton);
     await waitFor(() => {
       expect(download).toBeCalledTimes(1);
+    });
+  });
+
+  it('should have calculate function called when calcuate button is clicked', async () => {
+    const MockPatients = getMockRecoilState(patientTestCaseState, {
+      'example-pt': {
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        resources: [
+          {
+            resourceType: 'Procedure',
+            id: 'test-id',
+            status: 'completed',
+            subject: {}
+          }
+        ]
+      }
+    });
+
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
+
+    const MockMB = getMockRecoilState(measureBundleState, {
+      name: 'testName',
+      content: testBundle as fhir4.Bundle
+    });
+
+    // Mock calculate data requirements because of the changing state
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: {
+        resourceType: 'Library',
+        status: 'draft',
+        type: {}
+      }
+    });
+
+    jest.spyOn(Calculator, 'calculateMeasureReports').mockResolvedValue({
+      results: [MOCK_MEASURE_REPORT]
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <MockSelectedPatient />
+            <MockMB />
+            <MeasureUpload />
+            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          </>
+        )
+      );
+    });
+
+    const calculateButton = screen.getByTestId('calculate-button') as HTMLButtonElement;
+    expect(calculateButton).toBeInTheDocument();
+
+    const toggleShowCalculationButton = screen.queryByTestId('toggle-show-calculation-button') as HTMLButtonElement;
+    expect(toggleShowCalculationButton).not.toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(calculateButton);
+    });
+
+    await waitFor(() => {
+      const toggleShowCalculationButton = screen.getByTestId('toggle-show-calculation-button') as HTMLButtonElement;
+      expect(toggleShowCalculationButton).toBeInTheDocument();
+      const textDiv = screen.getByText('test123');
+      expect(textDiv).toBeInTheDocument();
     });
   });
 });

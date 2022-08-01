@@ -160,7 +160,8 @@ export function createFHIRResourceString(
   let codeData;
   if (primaryCodeType === 'FHIR.CodeableConcept') {
     codeData = {
-      coding: coding
+      // Need to add coding as an array for codeable concept
+      coding: [coding]
     };
   } else if (primaryCodeType === 'FHIR.Coding') {
     codeData = coding;

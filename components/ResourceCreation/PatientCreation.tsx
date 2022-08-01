@@ -1,4 +1,4 @@
-import { Button, Collapse, Group, Stack } from '@mantine/core';
+import { Button, Collapse, createStyles, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -16,6 +16,17 @@ import React, { useState } from 'react';
 import TestResourceCreation from './TestResourceCreation';
 import { download } from '../../util/downloadUtil';
 import ConfirmationModal from '../ConfirmationModal';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
+import parse from 'html-react-parser';
+
+const useStyles = createStyles(() => ({
+  highlightedMarkup: {
+    '& pre': {
+      whiteSpace: 'pre-wrap'
+    }
+  }
+}));
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -34,6 +45,46 @@ function PatientCreation({
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const measureBundle = useRecoilValue(measureBundleState);
+  const [showCalculation, setShowCalculation] = useState(false);
+  const { classes } = useStyles();
+
+  // Function to wrap the calculate function and catch errors in fqm-execution
+  const clickCalculateButton = async (id: string | null) => {
+    try {
+      await calculate(id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Function to calculate the selected patient's measure report
+  const calculate = async (id: string | null) => {
+    const options: CalculatorTypes.CalculationOptions = {
+      calculateHTML: true,
+      calculateSDEs: false,
+      reportType: 'individual',
+      measurementPeriodStart: measurementPeriod.start?.toISOString(),
+      measurementPeriodEnd: measurementPeriod.end?.toISOString()
+    };
+
+    if (id && measureBundle.content) {
+      const patientBundle = createPatientBundle(
+        currentPatients[id].patient,
+        currentPatients[id].resources
+      ) as fhir4.Bundle;
+
+      const mrResults = await Calculator.calculateMeasureReports(measureBundle.content, [patientBundle], options);
+      const [measureReport] = mrResults.results as fhir4.MeasureReport[];
+
+      const nextPatientState = produce(currentPatients, draftState => {
+        draftState[id].measureReport = measureReport;
+      });
+
+      setCurrentPatients(nextPatientState);
+      setShowCalculation(true);
+    }
+  };
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -103,6 +154,8 @@ function PatientCreation({
       setSelectedPatient(null);
     } else {
       setSelectedPatient(patientId);
+      // Reset the show calculation state variable to false so that it does show for other patients
+      setShowCalculation(false);
     }
   };
 
@@ -114,6 +167,7 @@ function PatientCreation({
     }
     return `Are you sure you want to delete ${patientName || 'this patient'}?`;
   };
+
   return (
     <>
       <CodeEditorModal
@@ -176,8 +230,32 @@ function PatientCreation({
                     >
                       <Trash />
                     </Button>
+                    <Button data-testid="calculate-button" onClick={() => clickCalculateButton(id)} color="gray">
+                      Calculate
+                    </Button>
+                    {currentPatients[id].measureReport !== undefined && (
+                      <Button
+                        data-testid="toggle-show-calculation-button"
+                        onClick={() => setShowCalculation(o => !o)}
+                        color="gray"
+                      >
+                        {showCalculation === true ? `Hide Results` : `Show Results`}
+                      </Button>
+                    )}
                   </Group>
-
+                  {selectedPatient === id && (
+                    <div
+                      className={classes.highlightedMarkup}
+                      style={{
+                        maxHeight: '55vh',
+                        overflow: 'scroll'
+                      }}
+                    >
+                      <Collapse in={showCalculation}>
+                        {parse(currentPatients[id].measureReport?.text?.div || '')}
+                      </Collapse>
+                    </div>
+                  )}
                   {selectedPatient === id && <TestResourceCreation />}
                 </Collapse>
               </div>
