@@ -29,7 +29,7 @@ const MOCK_BUNDLE: fhir4.Bundle = {
 };
 
 describe('PopulationCalculation', () => {
-  it('should not render Calculate button by default', () => {
+  it('should not render Calculate Population Results button by default', () => {
     render(
       mantineRecoilWrap(
         <>
@@ -42,7 +42,7 @@ describe('PopulationCalculation', () => {
     expect(calculateButton).not.toBeInTheDocument();
   });
 
-  it('should render Calculate button when measure bundle is present and at least one patient created', () => {
+  it('should render Calculate Population Results button when measure bundle is present and at least one patient created', () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       name: 'testName',
       content: MOCK_BUNDLE
@@ -71,7 +71,7 @@ describe('PopulationCalculation', () => {
     expect(calculateButton).toBeInTheDocument();
   });
 
-  it('should run calculation on all patients when calculate button is clicked', async () => {
+  it('should run calculation on all patients when Calculate Population Results button is clicked', async () => {
     const DEFAULT_PROPS = {
       closePatientModal: jest.fn(),
       openPatientModal: jest.fn()
@@ -126,7 +126,7 @@ describe('PopulationCalculation', () => {
       );
     });
 
-    const calculateButton = screen.getByTestId('calculate-all-button') as HTMLButtonElement;
+    const calculateButton = screen.getByRole('button', { name: 'Calculate Population Results' }) as HTMLButtonElement;
     expect(calculateButton).toBeInTheDocument();
 
     await act(async () => {
