@@ -1,4 +1,4 @@
-import { Button, Center, Grid } from '@mantine/core';
+import { Button, Center, Grid, Group, Popover } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -9,13 +9,14 @@ import { useState } from 'react';
 import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle } from '@tabler/icons';
+import { IconAlertCircle, IconX } from '@tabler/icons';
 
 export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
+  const [opened, setOpened] = useState(false);
 
   /**
    * Creates array containing patient info strings for each created patient. Used as labels when creating
@@ -73,6 +74,7 @@ export default function PopulationCalculation() {
             labeledMeasureReports.push({ label: patientLabels[i], report: mr as fhirJson.MeasureReport });
           });
           setMeasureReports(labeledMeasureReports);
+          setOpened(true);
         }
       })
       .catch(e => {
@@ -104,9 +106,25 @@ export default function PopulationCalculation() {
               </Button>
               {measureReports.length > 0 && (
                 <>
-                  <h2>Population Results</h2>
-                  <div data-testid="results-table">
-                    <PopulationResultsViewer reports={measureReports} />
+                  <div style={{ position: 'absolute', right: 0, padding: 5 }}>
+                    <Popover opened={opened} target={undefined}>
+                      <Group style={{ display: 'flex' }}>
+                        <h2>Population Results</h2>
+                        <Button
+                          leftIcon={<IconX size={18} />}
+                          aria-label="Close"
+                          onClick={() => setOpened(false)}
+                          style={{ marginLeft: 'auto' }}
+                          size="sm"
+                          color="red"
+                        >
+                          Close
+                        </Button>
+                      </Group>
+                      <div data-testid="results-table">
+                        <PopulationResultsViewer reports={measureReports} />
+                      </div>
+                    </Popover>
                   </div>
                 </>
               )}
