@@ -23,11 +23,7 @@ const Home: NextPage = () => {
           </Grid.Col>
         </Grid>
         <ResourceCreationPanel />
-        <Grid>
-          <Grid.Col span={12}>
-            <PopulationCalculation />
-          </Grid.Col>
-        </Grid>
+        <PopulationCalculation />
       </AppShell>
     </>
   );

@@ -38,7 +38,7 @@ describe('PopulationCalculation', () => {
       )
     );
 
-    const calculateButton = screen.queryByTestId('calculate-button');
+    const calculateButton = screen.queryByTestId('calculate-all-button');
     expect(calculateButton).not.toBeInTheDocument();
   });
 
@@ -67,7 +67,7 @@ describe('PopulationCalculation', () => {
       )
     );
 
-    const calculateButton = screen.getByTestId('calculate-all-button') as HTMLButtonElement;
+    const calculateButton = screen.getByRole('button', { name: 'Calculate Population Results' }) as HTMLButtonElement;
     expect(calculateButton).toBeInTheDocument();
   });
 
@@ -137,6 +137,5 @@ describe('PopulationCalculation', () => {
       const table = screen.getByTestId('results-table');
       expect(table).toBeInTheDocument();
     });
-
   });
 });
