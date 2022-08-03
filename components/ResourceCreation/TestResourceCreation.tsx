@@ -9,8 +9,10 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
+import dynamic from 'next/dynamic'
 
 function TestResourceCreation() {
+  const ResourceViz = dynamic(() => import('fhir-visualizers').then((mod) => mod.ResourceVisualizer), { ssr: false, })
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [selectedDataRequirement, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
@@ -103,6 +105,9 @@ function TestResourceCreation() {
   };
 
   const alternatingColor = ['#e3e3e3', '#ffffff'];
+  const types = ['Encounter','Condition','Observation','Medication','AllergyIntolerance','CarePlan','Procedure','Immunization','ServiceRequest',
+                 'DeviceRequest','Communication','Coverage','AdverseEvent','NutritionOrder','MedicationRequest','MedicationAdministration',
+                 'MedicationDispense','DiagnosticReport']
 
   return (
     <>
@@ -150,6 +155,12 @@ function TestResourceCreation() {
               </Grid>
             </Paper>
           ))}
+          {types.map((r) => {
+            const entries = currentTestCases[selectedPatient].resources.filter((e) => e.resourceType == r).map((e) => e)
+            if (entries.length > 0) {
+              return (<ResourceViz key={r} resourceType={r} rows={entries} />)
+            }
+          })}
         </>
       )}
     </>
