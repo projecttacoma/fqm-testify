@@ -36,6 +36,10 @@ function TestResourceCreation() {
     [currentTestCases, selectedPatient]
   );
 
+  const showDetails = (entry) => {
+    openResourceModal(entry.id);
+  };
+
   useEffect(() => {
     if (selectedDataRequirement.content && !currentResource) {
       openResourceModal();
@@ -158,7 +162,7 @@ function TestResourceCreation() {
           {types.map((r) => {
             const entries = currentTestCases[selectedPatient].resources.filter((e) => e.resourceType == r).map((e) => e)
             if (entries.length > 0) {
-              return (<ResourceViz key={r} resourceType={r} rows={entries} />)
+              return (<ResourceViz key={r} resourceType={r} onRowClick={showDetails} rows={entries} />)
             }
           })}
         </>
