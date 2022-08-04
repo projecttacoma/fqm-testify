@@ -1,4 +1,4 @@
-import { Button, Grid, Group, Paper, Text } from '@mantine/core';
+import { Button, Grid, Group, Paper, Text, createStyles } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -11,6 +11,14 @@ import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
 import dynamic from 'next/dynamic'
 
+const useStyles = createStyles(() => ({
+  patientView: {
+    'div.health-record__header': {
+      margin: '0px 0px'
+    }
+  }
+}));
+
 function TestResourceCreation() {
   const ResourceViz = dynamic(() => import('fhir-visualizers').then((mod) => mod.ResourceVisualizer), { ssr: false, })
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -19,6 +27,7 @@ function TestResourceCreation() {
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
+  const { classes } = useStyles();
 
   const openResourceModal = useCallback(
     (resourceId?: string) => {
@@ -127,13 +136,14 @@ function TestResourceCreation() {
       />
       {selectedPatient && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
-          <h3>Test Case Resources:</h3>
+          <div className={classes.patientView}>
           {types.map((r) => {
             const entries = currentTestCases[selectedPatient].resources.filter((e) => e.resourceType == r).map((e) => e)
             if (entries.length > 0) {
               return (<ResourceViz key={r} resourceType={r} onRowClick={showDetails} rows={entries} />)
             }
           })}
+          </div>
         </>
       )}
     </>
