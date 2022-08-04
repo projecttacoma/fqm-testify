@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
 import { useState } from 'react';
+import { Trash } from 'tabler-icons-react';
 
 const jsonLinter = jsonParseLinter();
 
@@ -10,7 +11,9 @@ export interface CodeEditorModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (value: string) => void;
+  onDelete: (value: string) => void;
   title?: string;
+  currentResource?: string;
   initialValue?: string;
 }
 
@@ -19,6 +22,8 @@ export default function CodeEditorModal({
   onClose,
   title,
   onSave,
+  onDelete,
+  currentResource = '',
   initialValue = ''
 }: CodeEditorModalProps) {
   const { colorScheme } = useMantineColorScheme();
@@ -83,6 +88,15 @@ export default function CodeEditorModal({
               </Button>
               <Button data-testid="codemirror-cancel-button" color="gray" onClick={onClose}>
                 Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  onDelete(currentResource);
+                }}
+                color="red"
+                data-testid="delete-resource-button"
+              >
+                <Trash />
               </Button>
             </Group>
           </Center>

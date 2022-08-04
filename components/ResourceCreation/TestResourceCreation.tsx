@@ -89,6 +89,7 @@ function TestResourceCreation() {
         setCurrentTestCases(nextResourceState);
       }
     }
+    closeResourceModal();
   };
 
   const getInitialResource = () => {
@@ -120,45 +121,13 @@ function TestResourceCreation() {
         onClose={closeResourceModal}
         title="Edit FHIR Resource"
         onSave={updateResource}
+        onDelete={deleteResource}
+        currentResource={currentResource}
         initialValue={getInitialResource()}
       />
       {selectedPatient && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
           <h3>Test Case Resources:</h3>
-          {currentTestCases[selectedPatient].resources.map((resource, idx) => (
-            <Paper
-              key={resource.id}
-              withBorder
-              p="md"
-              sx={{ backgroundColor: alternatingColor[idx % alternatingColor.length] }}
-            >
-              <Grid justify="space-between">
-                <Group>
-                  <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
-                </Group>
-                <Group>
-                  <Button
-                    onClick={() => {
-                      openResourceModal(resource.id);
-                    }}
-                    color="gray"
-                    data-testid="edit-resource-button"
-                  >
-                    <Edit />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      deleteResource(resource.id);
-                    }}
-                    color="red"
-                    data-testid="delete-resource-button"
-                  >
-                    <Trash />
-                  </Button>
-                </Group>
-              </Grid>
-            </Paper>
-          ))}
           {types.map((r) => {
             const entries = currentTestCases[selectedPatient].resources.filter((e) => e.resourceType == r).map((e) => e)
             if (entries.length > 0) {
