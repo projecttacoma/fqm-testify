@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Group, Popover } from '@mantine/core';
+import { Button, Center, Grid, Drawer } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconX } from '@tabler/icons';
+import { IconAlertCircle } from '@tabler/icons';
 
 interface PatientLabel {
   [patientId: string]: string;
@@ -27,7 +27,7 @@ export default function PopulationCalculation() {
    * @returns { Object } mapping of patient ids to patient info labels
    */
   const createPatientLabels = () => {
-    const patientLabels : PatientLabel = {};
+    const patientLabels: PatientLabel = {};
     Object.keys(currentPatients).forEach(id => {
       patientLabels[id] = getPatientInfoString(currentPatients[id].patient);
     });
@@ -73,9 +73,12 @@ export default function PopulationCalculation() {
         if (measureReports) {
           const patientLabels = createPatientLabels();
           const labeledMeasureReports: DetailedMeasureReport[] = [];
-          measureReports.forEach((mr) => {
+          measureReports.forEach(mr => {
             const patientId = mr.subject?.reference?.split('/')[1];
-            labeledMeasureReports.push({ label: (patientId ? patientLabels[patientId] : ''), report: mr as fhirJson.MeasureReport });
+            labeledMeasureReports.push({
+              label: patientId ? patientLabels[patientId] : '',
+              report: mr as fhirJson.MeasureReport
+            });
           });
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
@@ -110,26 +113,27 @@ export default function PopulationCalculation() {
               </Button>
               {measureReports.length > 0 && (
                 <>
-                  <div style={{ position: 'absolute', right: 0, padding: 5 }}>
-                    <Popover opened={opened} target={undefined}>
-                      <Group style={{ display: 'flex' }}>
-                        <h2>Population Results</h2>
-                        <Button
-                          leftIcon={<IconX size={18} />}
-                          aria-label="Close"
-                          onClick={() => setOpened(false)}
-                          style={{ marginLeft: 'auto' }}
-                          size="sm"
-                          color="red"
-                        >
-                          Close
-                        </Button>
-                      </Group>
-                      <div data-testid="results-table">
-                        <PopulationResultsViewer reports={measureReports} />
-                      </div>
-                    </Popover>
-                  </div>
+                  <Drawer
+                    opened={opened}
+                    onClose={() => setOpened(false)}
+                    position="bottom"
+                    padding="md"
+                    overlayOpacity={0.3}
+                    lockScroll={false}
+                    size="lg"
+                  >
+                    <h2>Population Results</h2>
+
+                    <div
+                      data-testid="results-table"
+                      style={{
+                        height: '15vh',
+                        overflow: 'scroll'
+                      }}
+                    >
+                      <PopulationResultsViewer reports={measureReports} />
+                    </div>
+                  </Drawer>
                 </>
               )}
             </Grid.Col>
