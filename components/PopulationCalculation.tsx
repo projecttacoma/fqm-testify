@@ -11,6 +11,10 @@ import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle, IconX } from '@tabler/icons';
 
+interface PatientLabel {
+  [patientId: string]: string;
+}
+
 export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
@@ -19,14 +23,13 @@ export default function PopulationCalculation() {
   const [opened, setOpened] = useState(false);
 
   /**
-   * Creates array containing patient info strings for each created patient. Used as labels when creating
-   * measure report population results table.
-   * @returns { Array } an array of patient labels
+   * Creates object that maps patient ids to their name/DOB info strings.
+   * @returns { Object } mapping of patient ids to patient info labels
    */
-  const createPatientLabels = (): string[] => {
-    const patientLabels: string[] = [];
+  const createPatientLabels = () => {
+    const patientLabels : PatientLabel = {};
     Object.keys(currentPatients).forEach(id => {
-      patientLabels.push(getPatientInfoString(currentPatients[id].patient));
+      patientLabels[id] = getPatientInfoString(currentPatients[id].patient);
     });
     return patientLabels;
   };
@@ -70,8 +73,9 @@ export default function PopulationCalculation() {
         if (measureReports) {
           const patientLabels = createPatientLabels();
           const labeledMeasureReports: DetailedMeasureReport[] = [];
-          measureReports.forEach((mr, i) => {
-            labeledMeasureReports.push({ label: patientLabels[i], report: mr as fhirJson.MeasureReport });
+          measureReports.forEach((mr) => {
+            const patientId = mr.subject?.reference?.split('/')[1];
+            labeledMeasureReports.push({ label: (patientId ? patientLabels[patientId] : ''), report: mr as fhirJson.MeasureReport });
           });
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
