@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Drawer } from '@mantine/core';
+import { Button, Center, Grid, Drawer, Group } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -21,6 +21,7 @@ export default function PopulationCalculation() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
   const [opened, setOpened] = useState(false);
+  const [showTableButton, setShowTableButton] = useState(false);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -82,6 +83,7 @@ export default function PopulationCalculation() {
           });
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
+          setShowTableButton(true);
         }
       })
       .catch(e => {
@@ -102,15 +104,27 @@ export default function PopulationCalculation() {
         <Center>
           <Grid>
             <Grid.Col span={12}>
-              <Button
-                data-testid="calculate-all-button"
-                aria-label="Calculate Population Results"
-                styles={{ root: { marginTop: 20 } }}
-                size="lg"
-                onClick={() => runCalculation()}
-              >
-                &nbsp;Calculate Population Results
-              </Button>
+              <Group>
+                <Button
+                  data-testid="calculate-all-button"
+                  aria-label="Calculate Population Results"
+                  styles={{ root: { marginTop: 20 } }}
+                  size="lg"
+                  onClick={() => runCalculation()}
+                >
+                  &nbsp;Calculate Population Results
+                </Button>
+                <Button
+                  data-testid="show-table-button"
+                  aria-label="Show Table"
+                  styles={{ root: { marginTop: 20 } }}
+                  size="lg"
+                  hidden={!showTableButton}
+                  onClick={() => setOpened(true)}
+                >
+                  &nbsp;Show Table
+                </Button>
+              </Group>
               {measureReports.length > 0 && (
                 <>
                   <Drawer
