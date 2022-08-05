@@ -79,6 +79,14 @@ FQM-Testify allows the user to create non-Patient FHIR resources after at least 
 
 FQM-Testify allows for exporting of all test cases by clicking the "Download All Patients" button, which generates and downloads a zip file with a subdirectory for each Patient, containing a Patient Bundle including the patient and all resources which reference the patient. Individual Patient Bundles can be downloaded as well by clicking on the patient entry and selecting the download button.
 
+### Running Measure Calculation on a Test Case
+
+FQM-testify allows for running measure calculation on a single test case for a given measure by selecting a patient entry and clicking the calculate button. Clicking the calculate button will display logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution). The measure calculation can be regenerated if non-patient test resources are added by clicking the calculate button. The logic highlighting can be hidden and shown using the hide/show logic highlighting button next to the calculate button.
+
+### Running Measure Calculation on All Test Cases
+
+FQM-testify enables users to run measure calculation on all test cases in addition to just one test case. Once a FHIR Measure and at least one test case are uploaded, the user can run measure calculation on all the created patients by clicking the Calculate Population Results button. Using calcuation from [the fqm-execution library](https://github.com/projecttacoma/fqm-execution), the population results for each patient appear in a population results table, with a row for each patient, labeled with the patient's name and date of birth. The population result table can be hidden or shown as well as regenerated if test cases are added.
+
 ## License
 
 Copyright 2022 The MITRE Corporation
