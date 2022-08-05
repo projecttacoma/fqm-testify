@@ -191,7 +191,13 @@ function PatientCreation({
         onConfirm={() => deletePatientTestCase(selectedPatient)}
       />
       {Object.keys(currentPatients).length > 0 && (
-        <>
+        <div
+          data-testid="patient-panel"
+          style={{
+            maxHeight: '40vh',
+            overflow: 'scroll'
+          }}
+        >
           <Stack data-testid="patient-stack">
             {Object.entries(currentPatients).map(([id, testCase]) => (
               <div key={id}>
@@ -268,7 +274,7 @@ function PatientCreation({
               </div>
             ))}
           </Stack>
-        </>
+        </div>
       )}
     </>
   );

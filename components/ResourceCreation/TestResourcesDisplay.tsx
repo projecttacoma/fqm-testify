@@ -16,7 +16,7 @@ export default function TestResourcesDisplay() {
     <div
       data-testid="test-resource-panel"
       style={{
-        maxHeight: '55vh',
+        maxHeight: '40vh',
         overflow: 'scroll'
       }}
     >

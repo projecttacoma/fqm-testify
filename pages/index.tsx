@@ -5,6 +5,7 @@ import AbacusHeader from '../components/AbacusHeader';
 import MeasureUpload from '../components/MeasureUpload';
 import DateSelectors from '../components/DateSelectors';
 import ResourceCreationPanel from '../components/ResourceCreation/ResourceCreationPanel';
+import PopulationCalculation from '../components/PopulationCalculation';
 
 const Home: NextPage = () => {
   return (
@@ -22,6 +23,7 @@ const Home: NextPage = () => {
           </Grid.Col>
         </Grid>
         <ResourceCreationPanel />
+        <PopulationCalculation />
       </AppShell>
     </>
   );
