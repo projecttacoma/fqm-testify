@@ -81,7 +81,7 @@ FQM-Testify allows for exporting of all test cases by clicking the "Download All
 
 ### Running Measure Calculation on a Test Case
 
-FQM-testify allows for running measure calculation on a single test case for a given measure by selecting a patient entry and clicking the calculate button. Clicking the calculate button will display logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution). The measure calculation can be regenerated if non-patient test resources are added by clicking the calculate button. The logic highlighting can be hidden and shown using the hide/show logic highlighting button next to the calculate button.
+FQM-Testify allows for running measure calculation on a single test case for a given measure by selecting a patient entry and clicking the calculate button. Clicking the calculate button will display logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution). The measure calculation can be regenerated if non-patient test resources are added by clicking the calculate button. The logic highlighting can be hidden and shown using the hide/show logic highlighting button next to the calculate button.
 
 ### Running Measure Calculation on All Test Cases
 
