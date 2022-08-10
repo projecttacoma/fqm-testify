@@ -5,10 +5,11 @@
   "scripts": {
     "check": "npm run test && npm run lint && npm run prettier",
     "dev": "next dev -p 3000",
-    "build": "npm run parse-primaryCodePath && npm run build:names && next build",
+    "build": "next build",
+    "build:codes": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts --loglevel silent",
+    "build:lookups": "npm run build:codes && npm run build:names",
     "build:names": "ts-node scripts/generatePatientNames.ts && prettier --write data/names.ts --loglevel silent",
     "start": "next start -p 3000",
-    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts --loglevel silent",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",
