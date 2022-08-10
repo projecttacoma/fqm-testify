@@ -1,16 +1,10 @@
-import { faker } from '@faker-js/faker';
+import _ from 'lodash';
+import { fakeNames } from '../data/names';
 
-export function generateRandomLastName() {
-  return `${faker.name.lastName()}${generateRandomNumber()}`;
+export function getRandomLastName() {
+  return _.sample(fakeNames.lastNames) ?? 'LastName456';
 }
 
-export function generateRandomFirstName(gender: 'male' | 'female') {
-  return `${faker.name.firstName(gender)}${generateRandomNumber()}`;
-}
-
-/**
- * Generate a random 3 digit number between 100-999
- */
-function generateRandomNumber() {
-  return Math.floor(Math.random() * (999 - 100) + 100);
+export function getRandomFirstName(gender: 'male' | 'female') {
+  return _.sample(fakeNames.firstNames[gender]) ?? 'FirstName123';
 }

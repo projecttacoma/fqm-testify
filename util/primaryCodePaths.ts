@@ -1,6 +1,6 @@
-import { primaryCodePathInfo } from '../scripts/parsePrimaryCodePath';
+import { PrimaryCodePathInfo } from './types';
 
-export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = {
+export const parsedPrimaryCodePaths: Record<string, PrimaryCodePathInfo> = {
   Account: {
     primaryCodePath: 'type',
     primaryCodeType: 'FHIR.CodeableConcept',

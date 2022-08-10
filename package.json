@@ -5,9 +5,11 @@
   "scripts": {
     "check": "npm run test && npm run lint && npm run prettier",
     "dev": "next dev -p 3000",
-    "build": "next build && npm run parse-primaryCodePath",
+    "build": "next build",
+    "build:codes": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts --loglevel silent",
+    "build:lookups": "npm run build:codes && npm run build:names",
+    "build:names": "ts-node scripts/generatePatientNames.ts && prettier --write data/names.ts --loglevel silent",
     "start": "next start -p 3000",
-    "parse-primaryCodePath": "ts-node scripts/parsePrimaryCodePath.ts && prettier --write util/primaryCodePaths.ts --loglevel silent",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",
@@ -18,7 +20,6 @@
   "dependencies": {
     "@codemirror/lang-json": "^0.20.0",
     "@codemirror/lint": "^0.20.3",
-    "@faker-js/faker": "^7.1.0",
     "@fhir-typescript/r4-core": "0.0.12-beta.15",
     "@mantine/core": "^4.2.4",
     "@mantine/dates": "^4.2.6",
@@ -44,6 +45,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.4.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
     "@types/fhir": "0.0.34",

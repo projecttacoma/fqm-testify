@@ -2,16 +2,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml2js from 'xml2js';
+import { PrimaryCodePathInfo } from '../util/types';
 
 const modelInfoPath = path.resolve(path.join(__dirname, '../fixtures/model-info/fhir-modelinfo-4.0.1.xml'));
 const outputPath = path.resolve(path.join(__dirname, '../util/primaryCodePaths.ts'));
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
-
-export interface primaryCodePathInfo {
-  primaryCodePath: string;
-  primaryCodeType?: string;
-  multipleCardinality: boolean;
-}
 
 interface elementChoice {
   $: {
@@ -32,7 +27,7 @@ export async function parse(xml: string) {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
 
-  const results: { [key: string]: primaryCodePathInfo } = {};
+  const results: { [key: string]: PrimaryCodePathInfo } = {};
 
   domainInfo.forEach((di: any) => {
     const resourceType = di.$.name;
@@ -42,8 +37,8 @@ export async function parse(xml: string) {
       const primaryCodePathElement = di.element.find((elem: any) => elem.$.name === primaryCodePath);
 
       if (primaryCodePathElement) {
-        let primaryCodeType;
-        let multipleCardinality;
+        let primaryCodeType: string;
+        let multipleCardinality: boolean;
         if (primaryCodePathElement.elementTypeSpecifier) {
           // length of element.elementTypeSpecifier is always 1, so we can index it at 0
           if (primaryCodePathElement.elementTypeSpecifier[0].choice) {
@@ -96,9 +91,9 @@ parse(xmlStr)
     fs.writeFileSync(
       outputPath,
       `
-      import { primaryCodePathInfo } from '../scripts/parsePrimaryCodePath';
+      import { PrimaryCodePathInfo } from './types';
 
-      export const parsedPrimaryCodePaths: Record<string, primaryCodePathInfo> = 
+      export const parsedPrimaryCodePaths: Record<string, PrimaryCodePathInfo> =
         ${JSON.stringify(data, null, 2)};
       `,
       'utf8'
