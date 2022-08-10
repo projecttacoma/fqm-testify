@@ -5,6 +5,8 @@ import { parsedPrimaryCodePaths } from './primaryCodePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 
+const fhirpath = require('fhirpath');
+
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
 
@@ -32,6 +34,14 @@ export function createPatientResourceString(birthDate: string): string {
   };
 
   return JSON.stringify(pt, null, 2);
+}
+
+export function getFhirResourceString(resource: fhir4.Resource) {
+  const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType].primaryCodePath;
+  return `(${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}: ${fhirpath.evaluate(
+    resource,
+    `${primaryCodePath}.coding.display`
+  )})`;
 }
 
 export function getPatientInfoString(patient: fhir4.Patient) {
