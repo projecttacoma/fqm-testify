@@ -2,9 +2,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { getRandomFirstName, getRandomLastName } from './randomizer';
 import { ValueSetsMap } from '../state/selectors/valueSetsMap';
 import { parsedPrimaryCodePaths } from './primaryCodePaths';
+import { parsedPrimaryDatePaths } from './primaryDatePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
+
+interface DateConversionInfo{
+  requirementDateType: 'Period' | 'dateTime',
+  validDateType: 'Period' | 'dateTime' | 'date',
+  requirementDateInfo: fhir4.Period | string,
+}
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -147,7 +154,24 @@ export function createFHIRResourceString(
     resourceType: dr.type,
     id: uuidv4()
   };
+  getResourcePrimaryCode(resource, dr, mb);
+  getResourcePatientReference(resource, dr, patientId);
+  return JSON.stringify(resource, null, 2);
+}
 
+function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, patientId: string | null) {
+  // determine if we should add a reference to the patient
+  if (ReferencesMap[dr.type] && patientId) {
+    // add if subject is in the list otherwise add it on the first one
+    if (ReferencesMap[dr.type].includes('subject')) {
+      resource.subject = { reference: `Patient/${patientId}` };
+    } else if (ReferencesMap[dr.type][0] && !ReferencesMap[dr.type][0].includes('.')) {
+      resource[ReferencesMap[dr.type][0]] = { reference: `Patient/${patientId}` };
+    }
+  }
+}
+
+function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
   // resource properties retrieved from data requirements
   dr.codeFilter?.forEach(cf => {
     if (!cf.valueSet && cf.path && cf.code) {
@@ -200,16 +224,80 @@ export function createFHIRResourceString(
   }
 
   resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
-
-  // determine if we should add a reference to the patient
-  if (ReferencesMap[dr.type] && patientId) {
-    // add if subject is in the list otherwise add it on the first one
-    if (ReferencesMap[dr.type].includes('subject')) {
-      resource.subject = { reference: `Patient/${patientId}` };
-    } else if (ReferencesMap[dr.type][0] && !ReferencesMap[dr.type][0].includes('.')) {
-      resource[ReferencesMap[dr.type][0]] = { reference: `Patient/${patientId}` };
-    }
-  }
-
-  return JSON.stringify(resource, null, 2);
 }
+
+function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement) {
+  const rt = dr.type;
+  const primaryDateInfo = parsedPrimaryDatePaths[rt];
+  if (primaryDateInfo) {
+    dr.dateFilter?.forEach(df => {
+      // pull path off date filter
+      const path = df.path ?? '';
+      // check if path exists on primary date info
+      if (Object.keys(primaryDateInfo).includes(path)) {
+        const fieldTypeInfo = primaryDateInfo[path];
+        // check for allowed types for value (Period => dateTime => date)
+        let validField;
+        if (fieldTypeInfo.isChoiceType) {
+          validField = getValidDateType(fieldTypeInfo.dataTypes);
+          console.log(`I'm a choiceType ${JSON.stringify(fieldTypeInfo, null, 2)}`);
+        } else {
+          validField = fieldTypeInfo.dataTypes[0];
+        }
+      }
+      // create valid type that will satisfy specified range
+      // add it to resource in specified field
+    });
+  }
+}
+
+function getValidDateType(dataTypes: string[]) {
+  if (dataTypes.includes('Period')) {
+    return 'Period';
+  } else if (dataTypes.includes('dateTime')) {
+    return 'dateTime';
+  } else {
+    return 'date';
+  }
+}
+
+function getRequirementDateType(df: fhir4.DataRequirementDateFilter) {
+  return df.valuePeriod ? 'Period' : ;
+}
+
+const EXAMPLE_DR = {
+  type: 'Condition',
+  codeFilter: [
+    {
+      path: 'type',
+      valueSet: 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016'
+    },
+    {
+      path: 'status',
+      code: [
+        {
+          code: 'finished',
+          system: 'http://hl7.org/fhir/encounter-status'
+        }
+      ]
+    }
+  ],
+  dateFilter: [
+    {
+      path: 'onset',
+      valuePeriod: {
+        start: '2019-01-01T00:00:00.000Z',
+        end: '2019-12-31T00:00:00.000Z'
+      }
+    }
+  ],
+  extension: [
+    {
+      url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-fhirQueryPattern',
+      valueString:
+        '/Encounter?type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016&status=finished&date=ge2019-01-01T00:00:00.000Z&date=le2019-12-31T00:00:00.000Z&subject=Patient/{{context.patientId}}'
+    }
+  ]
+};
+
+getResourcePrimaryDates({}, EXAMPLE_DR);
