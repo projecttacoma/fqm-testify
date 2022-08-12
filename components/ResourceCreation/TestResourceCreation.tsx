@@ -132,6 +132,7 @@ function TestResourceCreation() {
                     transition="fade"
                     transitionDuration={200}
                     label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
+                    disabled={getFhirResourceSummary(resource) === ''}
                   >
                     <Text lineClamp={1}>{`${idx + 1}. ${resource.resourceType} ${getFhirResourceSummary(
                       resource

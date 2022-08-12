@@ -43,13 +43,21 @@ export function createPatientResourceString(birthDate: string): string {
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
   const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType]?.primaryCodePath;
+  const resourceCode = `${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}`;
+  const resourceDisplay = `${fhirpath.evaluate(resource, `${primaryCodePath}.coding.display`)}`;
 
   if (primaryCodePath) {
-    return `(${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}: ${fhirpath.evaluate(
-      resource,
-      `${primaryCodePath}.coding.display`
-    )})
-    `;
+    if (resourceCode !== '' && resourceDisplay !== '') {
+      return `(${resourceCode}: ${resourceDisplay}`;
+    } else if (resourceCode !== '') {
+      return `(${resourceCode})`;
+    } else if (resourceDisplay !== '') {
+      return `(${resourceDisplay})`;
+    } else if (fhirpath.evaluate(resource, 'id')) {
+      return `(${fhirpath.evaluate(resource, 'id')})`;
+    } else {
+      return '';
+    }
   } else if (fhirpath.evaluate(resource, 'id')) {
     return `(${fhirpath.evaluate(resource, 'id')})`;
   } else {
