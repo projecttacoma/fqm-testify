@@ -9,6 +9,7 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 
 function TestResourceCreation() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -17,6 +18,7 @@ function TestResourceCreation() {
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
+  const measurementPeriod = useRecoilValue(measurementPeriodState);
 
   const openResourceModal = useCallback(
     (resourceId?: string) => {
@@ -94,8 +96,19 @@ function TestResourceCreation() {
           2
         );
       } else {
-        if (selectedDataRequirement.content && measureBundle.content) {
-          return createFHIRResourceString(selectedDataRequirement.content, measureBundle.content, selectedPatient);
+        if (
+          selectedDataRequirement.content &&
+          measureBundle.content &&
+          measurementPeriod.start &&
+          measurementPeriod.end
+        ) {
+          return createFHIRResourceString(
+            selectedDataRequirement.content,
+            measureBundle.content,
+            selectedPatient,
+            measurementPeriod.start.toISOString(),
+            measurementPeriod.end.toISOString()
+          );
         }
       }
     }

@@ -7,12 +7,6 @@ import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
 
-interface DateConversionInfo{
-  requirementDateType: 'Period' | 'dateTime',
-  validDateType: 'Period' | 'dateTime' | 'date',
-  requirementDateInfo: fhir4.Period | string,
-}
-
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
 
@@ -148,7 +142,9 @@ export function createPatientBundle(patient: fhir4.Patient, resources: fhir4.Fhi
 export function createFHIRResourceString(
   dr: fhir4.DataRequirement,
   mb: fhir4.Bundle,
-  patientId: string | null
+  patientId: string | null,
+  mpStart: string,
+  mpEnd: string
 ): string {
   const resource: any = {
     resourceType: dr.type,
@@ -156,6 +152,7 @@ export function createFHIRResourceString(
   };
   getResourcePrimaryCode(resource, dr, mb);
   getResourcePatientReference(resource, dr, patientId);
+  getResourcePrimaryDates(resource, dr, mpStart, mpEnd);
   return JSON.stringify(resource, null, 2);
 }
 
@@ -226,44 +223,152 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
   resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
 }
 
-function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement) {
+function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpStart: string, mpEnd: string) {
   const rt = dr.type;
   const primaryDateInfo = parsedPrimaryDatePaths[rt];
   if (primaryDateInfo) {
-    dr.dateFilter?.forEach(df => {
-      // pull path off date filter
-      const path = df.path ?? '';
-      // check if path exists on primary date info
-      if (Object.keys(primaryDateInfo).includes(path)) {
+    // TODO: if no date filters, fill all possible fields with valid dates in mp
+    if (dr.dateFilter && dr.dateFilter.length > 0) {
+      dr.dateFilter?.forEach(df => {
+        console.log(df);
+        // pull path off date filter
+        let path = df.path?.split('.')[0] ?? '';
+        // check if path exists on primary date info
+        if (Object.keys(primaryDateInfo).includes(path)) {
+          const fieldTypeInfo = primaryDateInfo[path];
+          // check for allowed types for value (Period => dateTime => date)
+          let validField;
+          if (fieldTypeInfo.isChoiceType) {
+            validField = getValidDateType(fieldTypeInfo.dataTypes);
+            path = `${path}${validField.charAt(0).toUpperCase() + validField.slice(1)}`;
+          } else {
+            validField = fieldTypeInfo.dataTypes[0];
+          }
+          if (validField === 'Period') {
+            if (df.valuePeriod) {
+              resource[path] = getRandomPeriodInPeriod(df.valuePeriod?.start ?? mpStart, df.valuePeriod?.end ?? mpEnd);
+            } else if (df.valueDateTime) {
+              // use dateTime as periodStart and periodEnd of resource
+              resource[path] = { start: df.valueDateTime, end: df.valueDateTime };
+            } else {
+              resource[path] = getRandomPeriodInPeriod(mpStart, mpEnd);
+              //pick random date within the measurement period and make a 1-day period
+            }
+          } else if (validField === 'dateTime') {
+            if (df.valuePeriod) {
+              //pick random dateTime within the period
+              resource[path] = getRandomDateInPeriod(
+                df.valuePeriod?.start ?? mpStart,
+                df.valuePeriod?.end ?? mpEnd
+              ).toISOString();
+            } else if (df.valueDateTime) {
+              // use valueDateTime
+              resource[path] = df.valueDateTime;
+            } else {
+              //pick random dateTime within the measurement period
+              resource[path] = getRandomDateInPeriod(mpStart, mpEnd).toISOString();
+            }
+          } else if (validField === 'date') {
+            if (df.valuePeriod) {
+              const date = getRandomDateInPeriod(df.valuePeriod?.start ?? mpStart, df.valuePeriod?.end ?? mpEnd);
+              resource[path] = jsDateToFHIRDate(date);
+            } else if (df.valueDateTime) {
+              // use valueDateTime and strip timezone
+              resource[path] = jsDateToFHIRDate(new Date(df.valueDateTime));
+            } else {
+              //pick random date within the measurement period
+              const date = getRandomDateInPeriod(mpStart, mpEnd);
+              resource[path] = jsDateToFHIRDate(date);
+            }
+          }
+        }
+        // create valid type that will satisfy specified range
+        // add it to resource in specified field
+      });
+    } else {
+      Object.keys(primaryDateInfo).forEach(path => {
         const fieldTypeInfo = primaryDateInfo[path];
-        // check for allowed types for value (Period => dateTime => date)
         let validField;
         if (fieldTypeInfo.isChoiceType) {
           validField = getValidDateType(fieldTypeInfo.dataTypes);
-          console.log(`I'm a choiceType ${JSON.stringify(fieldTypeInfo, null, 2)}`);
+          path = `${path}${validField.charAt(0).toUpperCase() + validField.slice(1)}`;
         } else {
           validField = fieldTypeInfo.dataTypes[0];
         }
-      }
-      // create valid type that will satisfy specified range
-      // add it to resource in specified field
-    });
+        if (validField === 'Period') {
+          resource[path] = getRandomPeriodInPeriod(mpStart, mpEnd);
+        } else if (validField === 'dateTime') {
+          resource[path] = getRandomDateInPeriod(mpStart, mpEnd).toISOString();
+        } else {
+          resource[path] = getRandomDateInPeriod(mpStart, mpEnd).toISOString();
+        }
+      });
+    }
+    console.log(resource);
   }
 }
 
 function getValidDateType(dataTypes: string[]) {
-  if (dataTypes.includes('Period')) {
-    return 'Period';
-  } else if (dataTypes.includes('dateTime')) {
-    return 'dateTime';
-  } else {
-    return 'date';
-  }
+  return dataTypes.reduce((acc, e) => {
+    if (acc === 'Period' || e === 'Period') {
+      return 'Period';
+    } else if (e === 'dateTime') {
+      return 'dateTime';
+    }
+    return acc;
+  }, 'date');
 }
 
-function getRequirementDateType(df: fhir4.DataRequirementDateFilter) {
-  return df.valuePeriod ? 'Period' : ;
+function getRandomDateInPeriod(start: string, end: string) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  endDate.setDate(endDate.getDate() - 1);
+
+  var date = new Date(+startDate + Math.random() * (endDate.getTime() - startDate.getTime()));
+  return date;
 }
+
+function jsDateToFHIRDate(date: Date) {
+  const year = date.getFullYear();
+  // month is 0 indexed
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${date.getFullYear()}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
+}
+
+function getRandomPeriodInPeriod(start: string, end: string): fhir4.Period {
+  const periodStart = getRandomDateInPeriod(start, end);
+  const periodEnd = new Date(periodStart);
+  periodEnd.setDate(periodEnd.getDate() + 1);
+  return {
+    start: periodStart.toISOString(),
+    end: periodEnd.toISOString()
+  };
+}
+
+// function getRequirementDateType(df: fhir4.DataRequirementDateFilter) {
+//   return df.valuePeriod ? 'Period' : df.valueDateTime ? 'dateTime' : null;
+// }
+
+// function populateDateInfo(dataTypes: string[], df: fhir4.DataRequirementDateFilter): DateConversionInfo | null {
+//   const validDateType = dataTypes.reduce((acc, e) => {
+//     if (acc === 'Period' || e === 'Period') {
+//       return 'Period';
+//     } else if (e === 'dateTime') {
+//       return 'dateTime';
+//     }
+//     return acc;
+//   }, 'date');
+//   let requirementDateType;
+//   let requirementDateInfo;
+//   if (df.valuePeriod) {
+//     requirementDateType = 'Period';
+//     requirementDateInfo = df.valuePeriod;
+//   } else if (df.valueDateTime) {
+//     requirementDateType = 'Period';
+//     requirementDateInfo = df.valuePeriod;
+//   }
+// }
 
 const EXAMPLE_DR = {
   type: 'Condition',
@@ -289,6 +394,44 @@ const EXAMPLE_DR = {
         start: '2019-01-01T00:00:00.000Z',
         end: '2019-12-31T00:00:00.000Z'
       }
+    },
+    {
+      path: 'onset2',
+      valueDateTime: '2019-01-01T00:00:00.000Z'
+    },
+    {
+      path: 'onset3',
+      valueDuration: {}
+    },
+    {
+      path: 'recordedDate',
+      valuePeriod: {
+        start: '2019-01-01T00:00:00.000Z',
+        end: '2019-12-31T00:00:00.000Z'
+      }
+    },
+    {
+      path: 'recordedDate2',
+      valueDateTime: '2019-12-31T00:00:00.000Z'
+    },
+    {
+      path: 'recordedDate3',
+      valueDuration: {}
+    },
+    {
+      path: 'test',
+      valuePeriod: {
+        start: '2019-01-01T00:00:00.000Z',
+        end: '2019-12-31T00:00:00.000Z'
+      }
+    },
+    {
+      path: 'test2',
+      valueDateTime: '2019-01-01T00:00:00.000Z'
+    },
+    {
+      path: 'test3',
+      valueDuration: {}
     }
   ],
   extension: [
@@ -300,4 +443,8 @@ const EXAMPLE_DR = {
   ]
 };
 
-getResourcePrimaryDates({}, EXAMPLE_DR);
+//getResourcePrimaryDates({}, EXAMPLE_DR, '2022-01-01', '2022-12-31');
+// console.log(randomDate('2022-01-01', '2022-12-31'));
+// console.log(randomDate('2022-01-01', '2022-12-31'));
+// console.log(randomDate('2020-01-01', '2020-12-31'));
+//console.log(getRandomPeriodInPeriod('1900-01-01', '2000-12-31'));
