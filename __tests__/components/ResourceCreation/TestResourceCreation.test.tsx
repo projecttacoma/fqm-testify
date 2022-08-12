@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import TestResourceCreation from '../../../components/ResourceCreation/TestResourceCreation';
@@ -137,7 +137,7 @@ describe('TestResourceCreation', () => {
     expect(resourceInfo).not.toBeInTheDocument();
   });
 
-  it('should render test resource list when populated', async () => {
+  it('should render test resource list when populated', () => {
     const MockResources = getMockRecoilState(patientTestCaseState, {
       'example-test-case': {
         patient: {
@@ -164,7 +164,7 @@ describe('TestResourceCreation', () => {
     });
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');
 
-    const baseDom = render(
+    render(
       mantineRecoilWrap(
         <>
           <MockResources />

@@ -38,7 +38,7 @@ export function createPatientResourceString(birthDate: string): string {
 /**
  * Identifies the primary code path of a resource and constructs a string which displays
  * resource summary information depending on what is a available
- * @param resource {Object} a fhir DataRequirement object
+ * @param resource {Object} a fhir Resource object
  * @returns {String} displaying the code and display text, code, or id of the resource or nothing
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
