@@ -4,8 +4,7 @@ import { ValueSetsMap } from '../state/selectors/valueSetsMap';
 import { parsedPrimaryCodePaths } from './primaryCodePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
-
-const fhirpath = require('fhirpath');
+import fhirpath from 'fhirpath';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -36,12 +35,26 @@ export function createPatientResourceString(birthDate: string): string {
   return JSON.stringify(pt, null, 2);
 }
 
-export function getFhirResourceString(resource: fhir4.Resource) {
-  const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType].primaryCodePath;
-  return `(${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}: ${fhirpath.evaluate(
-    resource,
-    `${primaryCodePath}.coding.display`
-  )})`;
+/**
+ * Identifies the primary code path of a resource and constructs a string which displays
+ * resource summary information depending on what is a available
+ * @param resource {Object} a fhir DataRequirement object
+ * @returns {String} displaying the code and display text, code, or id of the resource or nothing
+ */
+export function getFhirResourceSummary(resource: fhir4.Resource) {
+  const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType]?.primaryCodePath;
+
+  if (primaryCodePath) {
+    return `(${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}: ${fhirpath.evaluate(
+      resource,
+      `${primaryCodePath}.coding.display`
+    )})
+    `;
+  } else if (fhirpath.evaluate(resource, 'id')) {
+    return `(${fhirpath.evaluate(resource, 'id')})`;
+  } else {
+    return '';
+  }
 }
 
 export function getPatientInfoString(patient: fhir4.Patient) {

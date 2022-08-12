@@ -6,7 +6,7 @@ import CodeEditorModal from '../CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { createFHIRResourceString, getFhirResourceString } from '../../util/fhir';
+import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
 
@@ -131,9 +131,9 @@ function TestResourceCreation() {
                     withArrow
                     transition="fade"
                     transitionDuration={200}
-                    label={getFhirResourceString(resource)}
+                    label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
                   >
-                    <Text lineClamp={1}>{`${idx + 1}. ${resource.resourceType} ${getFhirResourceString(
+                    <Text lineClamp={1}>{`${idx + 1}. ${resource.resourceType} ${getFhirResourceSummary(
                       resource
                     )}`}</Text>
                   </Tooltip>

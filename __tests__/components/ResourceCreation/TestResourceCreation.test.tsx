@@ -164,7 +164,7 @@ describe('TestResourceCreation', () => {
     });
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');
 
-    render(
+    const baseDom = render(
       mantineRecoilWrap(
         <>
           <MockResources />
@@ -182,15 +182,6 @@ describe('TestResourceCreation', () => {
 
     const resourceCode = screen.getByText(/123: Colectomy/i);
     expect(resourceCode).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.mouseOver(resourceCode);
-    });
-
-    waitFor(() => {
-      const resourceCodes = screen.getAllByText(/123: Colectomy/i);
-      expect(resourceCodes).toHaveLength(2);
-    });
 
     const editResourceButton = screen.getByTestId('edit-resource-button') as HTMLButtonElement;
     expect(editResourceButton).toBeInTheDocument();
