@@ -5,14 +5,48 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
+import Fuse from 'fuse.js';
+import SearchBar from './SearchBar';
+import { searchQueryState } from '../../state/atoms/searchQuery';
 
 export default function TestResourcesDisplay() {
   const dataRequirements = useRecoilValue(dataRequirementsState);
   const [, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
   const valueSetMap = useRecoilValue(valueSetMapState);
   const currentPatients = useRecoilValue(patientTestCaseState);
+  const searchQuery = useRecoilValue(searchQueryState);
+
+  const getSearchContent = () => {
+    const searchContent: { type: string; key: string; displayString: string; }[] = [];
+    if (dataRequirements) {
+      dataRequirements.map((dr, i) => {
+        const type = dr.type;
+        const key = `${dr.type}${i}`
+        const displayString = getDataRequirementFiltersString(dr, valueSetMap);
+        searchContent.push({
+          type,
+          key,
+          displayString
+        });
+      });
+    }
+      return searchContent;
+  };
+
+  const returnSearchResults = (searchInput: string) => {
+    if (dataRequirements) {
+      const fuse = new Fuse(getSearchContent());
+      return fuse.search(searchInput);
+    }
+  };
+  
+
+  //const fuse = new Fuse();
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
+    <>
+    <SearchBar style={{padding: '10px'}}/>
+    {console.log(getSearchContent())}
     <div
       data-testid="test-resource-panel"
       style={{
@@ -43,5 +77,6 @@ export default function TestResourcesDisplay() {
         })}
       </Stack>
     </div>
+    </>
   ) : null;
 }
