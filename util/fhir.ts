@@ -38,28 +38,28 @@ export function createPatientResourceString(birthDate: string): string {
 /**
  * Identifies the primary code path of a resource and constructs a string which displays
  * resource summary information depending on what is a available
- * @param resource {Object} a fhir Resource object
+ * @param resource {fhir4.Resource} a fhir Resource object
  * @returns {String} displaying the code and display text, code, or id of the resource or nothing
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
   const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType]?.primaryCodePath;
-  const resourceCode = `${fhirpath.evaluate(resource, `${primaryCodePath}.coding.code`)}`;
-  const resourceDisplay = `${fhirpath.evaluate(resource, `${primaryCodePath}.coding.display`)}`;
 
   if (primaryCodePath) {
-    if (resourceCode !== '' && resourceDisplay !== '') {
-      return `(${resourceCode}: ${resourceDisplay}`;
-    } else if (resourceCode !== '') {
+    const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
+    const resourceCode = primaryCoding?.code;
+    const resourceDisplay = primaryCoding?.display;
+
+    if (resourceCode && resourceDisplay) {
+      return `(${resourceCode}: ${resourceDisplay})`;
+    } else if (resourceCode) {
       return `(${resourceCode})`;
-    } else if (resourceDisplay !== '') {
+    } else if (resourceDisplay) {
       return `(${resourceDisplay})`;
-    } else if (fhirpath.evaluate(resource, 'id')) {
-      return `(${fhirpath.evaluate(resource, 'id')})`;
-    } else {
-      return '';
     }
-  } else if (fhirpath.evaluate(resource, 'id')) {
-    return `(${fhirpath.evaluate(resource, 'id')})`;
+  }
+
+  if (resource.id) {
+    return `(${resource.id})`;
   } else {
     return '';
   }
