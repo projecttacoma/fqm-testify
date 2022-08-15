@@ -158,7 +158,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
               >
                 Import
               </Button>
-              <Button color="gray" onClick={closeAndReset}>
+              <Button variant="default" onClick={closeAndReset}>
                 Cancel
               </Button>
             </Group>

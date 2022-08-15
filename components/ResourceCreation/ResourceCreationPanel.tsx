@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { Button, Center, Grid, Group, Loader } from '@mantine/core';
+import { Button, Center, Grid, Group, Loader, Text } from '@mantine/core';
 import React, { ReactNode, Suspense, useState } from 'react';
 import produce from 'immer';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -181,6 +181,32 @@ export default function ResourceCreationPanel() {
       });
   };
 
+  const renderDataElements = () => {
+    if (measureBundle.content == null || Object.keys(currentPatients).length === 0) {
+      return '';
+    } else if (selectedPatient == null) {
+      return (
+        <Center>
+          <Text>Select a patient to add data</Text>
+        </Center>
+      );
+    }
+    return (
+      <Suspense
+        fallback={
+          <Center>
+            <Loader />
+          </Center>
+        }
+      >
+        <Center style={{ paddingBottom: '8px' }}>
+          <Text>Add data to {getPatientNameString(currentPatients[selectedPatient].patient)}</Text>
+        </Center>
+        <TestResourcesDisplay />
+      </Suspense>
+    );
+  };
+
   return (
     <>
       <ImportModal
@@ -194,7 +220,7 @@ export default function ResourceCreationPanel() {
             <IconUserPlus />
             &nbsp;Create Test Patient
           </Button>
-          <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} color="gray">
+          <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="default">
             <IconFileUpload />
             &nbsp;Import Test Patient(s)
           </Button>
@@ -202,7 +228,7 @@ export default function ResourceCreationPanel() {
             aria-label="Download All Patients"
             disabled={Object.keys(currentPatients).length === 0}
             onClick={exportAllPatients}
-            color="gray"
+            variant="default"
           >
             <IconFileDownload />
             &nbsp;Download All Patients
@@ -210,20 +236,8 @@ export default function ResourceCreationPanel() {
         </Group>
       </Center>
       <Grid>
-        {selectedPatient !== null && measureBundle.content && (
-          <Grid.Col span={4}>
-            <Suspense
-              fallback={
-                <Center>
-                  <Loader />
-                </Center>
-              }
-            >
-              <TestResourcesDisplay />
-            </Suspense>
-          </Grid.Col>
-        )}
-        <Grid.Col span={selectedPatient !== null && measureBundle.content ? 8 : 12}>
+        <Grid.Col span={4}>{renderDataElements()}</Grid.Col>
+        <Grid.Col span={8}>
           <PatientCreation {...{ openPatientModal, closePatientModal, isPatientModalOpen, currentPatient }} />
         </Grid.Col>
       </Grid>

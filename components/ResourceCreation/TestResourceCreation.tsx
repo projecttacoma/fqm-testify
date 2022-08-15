@@ -102,8 +102,6 @@ function TestResourceCreation() {
     return undefined;
   };
 
-  const alternatingColor = ['#e3e3e3', '#ffffff'];
-
   return (
     <>
       <CodeEditorModal
@@ -121,7 +119,7 @@ function TestResourceCreation() {
               key={resource.id}
               withBorder
               p="md"
-              sx={{ backgroundColor: alternatingColor[idx % alternatingColor.length] }}
+              sx={theme => ({ backgroundColor: idx % 2 === 0 ? theme.colors.gray[1] : 'white' })}
             >
               <Grid justify="space-between">
                 <Grid.Col span={10}>
@@ -144,7 +142,7 @@ function TestResourceCreation() {
                     onClick={() => {
                       openResourceModal(resource.id);
                     }}
-                    color="gray"
+                    variant="default"
                     data-testid="edit-resource-button"
                   >
                     <Edit />
@@ -154,6 +152,7 @@ function TestResourceCreation() {
                       deleteResource(resource.id);
                     }}
                     color="red"
+                    variant="outline"
                     data-testid="delete-resource-button"
                   >
                     <Trash />
