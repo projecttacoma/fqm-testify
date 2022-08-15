@@ -8,6 +8,8 @@ import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequ
 import Fuse from 'fuse.js';
 import SearchBar from './SearchBar';
 import { searchQueryState } from '../../state/atoms/searchQuery';
+import { useEffect, useState } from 'react';
+import { DataRequirement } from 'fhir/r4';
 
 export default function TestResourcesDisplay() {
   const dataRequirements = useRecoilValue(dataRequirementsState);
@@ -15,38 +17,44 @@ export default function TestResourcesDisplay() {
   const valueSetMap = useRecoilValue(valueSetMapState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const searchQuery = useRecoilValue(searchQueryState);
+  const [displayDataReqs, setDisplayDataReqs] = useState<DataRequirement[] | null>(dataRequirements);
 
-  const getSearchContent = () => {
-    const searchContent: { type: string; key: string; displayString: string; }[] = [];
-    if (dataRequirements) {
-      dataRequirements.map((dr, i) => {
-        const type = dr.type;
-        const key = `${dr.type}${i}`
-        const displayString = getDataRequirementFiltersString(dr, valueSetMap);
-        searchContent.push({
-          type,
-          key,
-          displayString
-        });
-      });
-    }
-      return searchContent;
-  };
-
-  const returnSearchResults = (searchInput: string) => {
-    if (dataRequirements) {
-      const fuse = new Fuse(getSearchContent());
-      return fuse.search(searchInput);
-    }
-  };
   
 
-  //const fuse = new Fuse();
+  
+
+  useEffect(() => {
+    const returnSearchResults = () => {
+      const searchContents = getSearchContent();
+      if (dataRequirements && searchContents) {
+        const options = {keys: ['type', 'key', 'id', 'displayString']};
+        const fuse = new Fuse(searchContents, options);
+        const results = fuse.search(searchQuery).map(dr => dr.item.displayString);
+        const foundDrs = dataRequirements.filter(dr => {return results.includes(getDataRequirementFiltersString(dr, valueSetMap))});
+        return foundDrs;
+      }
+    };
+
+    const getSearchContent = () => {
+      if (dataRequirements) {
+        const formattedData = dataRequirements.map((dr, i) => {
+          const type = dr.type;
+          const key = `${dr.type}${i}`
+          const id = dr.id;
+          const displayString = getDataRequirementFiltersString(dr, valueSetMap);
+          return {type, key, id, displayString}
+        });
+        return formattedData;
+      }
+    };
+
+    const searchResults = returnSearchResults();
+    setDisplayDataReqs(searchResults?.length ? searchResults : dataRequirements);
+  }, [dataRequirements, searchQuery, valueSetMap]);
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
     <>
     <SearchBar style={{padding: '10px'}}/>
-    {console.log(getSearchContent())}
     <div
       data-testid="test-resource-panel"
       style={{
@@ -55,7 +63,7 @@ export default function TestResourcesDisplay() {
       }}
     >
       <Stack>
-        {dataRequirements.map((dr, i) => {
+        {displayDataReqs?.map((dr, i) => {
           const key = `${dr.type}${i}`;
           const displayString = getDataRequirementFiltersString(dr, valueSetMap);
           return (

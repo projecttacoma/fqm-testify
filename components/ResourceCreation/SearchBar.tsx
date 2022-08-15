@@ -6,7 +6,7 @@ import {searchQueryState} from '../../state/atoms/searchQuery';
 export default function SearchBar(props: TextInputProps) {
   const theme = useMantineTheme();
   // TODO: make this accessible in test resources display?
-  const [, setSearchQuery] = useRecoilState(searchQueryState);
+  const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
   
   return (
     <TextInput
@@ -22,6 +22,7 @@ export default function SearchBar(props: TextInputProps) {
           )}
         </ActionIcon>
       }
+      value={searchQuery}
       placeholder="Search the data elements"
       rightSectionWidth={42}
       onChange={(event) => setSearchQuery(event.currentTarget.value)}
