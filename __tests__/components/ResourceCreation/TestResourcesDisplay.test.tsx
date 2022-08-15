@@ -79,6 +79,32 @@ describe('TestResourcesDisplay', () => {
     expect(vsText).toBeInTheDocument();
   });
 
+  it('should show search bar with display when display is shown', async () => {
+    const MockPatients = getMockRecoilState(patientTestCaseState, PATIENT_TEST_CASE_POPULATED);
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
+
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: MOCK_DATA_REQUIREMENTS
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <Suspense>
+              <TestResourcesDisplay />
+            </Suspense>
+          </>
+        )
+      );
+    });
+    //TODO: CHANGE THIS TO BE FOR THE SEARCH BAR (TRY DOING A GETBYROLE FOR TEXT INPUT PLZ)
+    const searchBar = screen.getByRole('textbox');
+    expect(searchBar).toBeInTheDocument();
+  });
+
   it('should not show display when patientTestCaseState is not populated', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
