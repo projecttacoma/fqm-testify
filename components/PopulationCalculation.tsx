@@ -109,7 +109,6 @@ export default function PopulationCalculation() {
                   data-testid="calculate-all-button"
                   aria-label="Calculate Population Results"
                   styles={{ root: { marginTop: 20 } }}
-                  size="lg"
                   onClick={() => runCalculation()}
                 >
                   &nbsp;Calculate Population Results
@@ -118,9 +117,9 @@ export default function PopulationCalculation() {
                   data-testid="show-table-button"
                   aria-label="Show Table"
                   styles={{ root: { marginTop: 20 } }}
-                  size="lg"
                   hidden={!showTableButton}
                   onClick={() => setOpened(true)}
+                  variant="default"
                 >
                   &nbsp;Show Table
                 </Button>

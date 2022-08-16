@@ -1,4 +1,4 @@
-import { Button, Collapse, createStyles, Group, Stack } from '@mantine/core';
+import { Button, Collapse, createStyles, Group, Stack, Tooltip } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -202,13 +202,15 @@ function PatientCreation({
             {Object.entries(currentPatients).map(([id, testCase]) => (
               <div key={id}>
                 <Button
-                  variant="default"
+                  variant={selectedPatient === id ? 'outline' : 'default'}
+                  color={selectedPatient === id ? 'orange' : 'black'}
                   leftIcon={selectedPatient === id ? <ChevronDown /> : <ChevronRight />}
                   fullWidth
                   onClick={() => updateSelectedPatient(id)}
                   styles={{
                     inner: {
-                      justifyContent: 'flex-start'
+                      justifyContent: 'flex-start',
+                      color: 'black'
                     }
                   }}
                 >
@@ -216,41 +218,49 @@ function PatientCreation({
                 </Button>
                 <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
                   <Group>
-                    <Button
-                      data-testid="export-patient-button"
-                      aria-label={'Export Patient'}
-                      onClick={() => {
-                        exportPatientTestCase(id);
-                      }}
-                    >
-                      <Download />
-                    </Button>
-                    <Button
-                      data-testid="edit-patient-button"
-                      aria-label={'Edit Patient'}
-                      onClick={() => {
-                        openPatientModal(id);
-                      }}
-                      color="gray"
-                    >
-                      <Edit />
-                    </Button>
-                    <Button
-                      data-testid="delete-patient-button"
-                      aria-label={'Delete Patient'}
-                      onClick={openConfirmationModal}
-                      color="red"
-                    >
-                      <Trash />
-                    </Button>
-                    <Button data-testid="calculate-button" onClick={() => clickCalculateButton(id)} color="gray">
+                    <Button data-testid="calculate-button" onClick={() => clickCalculateButton(id)}>
                       Calculate
                     </Button>
+                    <Tooltip label="Export Patient" openDelay={1000}>
+                      <Button
+                        data-testid="export-patient-button"
+                        aria-label={'Export Patient'}
+                        onClick={() => {
+                          exportPatientTestCase(id);
+                        }}
+                        variant="default"
+                      >
+                        <Download />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip label="Edit Patient" openDelay={1000}>
+                      <Button
+                        data-testid="edit-patient-button"
+                        aria-label={'Edit Patient'}
+                        onClick={() => {
+                          openPatientModal(id);
+                        }}
+                        variant="default"
+                      >
+                        <Edit />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip label="Delete Patient" openDelay={1000}>
+                      <Button
+                        data-testid="delete-patient-button"
+                        aria-label={'Delete Patient'}
+                        onClick={openConfirmationModal}
+                        color="red"
+                        variant="outline"
+                      >
+                        <Trash />
+                      </Button>
+                    </Tooltip>
                     {currentPatients[id].measureReport !== undefined && (
                       <Button
                         data-testid="toggle-show-calculation-button"
                         onClick={() => setShowCalculation(o => !o)}
-                        color="gray"
+                        variant="default"
                       >
                         {showCalculation === true ? `Hide Logic Highlighting` : `Show Logic Highlighting`}
                       </Button>

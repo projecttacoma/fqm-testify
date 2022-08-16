@@ -81,7 +81,7 @@ export default function CodeEditorModal({
               >
                 Save
               </Button>
-              <Button data-testid="codemirror-cancel-button" color="gray" onClick={onClose}>
+              <Button data-testid="codemirror-cancel-button" variant="default" onClick={onClose}>
                 Cancel
               </Button>
             </Group>

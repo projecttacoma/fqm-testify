@@ -34,7 +34,7 @@ export default function ConfirmationModal({ open = true, onClose, title, onConfi
               <Button data-testid="yes-button" onClick={() => onConfirm()}>
                 Yes
               </Button>
-              <Button data-testid="cancel-button" color="gray" onClick={onClose}>
+              <Button data-testid="cancel-button" variant="default" onClick={onClose}>
                 Cancel
               </Button>
             </Group>

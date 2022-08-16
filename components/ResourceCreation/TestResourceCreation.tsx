@@ -102,8 +102,6 @@ function TestResourceCreation() {
     return undefined;
   };
 
-  const alternatingColor = ['#e3e3e3', '#ffffff'];
-
   return (
     <>
       <CodeEditorModal
@@ -121,7 +119,7 @@ function TestResourceCreation() {
               key={resource.id}
               withBorder
               p="md"
-              sx={{ backgroundColor: alternatingColor[idx % alternatingColor.length] }}
+              sx={theme => ({ backgroundColor: idx % 2 === 0 ? theme.colors.gray[1] : 'white' })}
             >
               <Grid justify="space-between">
                 <Grid.Col span={10}>
@@ -140,24 +138,29 @@ function TestResourceCreation() {
                   </Tooltip>
                 </Grid.Col>
                 <Group>
-                  <Button
-                    onClick={() => {
-                      openResourceModal(resource.id);
-                    }}
-                    color="gray"
-                    data-testid="edit-resource-button"
-                  >
-                    <Edit />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      deleteResource(resource.id);
-                    }}
-                    color="red"
-                    data-testid="delete-resource-button"
-                  >
-                    <Trash />
-                  </Button>
+                  <Tooltip label="Edit FHIR Resource" openDelay={1000}>
+                    <Button
+                      onClick={() => {
+                        openResourceModal(resource.id);
+                      }}
+                      variant="default"
+                      data-testid="edit-resource-button"
+                    >
+                      <Edit />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Delete FHIR Resource" openDelay={1000}>
+                    <Button
+                      onClick={() => {
+                        deleteResource(resource.id);
+                      }}
+                      color="red"
+                      variant="outline"
+                      data-testid="delete-resource-button"
+                    >
+                      <Trash />
+                    </Button>
+                  </Tooltip>
                 </Group>
               </Grid>
             </Paper>
