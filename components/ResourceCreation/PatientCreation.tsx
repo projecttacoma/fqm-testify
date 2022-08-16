@@ -221,7 +221,7 @@ function PatientCreation({
                     <Button data-testid="calculate-button" onClick={() => clickCalculateButton(id)}>
                       Calculate
                     </Button>
-                    <Tooltip label="Export Patient">
+                    <Tooltip label="Export Patient" openDelay={1000}>
                       <Button
                         data-testid="export-patient-button"
                         aria-label={'Export Patient'}
@@ -233,7 +233,7 @@ function PatientCreation({
                         <Download />
                       </Button>
                     </Tooltip>
-                    <Tooltip label="Edit Patient">
+                    <Tooltip label="Edit Patient" openDelay={1000}>
                       <Button
                         data-testid="edit-patient-button"
                         aria-label={'Edit Patient'}
@@ -245,7 +245,7 @@ function PatientCreation({
                         <Edit />
                       </Button>
                     </Tooltip>
-                    <Tooltip label="Delete Patient">
+                    <Tooltip label="Delete Patient" openDelay={1000}>
                       <Button
                         data-testid="delete-patient-button"
                         aria-label={'Delete Patient'}
