@@ -1,4 +1,9 @@
-import { createFHIRResourceString, getDataRequirementFiltersString, createPatientBundle } from '../../util/fhir';
+import {
+  createFHIRResourceString,
+  getDataRequirementFiltersString,
+  createPatientBundle,
+  getFhirResourceSummary
+} from '../../util/fhir';
 
 const VS_MAP = { testvs: 'test vs name' };
 const DATA_REQUIREMENT_WITH_NO_VALUE_SETS = {
@@ -158,6 +163,101 @@ const TEST_MEASURE_BUNDLE_WITH_EXPANSION: fhir4.Bundle = {
   ]
 };
 
+const RESOURCE_WITH_NO_SUMMARY: fhir4.Resource = {
+  resourceType: 'Procedure'
+};
+
+const RESOURCE_WITH_NO_CODE: fhir4.Resource = {
+  resourceType: 'Procedure',
+  id: 'procedure-id'
+};
+
+const PROCEDURE_RESOURCE_WITH_FULL_SUMMARY: fhir4.Procedure = {
+  resourceType: 'Procedure',
+  id: 'procedure-id',
+  status: 'completed',
+  code: {
+    coding: [
+      {
+        code: '123',
+        display: 'This is an example of display text for a Procedure resource.'
+      }
+    ]
+  },
+  subject: {
+    reference: 'procedure-reference'
+  }
+};
+
+const PROCEDURE_RESOURCE_WITH_CODE: fhir4.Procedure = {
+  resourceType: 'Procedure',
+  id: 'procedure-id',
+  status: 'completed',
+  code: {
+    coding: [
+      {
+        code: '123'
+      }
+    ]
+  },
+  subject: {
+    reference: 'procedure-reference'
+  }
+};
+
+const PROCEDURE_RESOURCE_WITH_DISPLAY: fhir4.Procedure = {
+  resourceType: 'Procedure',
+  id: 'procedure-id',
+  status: 'completed',
+  code: {
+    coding: [
+      {
+        display: 'This is an example of display text for a Procedure resource.'
+      }
+    ]
+  },
+  subject: {
+    reference: 'procedure-reference'
+  }
+};
+
+const PROCEDURE_RESOURCE_WITH_TWO_CODES: fhir4.Procedure = {
+  resourceType: 'Procedure',
+  id: 'procedure-id',
+  status: 'completed',
+  code: {
+    coding: [
+      {
+        code: '123',
+        display: 'Display1'
+      },
+      {
+        code: '456',
+        display: 'Display2'
+      }
+    ]
+  },
+  subject: {
+    reference: 'procedure-reference'
+  }
+};
+
+const MEASURE_REPORT_WITH_ID: fhir4.MeasureReport = {
+  resourceType: 'MeasureReport',
+  id: 'measure-report-id',
+  type: 'individual',
+  status: 'complete',
+  measure: '',
+  period: {
+    start: '',
+    end: ''
+  },
+  text: {
+    div: 'test123',
+    status: 'additional'
+  }
+};
+
 describe('getDataRequirementFiltersString', () => {
   test('returns an empty string for resource with no valuesets', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUE_SETS, VS_MAP)).toEqual('');
@@ -172,6 +272,34 @@ describe('getDataRequirementFiltersString', () => {
     expect(getDataRequirementFiltersString(OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET, VS_MAP)).toEqual(
       'test vs name (testvs)\ntest display'
     );
+  });
+});
+
+describe('getFhirResourceSummary', () => {
+  test('returns an empty string for resource with no code, display, or id', () => {
+    expect(getFhirResourceSummary(RESOURCE_WITH_NO_SUMMARY)).toEqual('');
+  });
+  test('returns the resource id for resource with no code', () => {
+    expect(getFhirResourceSummary(RESOURCE_WITH_NO_CODE)).toEqual('(procedure-id)');
+  });
+  test('returns the resource id for resource with no primary code path', () => {
+    expect(getFhirResourceSummary(MEASURE_REPORT_WITH_ID)).toEqual('(measure-report-id)');
+  });
+  test('returns the code and display for resource with both', () => {
+    expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY)).toEqual(
+      '(123: This is an example of display text for a Procedure resource.)'
+    );
+  });
+  test('returns only the code when the display does not exist but the code does', () => {
+    expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_CODE)).toEqual('(123)');
+  });
+  test('returns only the display when the code does not exist but the display does', () => {
+    expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_DISPLAY)).toEqual(
+      '(This is an example of display text for a Procedure resource.)'
+    );
+  });
+  test('returns only the first code and display when there are multiple codes', () => {
+    expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_TWO_CODES)).toEqual('(123: Display1)');
   });
 });
 

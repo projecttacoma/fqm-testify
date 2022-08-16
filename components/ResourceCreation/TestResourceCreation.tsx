@@ -1,4 +1,4 @@
-import { Button, Grid, Group, Paper, Text } from '@mantine/core';
+import { Button, Grid, Group, Paper, Text, Tooltip } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -6,7 +6,7 @@ import CodeEditorModal from '../CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { createFHIRResourceString } from '../../util/fhir';
+import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
 
@@ -113,7 +113,7 @@ function TestResourceCreation() {
         onSave={updateResource}
         initialValue={getInitialResource()}
       />
-      {selectedPatient && currentTestCases[selectedPatient].resources.length > 0 && (
+      {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
           <h3>Test Case Resources:</h3>
           {currentTestCases[selectedPatient].resources.map((resource, idx) => (
@@ -124,9 +124,21 @@ function TestResourceCreation() {
               sx={{ backgroundColor: alternatingColor[idx % alternatingColor.length] }}
             >
               <Grid justify="space-between">
-                <Group>
-                  <Text>{`${idx + 1}. ${resource.resourceType}`}</Text>
-                </Group>
+                <Grid.Col span={10}>
+                  <Tooltip
+                    wrapLines
+                    width={500}
+                    withArrow
+                    transition="fade"
+                    transitionDuration={200}
+                    label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
+                    disabled={getFhirResourceSummary(resource) === ''}
+                  >
+                    <Text lineClamp={1}>{`${idx + 1}. ${resource.resourceType} ${getFhirResourceSummary(
+                      resource
+                    )}`}</Text>
+                  </Tooltip>
+                </Grid.Col>
                 <Group>
                   <Button
                     onClick={() => {

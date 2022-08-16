@@ -4,6 +4,7 @@ import { ValueSetsMap } from '../state/selectors/valueSetsMap';
 import { parsedPrimaryCodePaths } from './primaryCodePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
+import fhirpath from 'fhirpath';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -32,6 +33,36 @@ export function createPatientResourceString(birthDate: string): string {
   };
 
   return JSON.stringify(pt, null, 2);
+}
+
+/**
+ * Identifies the primary code path of a resource and constructs a string which displays
+ * resource summary information depending on what is a available
+ * @param resource {fhir4.Resource} a fhir Resource object
+ * @returns {String} displaying the code and display text, code, or id of the resource or nothing
+ */
+export function getFhirResourceSummary(resource: fhir4.Resource) {
+  const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType]?.primaryCodePath;
+
+  if (primaryCodePath) {
+    const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
+    const resourceCode = primaryCoding?.code;
+    const resourceDisplay = primaryCoding?.display;
+
+    if (resourceCode && resourceDisplay) {
+      return `(${resourceCode}: ${resourceDisplay})`;
+    } else if (resourceCode) {
+      return `(${resourceCode})`;
+    } else if (resourceDisplay) {
+      return `(${resourceDisplay})`;
+    }
+  }
+
+  if (resource.id) {
+    return `(${resource.id})`;
+  } else {
+    return '';
+  }
 }
 
 export function getPatientInfoString(patient: fhir4.Patient) {

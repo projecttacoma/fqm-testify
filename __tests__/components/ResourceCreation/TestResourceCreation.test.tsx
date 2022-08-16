@@ -149,7 +149,15 @@ describe('TestResourceCreation', () => {
             resourceType: 'Procedure',
             id: 'test-id',
             status: 'completed',
-            subject: {}
+            subject: {},
+            code: {
+              coding: [
+                {
+                  code: '123',
+                  display: 'Colectomy'
+                }
+              ]
+            }
           }
         ]
       }
@@ -171,6 +179,9 @@ describe('TestResourceCreation', () => {
 
     const procedureResource = screen.getByText(/1. Procedure/i);
     expect(procedureResource).toBeInTheDocument();
+
+    const resourceCode = screen.getByText(/123: Colectomy/i);
+    expect(resourceCode).toBeInTheDocument();
 
     const editResourceButton = screen.getByTestId('edit-resource-button') as HTMLButtonElement;
     expect(editResourceButton).toBeInTheDocument();
