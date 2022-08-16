@@ -118,7 +118,6 @@ describe('TestResourcesDisplay', () => {
         )
       );
     });
-    //TODO: CHANGE THIS TO BE FOR THE SEARCH BAR (TRY DOING A GETBYROLE FOR TEXT INPUT PLZ)
     const searchBar = screen.getByRole('textbox');
     expect(searchBar).toBeInTheDocument();
   });

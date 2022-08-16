@@ -12,9 +12,9 @@ import { useEffect, useState } from 'react';
 import { DataRequirement } from 'fhir/r4';
 
 interface DataSearchKeys {
-  type: string,
-  id: string | undefined,
-  displayString: string
+  type: string;
+  id: string | undefined;
+  displayString: string;
 }
 
 export default function TestResourcesDisplay() {
@@ -28,12 +28,12 @@ export default function TestResourcesDisplay() {
   useEffect(() => {
     /**
      * Assembles an array of data that will be searched by FuseJS to narrow
-     * down the displayed data requirements in the test resources display. 
+     * down the displayed data requirements in the test resources display.
      * @returns array of data to use for fuzzy searching
      */
     const getSearchContent = (): DataSearchKeys[] | undefined => {
       if (dataRequirements) {
-        const searchableData = dataRequirements.map((dr) => {
+        const searchableData = dataRequirements.map(dr => {
           const type = dr.type;
           const id = dr.id;
           const displayString = getDataRequirementFiltersString(dr, valueSetMap);
@@ -64,7 +64,7 @@ export default function TestResourcesDisplay() {
 
     const searchResults = filterBySearchResults();
     // default to all data requirements if there is no search query
-    setDataReqsToDisplay((searchResults && searchQuery !== '') ? searchResults : dataRequirements);
+    setDataReqsToDisplay(searchResults && searchQuery !== '' ? searchResults : dataRequirements);
   }, [dataRequirements, searchQuery, valueSetMap]);
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (

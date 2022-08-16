@@ -4,7 +4,6 @@ import { useRecoilState } from 'recoil';
 import { searchQueryState } from '../../state/atoms/searchQuery';
 
 export default function SearchBar(props: TextInputProps) {
-  //const theme = useMantineTheme();
   const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
 
   return (
