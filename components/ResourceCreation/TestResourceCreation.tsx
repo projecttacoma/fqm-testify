@@ -138,25 +138,29 @@ function TestResourceCreation() {
                   </Tooltip>
                 </Grid.Col>
                 <Group>
-                  <Button
-                    onClick={() => {
-                      openResourceModal(resource.id);
-                    }}
-                    variant="default"
-                    data-testid="edit-resource-button"
-                  >
-                    <Edit />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      deleteResource(resource.id);
-                    }}
-                    color="red"
-                    variant="outline"
-                    data-testid="delete-resource-button"
-                  >
-                    <Trash />
-                  </Button>
+                  <Tooltip label="Edit FHIR Resource" openDelay={1000}>
+                    <Button
+                      onClick={() => {
+                        openResourceModal(resource.id);
+                      }}
+                      variant="default"
+                      data-testid="edit-resource-button"
+                    >
+                      <Edit />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip label="Delete FHIR Resource" openDelay={1000}>
+                    <Button
+                      onClick={() => {
+                        deleteResource(resource.id);
+                      }}
+                      color="red"
+                      variant="outline"
+                      data-testid="delete-resource-button"
+                    >
+                      <Trash />
+                    </Button>
+                  </Tooltip>
                 </Group>
               </Grid>
             </Paper>
