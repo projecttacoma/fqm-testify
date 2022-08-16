@@ -33,7 +33,6 @@ export default function TestResourcesDisplay() {
      */
     const getSearchContent = (): DataSearchKeys[] | undefined => {
       if (dataRequirements) {
-        // TODO: figure out what to use for the keys
         const searchableData = dataRequirements.map((dr) => {
           const type = dr.type;
           const id = dr.id;
@@ -64,7 +63,8 @@ export default function TestResourcesDisplay() {
     };
 
     const searchResults = filterBySearchResults();
-    setDataReqsToDisplay(searchResults?.length ? searchResults : dataRequirements);
+    // default to all data requirements if there is no search query
+    setDataReqsToDisplay((searchResults && searchQuery !== '') ? searchResults : dataRequirements);
   }, [dataRequirements, searchQuery, valueSetMap]);
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
