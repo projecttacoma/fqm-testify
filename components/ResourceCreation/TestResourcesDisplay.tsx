@@ -11,6 +11,12 @@ import { searchQueryState } from '../../state/atoms/searchQuery';
 import { useEffect, useState } from 'react';
 import { DataRequirement } from 'fhir/r4';
 
+interface DataSearchKeys {
+  type: string,
+  id: string | undefined,
+  displayString: string
+}
+
 export default function TestResourcesDisplay() {
   const dataRequirements = useRecoilValue(dataRequirementsState);
   const [, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
@@ -21,21 +27,20 @@ export default function TestResourcesDisplay() {
 
   useEffect(() => {
     /**
-     * Assembles an array of data that will be searched by FuseJS in order to narrow
+     * Assembles an array of data that will be searched by FuseJS to narrow
      * down the displayed data requirements in the test resources display. 
      * @returns array of data to use for fuzzy searching
      */
-    const getSearchContent = () => {
+    const getSearchContent = (): DataSearchKeys[] | undefined => {
       if (dataRequirements) {
         // TODO: figure out what to use for the keys
-        const formattedData = dataRequirements.map((dr, i) => {
+        const searchableData = dataRequirements.map((dr) => {
           const type = dr.type;
-          const key = `${dr.type}${i}`;
           const id = dr.id;
           const displayString = getDataRequirementFiltersString(dr, valueSetMap);
-          return { type, key, id, displayString };
+          return { type, id, displayString };
         });
-        return formattedData;
+        return searchableData;
       }
     };
 
@@ -43,14 +48,13 @@ export default function TestResourcesDisplay() {
      * Uses FuseJS to do a fuzzy search on the search contents. Then, filters the
      * data requirements so that the displayed data requirements are those that
      * came back from the search.
-     * @returns array of data requirements that were returned during fuzzy searching
+     * @returns array of data requirements returned from FuseJS search
      */
     const filterBySearchResults = () => {
       const searchContents = getSearchContent();
       if (dataRequirements && searchContents) {
-        // TODO: fix this so we aren't hardcoding the keys
-        const options = { keys: ['type', 'key', 'id', 'displayString'] };
-        const fuse = new Fuse(searchContents, options);
+        const keys: (keyof DataSearchKeys)[] = ['type', 'id', 'displayString'];
+        const fuse = new Fuse(searchContents, { keys: keys });
         const results = fuse.search(searchQuery).map(dr => dr.item.displayString);
         const foundDrs = dataRequirements.filter(dr => {
           return results.includes(getDataRequirementFiltersString(dr, valueSetMap));
