@@ -164,10 +164,10 @@ const TEST_MEASURE_BUNDLE_WITH_EXPANSION: fhir4.Bundle = {
 };
 
 const RESOURCE_WITH_NO_SUMMARY: fhir4.Resource = {
-  resourceType: 'Prodcedure'
+  resourceType: 'Procedure'
 };
 
-const RESOURCE_WITH_NO_CODE_PATH: fhir4.Resource = {
+const RESOURCE_WITH_NO_CODE: fhir4.Resource = {
   resourceType: 'Procedure',
   id: 'procedure-id'
 };
@@ -242,6 +242,22 @@ const PROCEDURE_RESOURCE_WITH_TWO_CODES: fhir4.Procedure = {
   }
 };
 
+const MEASURE_REPORT_WITH_ID: fhir4.MeasureReport = {
+  resourceType: 'MeasureReport',
+  id: 'measure-report-id',
+  type: 'individual',
+  status: 'complete',
+  measure: '',
+  period: {
+    start: '',
+    end: ''
+  },
+  text: {
+    div: 'test123',
+    status: 'additional'
+  }
+};
+
 describe('getDataRequirementFiltersString', () => {
   test('returns an empty string for resource with no valuesets', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUE_SETS, VS_MAP)).toEqual('');
@@ -263,8 +279,11 @@ describe('getFhirResourceSummary', () => {
   test('returns an empty string for resource with no code, display, or id', () => {
     expect(getFhirResourceSummary(RESOURCE_WITH_NO_SUMMARY)).toEqual('');
   });
+  test('returns the resource id for resource with no code', () => {
+    expect(getFhirResourceSummary(RESOURCE_WITH_NO_CODE)).toEqual('(procedure-id)');
+  });
   test('returns the resource id for resource with no primary code path', () => {
-    expect(getFhirResourceSummary(RESOURCE_WITH_NO_CODE_PATH)).toEqual('(procedure-id)');
+    expect(getFhirResourceSummary(MEASURE_REPORT_WITH_ID)).toEqual('(measure-report-id)');
   });
   test('returns the code and display for resource with both', () => {
     expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY)).toEqual(
@@ -274,7 +293,7 @@ describe('getFhirResourceSummary', () => {
   test('returns only the code when the display does not exist but the code does', () => {
     expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_CODE)).toEqual('(123)');
   });
-  test('returns only the display when the code does not exist but the code does', () => {
+  test('returns only the display when the code does not exist but the display does', () => {
     expect(getFhirResourceSummary(PROCEDURE_RESOURCE_WITH_DISPLAY)).toEqual(
       '(This is an example of display text for a Procedure resource.)'
     );
