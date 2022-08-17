@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { DataRequirement } from 'fhir/r4';
 
 interface DataSearchKeys {
-  dr: DataRequirement,
+  dr: DataRequirement;
   type: string;
   displayString: string;
 }
@@ -23,23 +23,23 @@ export default function TestResourcesDisplay() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [dataReqsToDisplay, setDataReqsToDisplay] = useState<DataRequirement[] | null>(dataRequirements);
-  
+
   useEffect(() => {
     /**
      * Assembles an array of data that will be searched by FuseJS to narrow
      * down the displayed data requirements in the test resources display.
      * @returns array of data to use for fuzzy searching
      */
-   const getSearchContents = (): DataSearchKeys[] | undefined => {
-    if (dataRequirements) {
-      const searchableData = dataRequirements.map(dr => {
-        const type = dr.type;
-        const displayString = getDataRequirementFiltersString(dr, valueSetMap);
-        return { dr, type, displayString };
-      });
-      return searchableData;
-    }
-  };
+    const getSearchContents = (): DataSearchKeys[] | undefined => {
+      if (dataRequirements) {
+        const searchableData = dataRequirements.map(dr => {
+          const type = dr.type;
+          const displayString = getDataRequirementFiltersString(dr, valueSetMap);
+          return { dr, type, displayString };
+        });
+        return searchableData;
+      }
+    };
 
     /**
      * Uses FuseJS to do a fuzzy search on the search contents. Then, filters the
@@ -52,7 +52,7 @@ export default function TestResourcesDisplay() {
       if (dataRequirements && searchContents) {
         const keys: (keyof DataSearchKeys)[] = ['type', 'displayString'];
         const fuse = new Fuse(searchContents, { keys: keys, threshold: 0.3 });
-        const results = fuse.search(searchQuery).map((result) => result.item.dr);
+        const results = fuse.search(searchQuery).map(result => result.item.dr);
         return results;
       }
     };
@@ -64,7 +64,7 @@ export default function TestResourcesDisplay() {
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
     <>
-      <SearchBar style={{ padding: '10px' }}{...{searchQuery, setSearchQuery}} />
+      <SearchBar style={{ padding: '10px' }} {...{ searchQuery, setSearchQuery }} aria-label="search-bar" />
       <div
         data-testid="test-resource-panel"
         style={{

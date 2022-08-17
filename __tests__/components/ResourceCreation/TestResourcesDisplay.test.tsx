@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import TestResourcesDisplay from '../../../components/ResourceCreation/TestResourcesDisplay';
@@ -209,7 +209,6 @@ describe('TestResourcesDisplay', () => {
   it('should show no data requirements if fuzzy search does not return any results', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, PATIENT_TEST_CASE_POPULATED);
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
-    const MockSearchQuery = getMockRecoilState(searchQueryState, 'example search query that yields no results');
 
     jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
       results: MOCK_DATA_REQUIREMENTS
@@ -221,7 +220,6 @@ describe('TestResourcesDisplay', () => {
           <>
             <MockMB />
             <MockPatients />
-            <MockSearchQuery />
             <Suspense>
               <TestResourcesDisplay />
             </Suspense>
@@ -229,6 +227,9 @@ describe('TestResourcesDisplay', () => {
         )
       );
     });
+
+    const searchBar = screen.getByLabelText('search-bar');
+    fireEvent.change(searchBar, { target: { value: 'should show nothing' } });
     const trp = screen.getByTestId('test-resource-panel');
     expect(trp).toBeInTheDocument();
 
@@ -246,7 +247,6 @@ describe('TestResourcesDisplay', () => {
   it('should return a filtered set of the data requirements on successful fuzzy search with search bar', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, PATIENT_TEST_CASE_POPULATED);
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
-    const MockSearchQuery = getMockRecoilState(searchQueryState, 'encounter');
 
     jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
       results: MOCK_DATA_REQUIREMENTS
@@ -258,7 +258,6 @@ describe('TestResourcesDisplay', () => {
           <>
             <MockMB />
             <MockPatients />
-            <MockSearchQuery />
             <Suspense>
               <TestResourcesDisplay />
             </Suspense>
@@ -266,6 +265,9 @@ describe('TestResourcesDisplay', () => {
         )
       );
     });
+
+    const searchBar = screen.getByLabelText('search-bar');
+    fireEvent.change(searchBar, { target: { value: 'Encounter' } });
     const trp = screen.getByTestId('test-resource-panel');
     expect(trp).toBeInTheDocument();
 

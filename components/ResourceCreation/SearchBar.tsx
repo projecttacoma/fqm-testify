@@ -1,12 +1,12 @@
 import { TextInput, TextInputProps } from '@mantine/core';
 import { IconSearch } from '@tabler/icons';
 
-interface SearchBarProps {
+export interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (newValue: string) => void;
 }
 
-export default function SearchBar({searchQuery, setSearchQuery, ...textInputProps}: SearchBarProps & TextInputProps) {
+export default function SearchBar({ searchQuery, setSearchQuery, ...textInputProps }: SearchBarProps & TextInputProps) {
   return (
     <TextInput
       icon={<IconSearch size={18} stroke={1.5} />}
