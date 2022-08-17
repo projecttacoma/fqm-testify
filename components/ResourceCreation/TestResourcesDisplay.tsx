@@ -7,13 +7,12 @@ import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import Fuse from 'fuse.js';
 import SearchBar from './SearchBar';
-import { searchQueryState } from '../../state/atoms/searchQuery';
 import { useEffect, useState } from 'react';
 import { DataRequirement } from 'fhir/r4';
 
 interface DataSearchKeys {
+  dr: DataRequirement,
   type: string;
-  id: string | undefined;
   displayString: string;
 }
 
@@ -22,26 +21,25 @@ export default function TestResourcesDisplay() {
   const [, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
   const valueSetMap = useRecoilValue(valueSetMapState);
   const currentPatients = useRecoilValue(patientTestCaseState);
-  const searchQuery = useRecoilValue(searchQueryState);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [dataReqsToDisplay, setDataReqsToDisplay] = useState<DataRequirement[] | null>(dataRequirements);
-
+  
   useEffect(() => {
     /**
      * Assembles an array of data that will be searched by FuseJS to narrow
      * down the displayed data requirements in the test resources display.
      * @returns array of data to use for fuzzy searching
      */
-    const getSearchContent = (): DataSearchKeys[] | undefined => {
-      if (dataRequirements) {
-        const searchableData = dataRequirements.map(dr => {
-          const type = dr.type;
-          const id = dr.id;
-          const displayString = getDataRequirementFiltersString(dr, valueSetMap);
-          return { type, id, displayString };
-        });
-        return searchableData;
-      }
-    };
+   const getSearchContents = (): DataSearchKeys[] | undefined => {
+    if (dataRequirements) {
+      const searchableData = dataRequirements.map(dr => {
+        const type = dr.type;
+        const displayString = getDataRequirementFiltersString(dr, valueSetMap);
+        return { dr, type, displayString };
+      });
+      return searchableData;
+    }
+  };
 
     /**
      * Uses FuseJS to do a fuzzy search on the search contents. Then, filters the
@@ -50,15 +48,12 @@ export default function TestResourcesDisplay() {
      * @returns array of data requirements returned from FuseJS search
      */
     const filterBySearchResults = () => {
-      const searchContents = getSearchContent();
+      const searchContents = getSearchContents();
       if (dataRequirements && searchContents) {
-        const keys: (keyof DataSearchKeys)[] = ['type', 'id', 'displayString'];
-        const fuse = new Fuse(searchContents, { keys: keys });
-        const results = fuse.search(searchQuery).map(dr => dr.item.displayString);
-        const foundDrs = dataRequirements.filter(dr => {
-          return results.includes(getDataRequirementFiltersString(dr, valueSetMap));
-        });
-        return foundDrs;
+        const keys: (keyof DataSearchKeys)[] = ['type', 'displayString'];
+        const fuse = new Fuse(searchContents, { keys: keys, threshold: 0.3 });
+        const results = fuse.search(searchQuery).map((result) => result.item.dr);
+        return results;
       }
     };
 
@@ -69,7 +64,7 @@ export default function TestResourcesDisplay() {
 
   return dataRequirements?.length && Object.keys(currentPatients).length ? (
     <>
-      <SearchBar style={{ padding: '10px' }} />
+      <SearchBar style={{ padding: '10px' }}{...{searchQuery, setSearchQuery}} />
       <div
         data-testid="test-resource-panel"
         style={{

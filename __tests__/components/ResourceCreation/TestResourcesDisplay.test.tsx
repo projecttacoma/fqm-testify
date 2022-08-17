@@ -6,7 +6,6 @@ import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTest
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
 import { Suspense } from 'react';
-import { searchQueryState } from '../../../state/atoms/searchQuery';
 
 const PATIENT_TEST_CASE_POPULATED: TestCase = {
   pid1: { patient: { resourceType: 'Patient' } as fhir4.Patient, resources: [] }
