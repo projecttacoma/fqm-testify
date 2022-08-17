@@ -7,11 +7,12 @@ const outputPath = path.resolve(path.join(__dirname, '../util/primaryDatePaths.t
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 const DATE_TYPES = ['dateTime', 'date', 'Period'];
 
+export interface dateFieldInfo {
+  isChoiceType?: boolean;
+  dataTypes: string[];
+}
 export interface dateInfo {
-  [dateField: string]: {
-    isChoiceType?: boolean;
-    dataTypes: string[];
-  };
+  [dateField: string]: dateFieldInfo;
 }
 
 export interface primaryDatePathInfo {

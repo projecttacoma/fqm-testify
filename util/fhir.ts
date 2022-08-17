@@ -6,6 +6,7 @@ import { parsedPrimaryDatePaths } from './primaryDatePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
+import { dateFieldInfo } from '../scripts/parsePrimaryDatePath';
 
 const DEFAULT_PERIOD_LENGTH = 1;
 
@@ -225,7 +226,14 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
   resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
 }
 
-function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpStart: string, mpEnd: string) {
+/**
+ * Parses the primary date path info and populates date info to satisfy date filter specified in the passed-in data requirement
+ * @param {Object} resource FHIR resource being created
+ * @param {Object} dr a FHIR dataRequirement object
+ * @param {String} mpStart the start of the specified measurement period
+ * @param {String} mpEnd the end of the specified measurement period
+ */
+export function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpStart: string, mpEnd: string) {
   const rt = dr.type;
   const primaryDateInfo = parsedPrimaryDatePaths[rt];
   if (primaryDateInfo) {
@@ -249,8 +257,8 @@ function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpSta
               // use dateTime as periodStart and periodEnd of resource
               resource[newPath] = { start: df.valueDateTime, end: df.valueDateTime };
             } else {
+              // pick random period within the measurement period and make a 1-day period
               resource[newPath] = getRandomPeriodInPeriod(mpStart, mpEnd);
-              // pick random date within the measurement period and make a 1-day period
             }
           } else if (validField === 'dateTime') {
             if (df.valuePeriod) {
@@ -299,7 +307,13 @@ function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpSta
   }
 }
 
-function getDateType(fieldTypeInfo: any, path: string) {
+/**
+ * Determines the ideal date info type and path to populate a given attribute with date info
+ * @param {Object} fieldTypeInfo object containing information on date types the specified field can accept
+ * @param {String} path the attribute name that needs to be populated with date info
+ * @returns {Object} an object containing the newPath to enter date info and the ideal date info type
+ */
+export function getDateType(fieldTypeInfo: dateFieldInfo, path: string) {
   let validField;
   let newPath = path;
   if (fieldTypeInfo.isChoiceType) {
@@ -320,7 +334,13 @@ function getDateType(fieldTypeInfo: any, path: string) {
   return { validField, newPath };
 }
 
-function getRandomDateInPeriod(start: string, end: string) {
+/**
+ * Creates a JS date at a random time within the specified period
+ * @param {String} start start date string for the period
+ * @param {String} end end date string for the period
+ * @returns {Date} a js date object within the specified period
+ */
+export function getRandomDateInPeriod(start: string, end: string) {
   const startDate = new Date(start);
   const endDate = new Date(end);
   endDate.setDate(endDate.getDate() - 1);
@@ -329,15 +349,26 @@ function getRandomDateInPeriod(start: string, end: string) {
   return date;
 }
 
-function jsDateToFHIRDate(date: Date) {
+/**
+ * Converts a JS date to a FHIR date string
+ * @param {Date} date JS date to be converted
+ * @returns {String} a string representing a FHIR date
+ */
+export function jsDateToFHIRDate(date: Date) {
   const year = date.getFullYear();
   // month is 0 indexed
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  return `${date.getFullYear()}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
+  return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
 }
 
-function getRandomPeriodInPeriod(start: string, end: string): fhir4.Period {
+/**
+ * Takes in the start and end points of a period and returns a FHIR Period that takes place within the specified dates
+ * @param {string} start start date string for the period
+ * @param {string} end end date string for the period
+ * @returns {Object} a FHIR Period with length equal to the default period length that takes place within the passed-in period
+ */
+export function getRandomPeriodInPeriod(start: string, end: string): fhir4.Period {
   const periodStart = getRandomDateInPeriod(start, end);
   const periodEnd = new Date(periodStart);
   periodEnd.setDate(periodEnd.getDate() + DEFAULT_PERIOD_LENGTH);
@@ -346,76 +377,3 @@ function getRandomPeriodInPeriod(start: string, end: string): fhir4.Period {
     end: periodEnd.toISOString()
   };
 }
-
-const EXAMPLE_DR = {
-  type: 'Condition',
-  codeFilter: [
-    {
-      path: 'type',
-      valueSet: 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016'
-    },
-    {
-      path: 'status',
-      code: [
-        {
-          code: 'finished',
-          system: 'http://hl7.org/fhir/encounter-status'
-        }
-      ]
-    }
-  ],
-  dateFilter: [
-    {
-      path: 'onset',
-      valuePeriod: {
-        start: '2019-01-01T00:00:00.000Z',
-        end: '2019-12-31T00:00:00.000Z'
-      }
-    },
-    {
-      path: 'onset2',
-      valueDateTime: '2019-01-01T00:00:00.000Z'
-    },
-    {
-      path: 'onset3',
-      valueDuration: {}
-    },
-    {
-      path: 'recordedDate',
-      valuePeriod: {
-        start: '2019-01-01T00:00:00.000Z',
-        end: '2019-12-31T00:00:00.000Z'
-      }
-    },
-    {
-      path: 'recordedDate2',
-      valueDateTime: '2019-12-31T00:00:00.000Z'
-    },
-    {
-      path: 'recordedDate3',
-      valueDuration: {}
-    },
-    {
-      path: 'test',
-      valuePeriod: {
-        start: '2019-01-01T00:00:00.000Z',
-        end: '2019-12-31T00:00:00.000Z'
-      }
-    },
-    {
-      path: 'test2',
-      valueDateTime: '2019-01-01T00:00:00.000Z'
-    },
-    {
-      path: 'test3',
-      valueDuration: {}
-    }
-  ],
-  extension: [
-    {
-      url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-fhirQueryPattern',
-      valueString:
-        '/Encounter?type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016&status=finished&date=ge2019-01-01T00:00:00.000Z&date=le2019-12-31T00:00:00.000Z&subject=Patient/{{context.patientId}}'
-    }
-  ]
-};
