@@ -19,7 +19,7 @@ import {
   EXAMPLE_DR_DATETIME_TO_DATE,
   EXAMPLE_DR_MULTIPLE_DATE_FILTERS,
   EXAMPLE_DR_NO_DATEFILTER
-} from '../fixtures/dateFilterFixtures';
+} from '../../fixtures/test/dateFilterFixtures';
 
 const PERIOD_START = '2020-01-01T00:00:00.000Z';
 const PERIOD_END = '2020-12-31T00:00:00.000Z';
