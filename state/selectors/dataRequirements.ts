@@ -4,13 +4,19 @@ import { Calculator } from 'fqm-execution';
 import { getDataRequirementFiltersString } from '../../util/fhir';
 import { valueSetMapState } from './valueSetsMap';
 
+import { measurementPeriodState } from '../atoms/measurementPeriod';
+
 export const dataRequirementsState = selector<fhir4.DataRequirement[] | null>({
   key: 'dataRequirementsState',
   get: async ({ get }) => {
     const measureBundle = get(measureBundleState);
     const valueSetMap = get(valueSetMapState);
+    const measurementPeriod = get(measurementPeriodState);
     if (measureBundle.content && valueSetMap !== null) {
-      const requirements = await Calculator.calculateDataRequirements(measureBundle.content);
+      const requirements = await Calculator.calculateDataRequirements(measureBundle.content, {
+        measurementPeriodStart: measurementPeriod.start?.toISOString(),
+        measurementPeriodEnd: measurementPeriod.end?.toISOString()
+      });
       const drs = requirements.results.dataRequirement;
       if (drs) {
         drs.sort((a, b) => {
