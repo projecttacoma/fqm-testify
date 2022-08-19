@@ -190,9 +190,9 @@ describe('TestResourceCreation', () => {
     expect(deleteResourceButton).toBeInTheDocument();
   });
 
-  it('should delete resource when button is clicked', () => {
-    const MockResources = getMockRecoilState(patientTestCaseState, {
-      'example-test-case': {
+  it('should render confirmation modal when delete button is clicked', () => {
+    const MockPatients = getMockRecoilState(patientTestCaseState, {
+      'example-pt': {
         patient: {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
@@ -207,24 +207,25 @@ describe('TestResourceCreation', () => {
         ]
       }
     });
-    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-test-case');
+
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
 
     render(
       mantineRecoilWrap(
         <>
-          <MockResources />
+          <MockPatients />
           <MockSelectedPatient />
           <TestResourceCreation />
         </>
       )
     );
 
-    const deleteResourceButton = screen.getByTestId('delete-resource-button') as HTMLButtonElement;
-    expect(deleteResourceButton).toBeInTheDocument();
+    const deleteButton = screen.getByTestId('delete-resource-button') as HTMLButtonElement;
+    expect(deleteButton).toBeInTheDocument();
 
-    fireEvent.click(deleteResourceButton);
+    fireEvent.click(deleteButton);
 
-    const resourceInfo = screen.queryByText(/test case resources/i);
-    expect(resourceInfo).not.toBeInTheDocument();
+    const confirmationModal = screen.getByRole('dialog');
+    expect(confirmationModal).toBeInTheDocument();
   });
 });
