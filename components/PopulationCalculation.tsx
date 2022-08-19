@@ -10,6 +10,7 @@ import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
+import Link from 'next/link';
 
 interface PatientLabel {
   [patientId: string]: string;
@@ -22,6 +23,7 @@ export default function PopulationCalculation() {
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
   const [opened, setOpened] = useState(false);
   const [showTableButton, setShowTableButton] = useState(false);
+  const [showCoverageButton, setShowCoverageButton] = useState(false);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -84,6 +86,7 @@ export default function PopulationCalculation() {
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
           setShowTableButton(true);
+          setShowCoverageButton(true);
         }
       })
       .catch(e => {
@@ -123,6 +126,18 @@ export default function PopulationCalculation() {
                 >
                   &nbsp;Show Table
                 </Button>
+                <Link href={`/${measureBundle.content.id}/coverage`} key={'coverage'} passHref>
+                  <Button
+                    data-testid="show-coverage-button"
+                    aria-label="Show Clause Coverage"
+                    styles={{ root: { marginTop: 20 } }}
+                    hidden={!showCoverageButton}
+                    onClick={() => null}
+                    variant="default"
+                  >
+                    &nbsp;Show Clause Coverage
+                  </Button>
+                </Link>
               </Group>
               {measureReports.length > 0 && (
                 <>

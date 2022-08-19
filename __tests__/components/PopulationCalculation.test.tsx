@@ -51,8 +51,21 @@ describe('PopulationCalculation', () => {
       )
     );
 
-    const calculateButton = screen.queryByTestId('show-table-button');
-    expect(calculateButton).not.toBeInTheDocument();
+    const showTableButton = screen.queryByTestId('show-table-button');
+    expect(showTableButton).not.toBeInTheDocument();
+  });
+
+  it('should not render Show Clause Coverage button by default', () => {
+    render(
+      mantineRecoilWrap(
+        <>
+          <PopulationCalculation />
+        </>
+      )
+    );
+
+    const showClauseCoverageButton = screen.queryByTestId('show-coverage-button');
+    expect(showClauseCoverageButton).not.toBeInTheDocument();
   });
 
   it('should render Calculate Population Results button when measure bundle is present and at least one patient created', () => {
@@ -217,6 +230,74 @@ describe('PopulationCalculation', () => {
     await waitFor(() => {
       const showTableButton = screen.getByTestId('show-table-button');
       expect(showTableButton).toBeInTheDocument();
+    });
+  });
+
+  it('should render Show Clause Coverage button once calculation has finished', async () => {
+    const DEFAULT_PROPS = {
+      closePatientModal: jest.fn(),
+      openPatientModal: jest.fn()
+    };
+
+    const MockPatients = getMockRecoilState(patientTestCaseState, {
+      'example-pt': {
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        resources: [
+          {
+            resourceType: 'Procedure',
+            id: 'test-id',
+            status: 'completed',
+            subject: {}
+          }
+        ]
+      }
+    });
+
+    const MockMB = getMockRecoilState(measureBundleState, {
+      name: 'testName',
+      content: MOCK_BUNDLE
+    });
+
+    // Mock calculate data requirements because of the changing state
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: {
+        resourceType: 'Library',
+        status: 'draft',
+        type: {}
+      }
+    });
+
+    jest.spyOn(Calculator, 'calculateMeasureReports').mockResolvedValue({
+      results: [MOCK_MEASURE_REPORT]
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <MockMB />
+            <MeasureUpload />
+            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+            <PopulationCalculation />
+          </>
+        )
+      );
+    });
+
+    const calculateButton = screen.getByTestId('calculate-all-button');
+    expect(calculateButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(calculateButton);
+    });
+
+    await waitFor(() => {
+      const showClauseCoverageButton = screen.getByTestId('show-coverage-button');
+      expect(showClauseCoverageButton).toBeInTheDocument();
     });
   });
 });
