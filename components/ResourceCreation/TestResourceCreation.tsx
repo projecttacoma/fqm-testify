@@ -140,11 +140,11 @@ function TestResourceCreation() {
     return undefined;
   };
 
-  const getConfirmationModalText = (id: string | null) => {
-    if (selectedPatient && id) {
-      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+  const getConfirmationModalText = (resourceId: string | null) => {
+    if (selectedPatient && resourceId) {
+      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
       const resource = currentTestCases[selectedPatient].resources[resourceIndex];
-      return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}`;
+      return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
     }
   };
 
