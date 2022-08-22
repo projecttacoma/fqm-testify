@@ -1,4 +1,4 @@
-import { Modal, Button, Center, Group, Text, Grid } from '@mantine/core';
+import { Modal, Button, Center, Group, Text, Grid, Space } from '@mantine/core';
 import { AlertTriangle } from 'tabler-icons-react';
 
 export interface ConfirmationModalProps {
@@ -23,8 +23,11 @@ export default function ConfirmationModal({ open = true, onClose, title, onConfi
         <Grid.Col>
           <Center>
             <AlertTriangle color="red" size={35} />
-            <Text size="sm" weight={700} align="center">
-              &nbsp;{title}
+          </Center>
+          <Space></Space>
+          <Center>
+            <Text weight={700} align="center" lineClamp={2}>
+              {title}
             </Text>
           </Center>
         </Grid.Col>

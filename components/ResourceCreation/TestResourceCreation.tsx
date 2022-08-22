@@ -10,6 +10,7 @@ import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhi
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { Edit, Trash } from 'tabler-icons-react';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import ConfirmationModal from '../ConfirmationModal';
 
 function TestResourceCreation() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -19,6 +20,29 @@ function TestResourceCreation() {
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+
+  const openConfirmationModal = useCallback(
+    (resourceId?: string) => {
+      if (
+        resourceId &&
+        selectedPatient &&
+        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+      ) {
+        setCurrentResource(resourceId);
+      } else {
+        setCurrentResource(null);
+      }
+      setIsConfirmationModalOpen(true);
+    },
+    [currentTestCases, selectedPatient]
+  );
+
+  const closeConfirmationModal = () => {
+    setIsConfirmationModalOpen(false);
+    setCurrentResource(null);
+    setSelectedDataRequirement({ name: '', content: null });
+  };
 
   const openResourceModal = useCallback(
     (resourceId?: string) => {
@@ -75,7 +99,7 @@ function TestResourceCreation() {
     closeResourceModal();
   };
 
-  const deleteResource = (id?: string) => {
+  const deleteResource = (id: string | null) => {
     if (id && selectedPatient) {
       const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
       if (resourceIndexToDelete >= 0) {
@@ -85,6 +109,7 @@ function TestResourceCreation() {
         setCurrentTestCases(nextResourceState);
       }
     }
+    closeConfirmationModal();
   };
 
   const getInitialResource = () => {
@@ -115,6 +140,14 @@ function TestResourceCreation() {
     return undefined;
   };
 
+  const getConfirmationModalText = (resourceId: string | null) => {
+    if (selectedPatient && resourceId) {
+      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+      const resource = currentTestCases[selectedPatient].resources[resourceIndex];
+      return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
+    }
+  };
+
   return (
     <>
       <CodeEditorModal
@@ -123,6 +156,12 @@ function TestResourceCreation() {
         title="Edit FHIR Resource"
         onSave={updateResource}
         initialValue={getInitialResource()}
+      />
+      <ConfirmationModal
+        open={isConfirmationModalOpen}
+        onClose={closeConfirmationModal}
+        title={getConfirmationModalText(currentResource)}
+        onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
@@ -165,7 +204,7 @@ function TestResourceCreation() {
                   <Tooltip label="Delete FHIR Resource" openDelay={1000}>
                     <Button
                       onClick={() => {
-                        deleteResource(resource.id);
+                        openConfirmationModal(resource.id);
                       }}
                       color="red"
                       variant="outline"
