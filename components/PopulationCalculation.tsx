@@ -2,7 +2,7 @@ import { Button, Center, Grid, Drawer, Group } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
 import { createPatientBundle, getPatientInfoString } from '../util/fhir';
 import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
@@ -48,6 +48,7 @@ export default function PopulationCalculation() {
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: false,
       calculateSDEs: false,
+      calculateClauseCoverage: true,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString()
@@ -61,6 +62,9 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
+      // TODO: change this so that we can access the coverage HTML???
+      const results = await Calculator.calculate(measureBundle.content, patientBundles, options);
+      const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
       const measureReports = await Calculator.calculateMeasureReports(measureBundle.content, patientBundles, options);
       return measureReports.results as fhir4.MeasureReport[];
     } else return;

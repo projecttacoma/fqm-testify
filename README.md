@@ -87,6 +87,8 @@ FQM-Testify allows for running measure calculation on a single test case for a g
 
 FQM-Testify enables users to run measure calculation on all test cases in addition to just one test case. Once a FHIR Measure and at least one test case are uploaded, the user can run measure calculation on all the created patients by clicking the Calculate Population Results button. Using calcuation from [the fqm-execution library](https://github.com/projecttacoma/fqm-execution), the population results for each patient appear in a population results table, with a row for each patient, labeled with the patient's name and date of birth. The population result table can be hidden or shown as well as regenerated if test cases are added.
 
+Once calculation has finished, the user can access an HTML representation of the clauses covered by the test cases that were passed into the calculation. This can be accessed by clicking on the "Show Clause Coverage" button.
+
 ## License
 
 Copyright 2022 The MITRE Corporation
