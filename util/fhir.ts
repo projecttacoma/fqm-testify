@@ -179,6 +179,8 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
     }
   });
 
+  // THIS IS WHERE IT BREAKS
+
   // resource properties retrieved from parsed primary code path script
   const vsUrl = dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet;
   const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vsUrl)[0]
