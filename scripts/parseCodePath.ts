@@ -38,6 +38,7 @@ export async function parse(xml: string) {
     if (primaryCodePath) {
       let codeType: string;
       let multipleCardinality: boolean;
+      let choiceType: boolean;
 
       di.element.forEach((elem: any) => {
         if (elem.elementTypeSpecifier) {
@@ -63,20 +64,23 @@ export async function parse(xml: string) {
 
             // all choice types are 0..1 or 1..1 cardinality
             multipleCardinality = false;
+            choiceType = true;
           } else {
             // xsi:type is ListTypeSpecifier
             codeType = elem.elementTypeSpecifier[0].$.elementType;
 
             // single type of 0..* or 1..* cardinality
             multipleCardinality = true;
+            choiceType = false;
           }
         } else {
           // single type of 0..1 or 1..1 cardinality
           codeType = elem.$.elementType;
           multipleCardinality = false;
+          choiceType = false;
         }
         if (codeType === 'FHIR.CodeableConcept' || codeType === 'FHIR.Coding' || codeType === 'FHIR.code') {
-          paths[elem.$.name] = { codeType: codeType, multipleCardinality: multipleCardinality };
+          paths[elem.$.name] = { codeType: codeType, multipleCardinality: multipleCardinality, choiceType: choiceType };
         }
       });
       results[resourceType] = {
