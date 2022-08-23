@@ -10,7 +10,7 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000' , html: ''}
+            query: { measureId: 'measure-EXM130-7.3.000' , clauseCoverageHTML: 'test html'}
           })}
         >
           <ClauseCoveragePage />
@@ -27,7 +27,7 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000', html: '' }
+            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
           })}
         >
           <ClauseCoveragePage />
@@ -35,6 +35,38 @@ describe('coverage page rendering', () => {
       );
     });
 
-    expect(screen.getByText('Clause coverage for measure: measure-EXM130-7.3.000')).toBeInTheDocument();
+    expect(screen.getByText('Clause coverage for measure bundle: measure-EXM130-7.3.000')).toBeInTheDocument();
   });
+
+  it ('should display html content', async () => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({
+            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
+          })}
+        >
+          <ClauseCoveragePage />
+        </RouterContext.Provider>
+      );
+    });
+    const textDiv = screen.getByText('test html');
+    expect(textDiv).toBeInTheDocument();
+  });
+
+  it('should display no clause coverage header when coverage html is not available', async () => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({
+            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: undefined }
+          })}
+        >
+          <ClauseCoveragePage />
+        </RouterContext.Provider>
+      );
+    });
+
+    expect(screen.getByText('No clause coverage results available for measure bundle: measure-EXM130-7.3.000')).toBeInTheDocument();
+  })
 });

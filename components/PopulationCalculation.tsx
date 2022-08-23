@@ -23,8 +23,8 @@ export default function PopulationCalculation() {
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
   const [opened, setOpened] = useState(false);
   const [showTableButton, setShowTableButton] = useState(false);
-  const [showCoverageButton, setShowCoverageButton] = useState(false);
-  const [html, setHTML] = useState('');
+  const [showClauseCoverageButton, setShowClauseCoverageButton] = useState(false);
+  const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -66,10 +66,9 @@ export default function PopulationCalculation() {
       const calculationResults = await Calculator.calculate(measureBundle.content, patientBundles, options);
       const { results, coverageHTML } = calculationResults;
       if (coverageHTML) {
-        setHTML(coverageHTML);
+        setClauseCoverageHTML(coverageHTML);
       }
       const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
-      
       return measureReports as fhir4.MeasureReport[];
     } else return;
   };
@@ -94,7 +93,7 @@ export default function PopulationCalculation() {
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
           setShowTableButton(true);
-          setShowCoverageButton(true);
+          setShowClauseCoverageButton(true);
         }
       })
       .catch(e => {
@@ -135,7 +134,7 @@ export default function PopulationCalculation() {
                   &nbsp;Show Table
                 </Button>
                 <Link
-                  href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { html } }}
+                  href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { clauseCoverageHTML } }}
                   key={'coverage'}
                   passHref
                 >
@@ -143,7 +142,7 @@ export default function PopulationCalculation() {
                     data-testid="show-coverage-button"
                     aria-label="Show Clause Coverage"
                     styles={{ root: { marginTop: 20 } }}
-                    hidden={!showCoverageButton}
+                    hidden={!showClauseCoverageButton}
                     variant="default"
                   >
                     &nbsp;Show Clause Coverage
