@@ -10,7 +10,7 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000' , clauseCoverageHTML: 'test html'}
+            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
           })}
         >
           <ClauseCoveragePage />
@@ -38,7 +38,7 @@ describe('coverage page rendering', () => {
     expect(screen.getByText('Clause coverage for measure bundle: measure-EXM130-7.3.000')).toBeInTheDocument();
   });
 
-  it ('should display html content', async () => {
+  it('should display HTML content', async () => {
     await act(async () => {
       render(
         <RouterContext.Provider
@@ -67,6 +67,8 @@ describe('coverage page rendering', () => {
       );
     });
 
-    expect(screen.getByText('No clause coverage results available for measure bundle: measure-EXM130-7.3.000')).toBeInTheDocument();
-  })
+    expect(
+      screen.getByText('No clause coverage results available for measure bundle: measure-EXM130-7.3.000')
+    ).toBeInTheDocument();
+  });
 });

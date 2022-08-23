@@ -134,7 +134,9 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
+      return [MOCK_MEASURE_REPORT];
+    });
 
     jest.spyOn(Calculator, 'calculate').mockResolvedValue({
       results: []
@@ -204,7 +206,13 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
+      return [MOCK_MEASURE_REPORT];
+    });
+
+    jest.spyOn(Calculator, 'calculate').mockResolvedValue({
+      results: []
+    });
 
     await act(async () => {
       render(
@@ -270,7 +278,13 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
+      return [MOCK_MEASURE_REPORT];
+    });
+
+    jest.spyOn(Calculator, 'calculate').mockResolvedValue({
+      results: []
+    });
 
     await act(async () => {
       render(

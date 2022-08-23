@@ -18,7 +18,7 @@ const ClauseCoveragePage = () => {
   if (typeof clauseCoverageHTML === 'string' && clauseCoverageHTML.length > 0) {
     return (
       <>
-        <Group>
+        <Group style={{ outlineColor: '2px' }}>
           <BackButton />
           <h2>Clause coverage for measure bundle: {`${measureId}`}</h2>
         </Group>
@@ -35,14 +35,15 @@ const ClauseCoveragePage = () => {
         </Center>
       </>
     );
-  } else return (
-    <>
-    <Group>
-      <BackButton />
-      <h2>No clause coverage results available for measure bundle: {`${measureId}`} </h2>
-    </Group>
-    </>
-  );
+  } else
+    return (
+      <>
+        <Group>
+          <BackButton />
+          <h2>No clause coverage results available for measure bundle: {`${measureId}`} </h2>
+        </Group>
+      </>
+    );
 };
 
 export default ClauseCoveragePage;
