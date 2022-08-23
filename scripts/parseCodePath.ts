@@ -64,6 +64,8 @@ export async function parse(xml: string) {
 
             // all choice types are 0..1 or 1..1 cardinality
             multipleCardinality = false;
+
+            // indicate that this is a choice type
             choiceType = true;
           } else {
             // xsi:type is ListTypeSpecifier
@@ -71,12 +73,16 @@ export async function parse(xml: string) {
 
             // single type of 0..* or 1..* cardinality
             multipleCardinality = true;
+
+            // indicate that this is not a choice type
             choiceType = false;
           }
         } else {
           // single type of 0..1 or 1..1 cardinality
           codeType = elem.$.elementType;
           multipleCardinality = false;
+
+          // indicate that this is not a choice type
           choiceType = false;
         }
         if (codeType === 'FHIR.CodeableConcept' || codeType === 'FHIR.Coding' || codeType === 'FHIR.code') {

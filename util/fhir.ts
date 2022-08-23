@@ -173,22 +173,16 @@ function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, p
 
 function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
   // resource properties retrieved from data requirements
-  // 1. iterate over code filters and try to do everything the code filter is saying before continuing
-  // after that we don't need to revisit the code filters
   dr.codeFilter?.forEach(cf => {
     if (!cf.valueSet && cf.path && cf.code) {
       resource[cf.path] = cf.code[0].code;
     }
   });
 
-  // THIS IS WHERE IT BREAKS
-
   let vsUrl: string | undefined;
 
   // resource properties retrieved from parsed primary code path script
   if (dr.codeFilter) {
-    console.log('hello');
-    console.log(dr.codeFilter);
     vsUrl =
       dr.codeFilter?.filter(cf => cf.valueSet).length > 0 ? dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet : '';
   }
@@ -210,7 +204,6 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
     ({ code, display } = codeAndDisplay || {});
   }
 
-  // need to know for any possible path what's the possible type
   const primaryCodePath = parsedCodePaths[dr.type].primaryCodePath;
   const primaryCodeType = parsedCodePaths[dr.type].paths[primaryCodePath].codeType;
 
