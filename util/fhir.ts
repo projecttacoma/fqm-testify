@@ -173,6 +173,8 @@ function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, p
 
 function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
   // resource properties retrieved from data requirements
+  // 1. iterate over code filters and try to do everything the code filter is saying before continuing
+  // after that we don't need to revisit the code filters
   dr.codeFilter?.forEach(cf => {
     if (!cf.valueSet && cf.path && cf.code) {
       resource[cf.path] = cf.code[0].code;
