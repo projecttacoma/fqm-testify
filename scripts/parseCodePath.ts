@@ -32,7 +32,7 @@ export async function parse(xml: string) {
   domainInfo.forEach((di: any) => {
     const resourceType = di.$.name;
     const primaryCodePath = di.$.primaryCodePath;
-    const paths: CodePathInfo = {};
+    const paths: Record<string, CodePathInfo> = {};
 
     // check if primaryCodePath exists
     if (primaryCodePath) {
@@ -86,7 +86,7 @@ export async function parse(xml: string) {
           choiceType = false;
         }
         if (codeType === 'FHIR.CodeableConcept' || codeType === 'FHIR.Coding' || codeType === 'FHIR.code') {
-          paths[elem.$.name] = { codeType: codeType, multipleCardinality: multipleCardinality, choiceType: choiceType };
+          paths[elem.$.name] = { codeType, multipleCardinality, choiceType };
         }
       });
       results[resourceType] = {
