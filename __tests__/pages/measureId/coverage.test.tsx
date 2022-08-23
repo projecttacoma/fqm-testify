@@ -10,7 +10,7 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000' }
+            query: { measureId: 'measure-EXM130-7.3.000' , html: ''}
           })}
         >
           <ClauseCoveragePage />
@@ -27,7 +27,7 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000' }
+            query: { measureId: 'measure-EXM130-7.3.000', html: '' }
           })}
         >
           <ClauseCoveragePage />

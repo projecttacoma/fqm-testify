@@ -24,6 +24,7 @@ export default function PopulationCalculation() {
   const [opened, setOpened] = useState(false);
   const [showTableButton, setShowTableButton] = useState(false);
   const [showCoverageButton, setShowCoverageButton] = useState(false);
+  const [html, setHTML] = useState('');
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -62,11 +63,14 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
-      // TODO: change this so that we can access the coverage HTML???
-      const results = await Calculator.calculate(measureBundle.content, patientBundles, options);
+      const calculationResults = await Calculator.calculate(measureBundle.content, patientBundles, options);
+      const { results, coverageHTML } = calculationResults;
+      if (coverageHTML) {
+        setHTML(coverageHTML);
+      }
       const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
-      const measureReports = await Calculator.calculateMeasureReports(measureBundle.content, patientBundles, options);
-      return measureReports.results as fhir4.MeasureReport[];
+      
+      return measureReports as fhir4.MeasureReport[];
     } else return;
   };
 
@@ -130,13 +134,16 @@ export default function PopulationCalculation() {
                 >
                   &nbsp;Show Table
                 </Button>
-                <Link href={`/${measureBundle.content.id}/coverage`} key={'coverage'} passHref>
+                <Link
+                  href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { html } }}
+                  key={'coverage'}
+                  passHref
+                >
                   <Button
                     data-testid="show-coverage-button"
                     aria-label="Show Clause Coverage"
                     styles={{ root: { marginTop: 20 } }}
                     hidden={!showCoverageButton}
-                    onClick={() => null}
                     variant="default"
                   >
                     &nbsp;Show Clause Coverage
@@ -155,7 +162,6 @@ export default function PopulationCalculation() {
                     size="lg"
                   >
                     <h2>Population Results</h2>
-
                     <div
                       data-testid="results-table"
                       style={{

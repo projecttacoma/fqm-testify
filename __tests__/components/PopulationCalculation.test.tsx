@@ -4,7 +4,7 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Calculator } from 'fqm-execution';
+import { Calculator, MeasureReportBuilder } from 'fqm-execution';
 import MeasureUpload from '../../components/MeasureUpload';
 import PatientCreation from '../../components/ResourceCreation/PatientCreation';
 
@@ -134,8 +134,10 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(Calculator, 'calculateMeasureReports').mockResolvedValue({
-      results: [MOCK_MEASURE_REPORT]
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
+
+    jest.spyOn(Calculator, 'calculate').mockResolvedValue({
+      results: []
     });
 
     await act(async () => {
@@ -202,9 +204,7 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(Calculator, 'calculateMeasureReports').mockResolvedValue({
-      results: [MOCK_MEASURE_REPORT]
-    });
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
 
     await act(async () => {
       render(
@@ -270,9 +270,7 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(Calculator, 'calculateMeasureReports').mockResolvedValue({
-      results: [MOCK_MEASURE_REPORT]
-    });
+    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {return [MOCK_MEASURE_REPORT]});
 
     await act(async () => {
       render(
