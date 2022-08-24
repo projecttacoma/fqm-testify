@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getRandomFirstName, getRandomLastName } from './randomizer';
 import { ValueSetsMap } from '../state/selectors/valueSetsMap';
-import { parsedPrimaryCodePaths } from './primaryCodePaths';
 import { parsedPrimaryDatePaths } from './primaryDatePaths';
+import { parsedCodePaths } from './codePaths';
 import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
@@ -46,7 +46,7 @@ export function createPatientResourceString(birthDate: string): string {
  * @returns {String} displaying the code and display text, code, or id of the resource or nothing
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
-  const primaryCodePath = parsedPrimaryCodePaths[resource.resourceType]?.primaryCodePath;
+  const primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
 
   if (primaryCodePath) {
     const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
@@ -179,8 +179,13 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
     }
   });
 
+  let vsUrl: string | undefined;
+
   // resource properties retrieved from parsed primary code path script
-  const vsUrl = dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet;
+  if (dr.codeFilter) {
+    vsUrl =
+      dr.codeFilter?.filter(cf => cf.valueSet).length > 0 ? dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet : '';
+  }
   const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vsUrl)[0]
     .resource as fhir4.ValueSet;
 
@@ -199,8 +204,8 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
     ({ code, display } = codeAndDisplay || {});
   }
 
-  const primaryCodePath = parsedPrimaryCodePaths[dr.type].primaryCodePath;
-  const primaryCodeType = parsedPrimaryCodePaths[dr.type].primaryCodeType;
+  const primaryCodePath = parsedCodePaths[dr.type].primaryCodePath;
+  const primaryCodeType = parsedCodePaths[dr.type].paths[primaryCodePath].codeType;
 
   const coding = {
     system,
@@ -223,7 +228,9 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
     codeData = null;
   }
 
-  resource[primaryCodePath] = parsedPrimaryCodePaths[dr.type].multipleCardinality ? [codeData] : codeData;
+  resource[primaryCodePath] = parsedCodePaths[dr.type].paths[primaryCodePath].multipleCardinality
+    ? [codeData]
+    : codeData;
 }
 
 /**

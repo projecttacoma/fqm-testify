@@ -1,5 +1,10 @@
-export interface PrimaryCodePathInfo {
+export interface ResourceCodeInfo {
   primaryCodePath: string;
-  primaryCodeType?: string;
+  paths: Record<string, CodePathInfo>;
+}
+
+export interface CodePathInfo {
+  codeType: string;
   multipleCardinality: boolean;
+  choiceType: boolean;
 }
