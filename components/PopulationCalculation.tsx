@@ -63,8 +63,7 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
-      const calculationResults = await Calculator.calculate(measureBundle.content, patientBundles, options);
-      const { results, coverageHTML } = calculationResults;
+      const { results, coverageHTML } = await Calculator.calculate(measureBundle.content, patientBundles, options);
       if (coverageHTML) {
         setClauseCoverageHTML(coverageHTML);
       }

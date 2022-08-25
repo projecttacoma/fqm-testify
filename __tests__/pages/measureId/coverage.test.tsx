@@ -22,7 +22,7 @@ describe('coverage page rendering', () => {
     expect(backButton).toBeInTheDocument();
   });
 
-  it('should display header with measure id of calculated measure', async () => {
+  it('should display header with measure id of calculated measure, and HTML content', async () => {
     await act(async () => {
       render(
         <RouterContext.Provider
@@ -36,20 +36,6 @@ describe('coverage page rendering', () => {
     });
 
     expect(screen.getByText('Clause coverage for measure bundle: measure-EXM130-7.3.000')).toBeInTheDocument();
-  });
-
-  it('should display HTML content', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
-          })}
-        >
-          <ClauseCoveragePage />
-        </RouterContext.Provider>
-      );
-    });
     const textDiv = screen.getByText('test html');
     expect(textDiv).toBeInTheDocument();
   });
