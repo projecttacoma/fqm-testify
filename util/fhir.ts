@@ -172,65 +172,62 @@ function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, p
 }
 
 function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
-  // resource properties retrieved from data requirements
+  // go through each of the elements in the codeFilter array on the data requirement, if it exists
+
   dr.codeFilter?.forEach(cf => {
-    if (!cf.valueSet && cf.path && cf.code) {
-      resource[cf.path] = cf.code[0].code;
+    let system, version, display, code;
+    const path = cf.path;
+    // check to see if the code filter has a value set
+    if (cf.valueSet) {
+      const vsResource = mb?.entry?.filter(
+        r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === cf.valueSet
+      )[0].resource as fhir4.ValueSet;
+
+      // assume ValueSet resource will either contain compose or expansion
+      if (vsResource?.expansion?.contains) {
+        // randomly select ValueSetExpansionContains to add to resource
+        const contains = _.sample(vsResource.expansion.contains);
+        ({ system, version, code, display } = contains || {});
+      } else if (vsResource?.compose) {
+        // randomly select ValueSetComposeInclude to add to resource
+        const include = _.sample(vsResource.compose.include);
+        // randomly select concept from ValueSetComposeInclude to add to resource
+        const codeAndDisplay = _.sample(include?.concept);
+        ({ system, version } = include || {});
+        ({ code, display } = codeAndDisplay || {});
+      }
+    } else {
+      // it doesn't have a valueSet, see if there is a direct reference code
+      const directCode = cf.code as fhir4.Coding[];
+      ({ system, version, code, display } = directCode[0] || {});
+    }
+
+    if (path) {
+      if (parsedCodePaths[dr.type].paths[path] !== undefined) {
+        const codeType = parsedCodePaths[dr.type].paths[path].codeType;
+        const coding = {
+          system,
+          version,
+          code,
+          display
+        };
+        let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
+        if (codeType === 'FHIR.CodeableConcept') {
+          // Need to add coding as an array for codeable concept
+          codeData = {
+            coding: [coding]
+          };
+        } else if (codeType === 'FHIR.Coding') {
+          codeData = coding;
+        } else if (codeType === 'FHIR.code') {
+          codeData = code;
+        } else {
+          codeData = null;
+        }
+        resource[path] = parsedCodePaths[dr.type].paths[path].multipleCardinality ? [codeData] : codeData;
+      }
     }
   });
-
-  let vsUrl: string | undefined;
-
-  // resource properties retrieved from parsed primary code path script
-  if (dr.codeFilter) {
-    vsUrl =
-      dr.codeFilter?.filter(cf => cf.valueSet).length > 0 ? dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet : '';
-  }
-  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vsUrl)[0]
-    .resource as fhir4.ValueSet;
-
-  // assume ValueSet resource will either contain compose or expansion
-  let system, version, display, code;
-  if (vsResource?.expansion?.contains) {
-    // randomly select ValueSetExpansionContains to add to resource
-    const contains = _.sample(vsResource.expansion.contains);
-    ({ system, version, code, display } = contains || {});
-  } else if (vsResource?.compose) {
-    // randomly select ValueSetComposeInclude to add to resource
-    const include = _.sample(vsResource.compose.include);
-    // randomly select concept from ValueSetComposeInclude to add to resource
-    const codeAndDisplay = _.sample(include?.concept);
-    ({ system, version } = include || {});
-    ({ code, display } = codeAndDisplay || {});
-  }
-
-  const primaryCodePath = parsedCodePaths[dr.type].primaryCodePath;
-  const primaryCodeType = parsedCodePaths[dr.type].paths[primaryCodePath].codeType;
-
-  const coding = {
-    system,
-    version,
-    code,
-    display
-  };
-
-  let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
-  if (primaryCodeType === 'FHIR.CodeableConcept') {
-    codeData = {
-      // Need to add coding as an array for codeable concept
-      coding: [coding]
-    };
-  } else if (primaryCodeType === 'FHIR.Coding') {
-    codeData = coding;
-  } else if (primaryCodeType === 'FHIR.code') {
-    codeData = code;
-  } else {
-    codeData = null;
-  }
-
-  resource[primaryCodePath] = parsedCodePaths[dr.type].paths[primaryCodePath].multipleCardinality
-    ? [codeData]
-    : codeData;
 }
 
 /**
