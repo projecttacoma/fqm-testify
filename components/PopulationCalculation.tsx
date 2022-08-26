@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Drawer, Group } from '@mantine/core';
+import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -22,8 +22,8 @@ export default function PopulationCalculation() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
   const [opened, setOpened] = useState(false);
-  const [showTableButton, setShowTableButton] = useState(false);
-  const [showClauseCoverageButton, setShowClauseCoverageButton] = useState(false);
+  const [enableTableButton, setEnableTableButton] = useState(false);
+  const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
 
   /**
@@ -91,8 +91,8 @@ export default function PopulationCalculation() {
           });
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
-          setShowTableButton(true);
-          setShowClauseCoverageButton(true);
+          setEnableTableButton(true);
+          setEnableClauseCoverageButton(true);
         }
       })
       .catch(e => {
@@ -122,30 +122,42 @@ export default function PopulationCalculation() {
                 >
                   &nbsp;Calculate Population Results
                 </Button>
-                <Button
-                  data-testid="show-table-button"
-                  aria-label="Show Table"
-                  styles={{ root: { marginTop: 20 } }}
-                  hidden={!showTableButton}
-                  onClick={() => setOpened(true)}
-                  variant="default"
+                <Tooltip
+                  label="Disabled until calculation results are available"
+                  openDelay={1000}
+                  disabled={enableTableButton ? true : false}
                 >
-                  &nbsp;Show Table
-                </Button>
+                  <Button
+                    data-testid="show-table-button"
+                    aria-label="Show Table"
+                    styles={{ root: { marginTop: 20 } }}
+                    disabled={!enableTableButton}
+                    onClick={() => setOpened(true)}
+                    variant="default"
+                  >
+                    &nbsp;Show Table
+                  </Button>
+                </Tooltip>
                 <Link
                   href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { clauseCoverageHTML } }}
                   key={'coverage'}
                   passHref
                 >
-                  <Button
-                    data-testid="show-coverage-button"
-                    aria-label="Show Clause Coverage"
-                    styles={{ root: { marginTop: 20 } }}
-                    hidden={!showClauseCoverageButton}
-                    variant="default"
+                  <Tooltip
+                    label="Disabled until calculation results are available"
+                    openDelay={1000}
+                    disabled={enableClauseCoverageButton ? true : false}
                   >
-                    &nbsp;Show Clause Coverage
-                  </Button>
+                    <Button
+                      data-testid="show-coverage-button"
+                      aria-label="Show Clause Coverage"
+                      styles={{ root: { marginTop: 20 } }}
+                      disabled={!enableClauseCoverageButton}
+                      variant="default"
+                    >
+                      &nbsp;Show Clause Coverage
+                    </Button>
+                  </Tooltip>
                 </Link>
               </Group>
               {measureReports.length > 0 && (
