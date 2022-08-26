@@ -18,7 +18,7 @@ const ClauseCoveragePage = () => {
   if (typeof clauseCoverageHTML === 'string' && clauseCoverageHTML.length > 0) {
     return (
       <>
-        <Group style={{ outlineColor: '2px' }}>
+        <Group>
           <BackButton />
           <h2>Clause coverage for measure bundle: {`${measureId}`}</h2>
         </Group>
@@ -26,8 +26,9 @@ const ClauseCoveragePage = () => {
           <div
             className={classes.highlightedMarkup}
             style={{
-              maxHeight: '55vh',
-              overflow: 'scroll'
+              maxHeight: '90vh',
+              overflow: 'scroll',
+              marginLeft: '5px'
             }}
           >
             {parse(clauseCoverageHTML)}

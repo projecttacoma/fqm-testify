@@ -13,7 +13,8 @@ const BackButton = () => {
         radius="md"
         size="sm"
         style={{
-          float: 'left'
+          float: 'left',
+          marginLeft: '5px'
         }}
       >
         <ArrowNarrowLeft size="36" />
