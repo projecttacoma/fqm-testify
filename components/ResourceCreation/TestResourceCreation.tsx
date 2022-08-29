@@ -1,4 +1,4 @@
-import { Button, Grid, Group, Paper, Text, Tooltip } from '@mantine/core';
+import { Stack } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -8,9 +8,9 @@ import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequ
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { Edit, Trash } from 'tabler-icons-react';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../ConfirmationModal';
+import ResourceInfoCard from '../ResourceInfoCard';
 
 function TestResourceCreation() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -164,60 +164,16 @@ function TestResourceCreation() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <>
-          <h3>Test Case Resources:</h3>
-          {currentTestCases[selectedPatient].resources.map((resource, idx) => (
-            <Paper
+        <Stack>
+          {currentTestCases[selectedPatient].resources.map(resource => (
+            <ResourceInfoCard
               key={resource.id}
-              withBorder
-              p="md"
-              sx={theme => ({ backgroundColor: idx % 2 === 0 ? theme.colors.gray[1] : 'white' })}
-            >
-              <Grid justify="space-between">
-                <Grid.Col span={10}>
-                  <Tooltip
-                    wrapLines
-                    width={500}
-                    withArrow
-                    transition="fade"
-                    transitionDuration={200}
-                    label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
-                    disabled={getFhirResourceSummary(resource) === ''}
-                  >
-                    <Text lineClamp={1}>{`${idx + 1}. ${resource.resourceType} ${getFhirResourceSummary(
-                      resource
-                    )}`}</Text>
-                  </Tooltip>
-                </Grid.Col>
-                <Group>
-                  <Tooltip label="Edit FHIR Resource" openDelay={1000}>
-                    <Button
-                      onClick={() => {
-                        openResourceModal(resource.id);
-                      }}
-                      variant="default"
-                      data-testid="edit-resource-button"
-                    >
-                      <Edit />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip label="Delete FHIR Resource" openDelay={1000}>
-                    <Button
-                      onClick={() => {
-                        openConfirmationModal(resource.id);
-                      }}
-                      color="red"
-                      variant="outline"
-                      data-testid="delete-resource-button"
-                    >
-                      <Trash />
-                    </Button>
-                  </Tooltip>
-                </Group>
-              </Grid>
-            </Paper>
+              resource={resource}
+              onEditClick={() => openResourceModal(resource.id)}
+              onDeleteClick={() => openConfirmationModal(resource.id)}
+            />
           ))}
-        </>
+        </Stack>
       )}
     </>
   );

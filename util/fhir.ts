@@ -85,6 +85,10 @@ export function getPatientInfoString(patient: fhir4.Patient) {
   return `${getPatientNameString(patient)} (DOB: ${patient.birthDate})`;
 }
 
+export function getPatientDOBString(patient: fhir4.Patient) {
+  return `DOB: ${patient.birthDate}`;
+}
+
 export function getPatientNameString(patient: fhir4.Patient) {
   return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family}`;
 }

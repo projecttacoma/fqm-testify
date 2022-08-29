@@ -22,7 +22,9 @@ const Home: NextPage = () => {
             <DateSelectors />
           </Grid.Col>
         </Grid>
-        <ResourceCreationPanel />
+        <div style={{ paddingTop: '24px' }}>
+          <ResourceCreationPanel />
+        </div>
         <PopulationCalculation />
       </AppShell>
     </>

@@ -1,34 +1,22 @@
-import { Button, Collapse, createStyles, Group, Stack, Tooltip } from '@mantine/core';
+import JSZip from 'jszip';
+import { downloadZip } from '../../util/downloadUtil';
+import { Button, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import {
-  createPatientResourceString,
-  getPatientInfoString,
-  getPatientNameString,
-  createPatientBundle
-} from '../../util/fhir';
+import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
+import { createPatientResourceString, getPatientNameString, createPatientBundle } from '../../util/fhir';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { ChevronRight, ChevronDown, Download, Edit, Trash } from 'tabler-icons-react';
-import React, { useState } from 'react';
-import TestResourceCreation from './TestResourceCreation';
+import React, { ReactNode, useState } from 'react';
 import { download } from '../../util/downloadUtil';
 import ConfirmationModal from '../ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
-import parse from 'html-react-parser';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle } from '@tabler/icons';
-
-const useStyles = createStyles(() => ({
-  highlightedMarkup: {
-    '& pre': {
-      whiteSpace: 'pre-wrap'
-    }
-  }
-}));
+import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
+import ImportModal from './ImportModal';
+import { bundleToTestCase } from '../../util/import';
+import PatientInfoCard from '../PatientInfoCard';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -43,55 +31,12 @@ function PatientCreation({
   isPatientModalOpen,
   currentPatient
 }: PatientCreationProps) {
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const measureBundle = useRecoilValue(measureBundleState);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const measureBundle = useRecoilValue(measureBundleState);
-  const [showCalculation, setShowCalculation] = useState(false);
-  const { classes } = useStyles();
-
-  // Function to wrap the calculate function and catch errors in fqm-execution
-  const clickCalculateButton = async (id: string | null) => {
-    try {
-      await calculate(id);
-    } catch (error) {
-      if (error instanceof Error) {
-        showNotification({
-          icon: <IconAlertCircle />,
-          title: 'Calculation Error',
-          message: error.message,
-          color: 'red'
-        });
-      }
-    }
-  };
-
-  // Function to calculate the selected patient's measure report
-  const calculate = async (id: string | null) => {
-    const options: CalculatorTypes.CalculationOptions = {
-      calculateHTML: true,
-      // TODO: Flip this to true once a new fqm-execution version is released/dependency is updated
-      calculateSDEs: false,
-      reportType: 'individual',
-      measurementPeriodStart: measurementPeriod.start?.toISOString(),
-      measurementPeriodEnd: measurementPeriod.end?.toISOString()
-    };
-
-    if (id && measureBundle.content) {
-      const patientBundle = createPatientBundle(currentPatients[id].patient, currentPatients[id].resources);
-
-      const mrResults = await Calculator.calculateMeasureReports(measureBundle.content, [patientBundle], options);
-      const [measureReport] = mrResults.results as fhir4.MeasureReport[];
-
-      const nextPatientState = produce(currentPatients, draftState => {
-        draftState[id].measureReport = measureReport;
-      });
-
-      setCurrentPatients(nextPatientState);
-      setShowCalculation(true);
-    }
-  };
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -156,16 +101,6 @@ function PatientCreation({
     return undefined;
   };
 
-  const updateSelectedPatient = (patientId: string) => {
-    if (selectedPatient === patientId) {
-      setSelectedPatient(null);
-    } else {
-      setSelectedPatient(patientId);
-      // Reset the show calculation state variable to false so that it does show for other patients
-      setShowCalculation(false);
-    }
-  };
-
   const getConfirmationModalText = (patientId: string | null) => {
     let patientName;
     if (patientId !== null) {
@@ -173,6 +108,148 @@ function PatientCreation({
       patientName = getPatientNameString(patient);
     }
     return `Are you sure you want to delete ${patientName || 'this patient'}?`;
+  };
+
+  const exportAllPatients = () => {
+    // Build zip file
+    const zip = new JSZip();
+    const dateCreated = new Date();
+    const fileNameString = `${measureBundle.name.replace('.json', '')}-test-cases`;
+    const measureBundleFolder = zip.folder(fileNameString);
+    if (measureBundleFolder) {
+      Object.keys(currentPatients).forEach(id => {
+        const bundleString: string = JSON.stringify(
+          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+          null,
+          2
+        );
+        const testCaseFileName = `${getPatientNameString(currentPatients[id].patient)}-${id}.json`;
+        // create file for each bundleString
+        measureBundleFolder.file(testCaseFileName, bundleString);
+      });
+      downloadZip(zip, `${fileNameString}-${dateCreated.toISOString()}.zip`);
+    } else {
+      showNotification({
+        title: 'Measure Bundle Folder Creation Failed',
+        message: 'Could not successfully create zip folder for downloading all patients'
+      });
+    }
+  };
+
+  const handleSubmittedImport = (files: File[]) => {
+    const filePromises = files.map(readFileContent);
+
+    let successCount = 0,
+      failureCount = 0;
+    Promise.all(filePromises)
+      .then(allFileContent => {
+        const nextPatientState = produce(currentPatients, draftState => {
+          allFileContent.forEach(({ fileName, fileContent }) => {
+            // Cast to FhirResource to safely access resourceType if no error is thrown during parse
+            let resource = {} as fhir4.FhirResource;
+            try {
+              resource = JSON.parse(fileContent);
+            } catch (e) {
+              if (e instanceof Error) {
+                failureCount += 1;
+                showImportError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
+                return;
+              }
+            }
+
+            if (resource.resourceType !== 'Bundle') {
+              failureCount += 1;
+              showImportError(
+                <>
+                  <strong>{fileName}</strong> is not a FHIR Bundle
+                </>
+              );
+              return;
+            }
+
+            const bundle = resource as fhir4.Bundle;
+            let testCase = {} as TestCaseInfo;
+
+            try {
+              testCase = bundleToTestCase(bundle);
+            } catch (e) {
+              if (e instanceof Error) {
+                failureCount += 1;
+                showImportError(
+                  <>
+                    <strong>{fileName}</strong>: {e.message}
+                  </>
+                );
+                return;
+              }
+            }
+
+            if (!testCase.patient.id) {
+              failureCount += 1;
+              showImportError(
+                <>
+                  <strong>{fileName}</strong>: Could not find id on patient resource
+                </>
+              );
+              return;
+            }
+
+            draftState[testCase.patient.id] = testCase;
+            successCount += 1;
+          });
+        });
+
+        setCurrentPatients(nextPatientState);
+      })
+      .catch(err => {
+        failureCount += 1;
+        // If this catch block happens, the FileReader couldn't read any files. For now, we're stopping import at this
+        // Other error cases (i.e. invalid JSON, invalid Bundle) will fail safely
+        showNotification({
+          id: 'import-error',
+          icon: <IconAlertCircle />,
+          title: 'Import error',
+          message: err.message,
+          color: 'red'
+        });
+      })
+      .finally(() => {
+        showNotification({
+          id: 'import-info',
+          icon: <IconInfoCircle />,
+          title: 'Import Results',
+          message: `Success: ${successCount}\nFailed: ${failureCount}`,
+          color: 'blue'
+        });
+      });
+  };
+
+  const readFileContent = (file: File): Promise<{ fileName: string; fileContent: string }> => {
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      // Set the native promise rejection for the FileReader to properly catch errors
+      reader.onerror = reject;
+
+      reader.onload = () => {
+        resolve({ fileName: file.name, fileContent: reader.result as string });
+      };
+
+      reader.readAsText(file);
+    });
+  };
+
+  const showImportError = (message: string | ReactNode) => {
+    showNotification({
+      icon: <IconAlertCircle />,
+      title: 'Import error',
+      message,
+      color: 'red'
+    });
   };
 
   return (
@@ -190,97 +267,51 @@ function PatientCreation({
         title={getConfirmationModalText(selectedPatient)}
         onConfirm={() => deletePatientTestCase(selectedPatient)}
       />
-      {Object.keys(currentPatients).length > 0 && (
-        <div
-          data-testid="patient-panel"
-          style={{
-            maxHeight: '40vh',
-            overflow: 'scroll'
-          }}
+      <ImportModal
+        open={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSubmit={handleSubmittedImport}
+      />
+      <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+        <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="default">
+          <IconFileUpload />
+          &nbsp;Import
+        </Button>
+        <Button
+          aria-label="Download All Patients"
+          disabled={Object.keys(currentPatients).length === 0}
+          onClick={exportAllPatients}
+          variant="default"
         >
+          <IconFileDownload />
+          &nbsp;Download All
+        </Button>
+        <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
+          <IconUserPlus />
+          &nbsp;Create
+        </Button>
+      </Group>
+      {Object.keys(currentPatients).length > 0 && (
+        <div data-testid="patient-panel">
           <Stack data-testid="patient-stack">
             {Object.entries(currentPatients).map(([id, testCase]) => (
-              <div key={id}>
-                <Button
-                  variant={selectedPatient === id ? 'outline' : 'default'}
-                  color={selectedPatient === id ? 'orange' : 'black'}
-                  leftIcon={selectedPatient === id ? <ChevronDown /> : <ChevronRight />}
-                  fullWidth
-                  onClick={() => updateSelectedPatient(id)}
-                  styles={{
-                    inner: {
-                      justifyContent: 'flex-start',
-                      color: 'black'
-                    }
-                  }}
-                >
-                  {getPatientInfoString(testCase.patient)}
-                </Button>
-                <Collapse in={selectedPatient === id} style={{ padding: '4px' }}>
-                  <Group>
-                    <Button data-testid="calculate-button" onClick={() => clickCalculateButton(id)}>
-                      Calculate
-                    </Button>
-                    <Tooltip label="Export Patient" openDelay={1000}>
-                      <Button
-                        data-testid="export-patient-button"
-                        aria-label={'Export Patient'}
-                        onClick={() => {
-                          exportPatientTestCase(id);
-                        }}
-                        variant="default"
-                      >
-                        <Download />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip label="Edit Patient" openDelay={1000}>
-                      <Button
-                        data-testid="edit-patient-button"
-                        aria-label={'Edit Patient'}
-                        onClick={() => {
-                          openPatientModal(id);
-                        }}
-                        variant="default"
-                      >
-                        <Edit />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip label="Delete Patient" openDelay={1000}>
-                      <Button
-                        data-testid="delete-patient-button"
-                        aria-label={'Delete Patient'}
-                        onClick={openConfirmationModal}
-                        color="red"
-                        variant="outline"
-                      >
-                        <Trash />
-                      </Button>
-                    </Tooltip>
-                    {currentPatients[id].measureReport !== undefined && (
-                      <Button
-                        data-testid="toggle-show-calculation-button"
-                        onClick={() => setShowCalculation(o => !o)}
-                        variant="default"
-                      >
-                        {showCalculation === true ? `Hide Logic Highlighting` : `Show Logic Highlighting`}
-                      </Button>
-                    )}
-                  </Group>
-                  {selectedPatient === id && (
-                    <div
-                      className={classes.highlightedMarkup}
-                      style={{
-                        maxHeight: '55vh',
-                        overflow: 'scroll'
-                      }}
-                    >
-                      <Collapse in={showCalculation}>
-                        {parse(currentPatients[id].measureReport?.text?.div || '')}
-                      </Collapse>
-                    </div>
-                  )}
-                  {selectedPatient === id && <TestResourceCreation />}
-                </Collapse>
+              <div
+                key={id}
+                onClick={() => {
+                  if (selectedPatient !== id) {
+                    setSelectedPatient(id);
+                  } else {
+                    setSelectedPatient(null);
+                  }
+                }}
+              >
+                <PatientInfoCard
+                  patient={testCase.patient}
+                  onExportClick={() => exportPatientTestCase(id)}
+                  onEditClick={() => openPatientModal(id)}
+                  onDeleteClick={() => openConfirmationModal()}
+                  selected={selectedPatient === id}
+                />
               </div>
             ))}
           </Stack>
