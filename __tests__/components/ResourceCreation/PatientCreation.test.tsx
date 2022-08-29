@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
-import PatientCreation from '../../../components/ResourceCreation/PatientCreation';
+import PatientCreationPanel from '../../../components/patient-creation/PatientCreationPanel';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { download } from '../../../util/downloadUtil';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
-import MeasureUpload from '../../../components/MeasureUpload';
+import MeasureUpload from '../../../components/measure-upload/MeasureUpload';
 import { Calculator } from 'fqm-execution';
 
 jest.mock('../../../util/downloadUtil', () => ({
@@ -47,7 +47,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -63,7 +63,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={true} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={true} currentPatient={null} />
         </>
       )
     );
@@ -80,7 +80,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -104,7 +104,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -131,7 +131,7 @@ describe('PatientCreation', () => {
         <>
           <MockPatients />
           <MockSelectedPatient />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -167,7 +167,7 @@ describe('PatientCreation', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );
@@ -226,7 +226,7 @@ describe('PatientCreation', () => {
           <MockSelectedPatient />
           <MockMB />
           <MeasureUpload />
-          <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+          <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
         </>
       )
     );

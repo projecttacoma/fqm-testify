@@ -1,4 +1,4 @@
-import MissingValueSetModal from '../../components/MissingValueSetModal';
+import MissingValueSetModal from '../../components/modals/MissingValueSetModal';
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';

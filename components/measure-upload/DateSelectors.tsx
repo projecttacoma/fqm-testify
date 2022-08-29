@@ -1,7 +1,7 @@
 import { Grid } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import { useRecoilState } from 'recoil';
-import { measurementPeriodState } from '../state/atoms/measurementPeriod';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 
 export default function DateSelectors() {
   const [period, setPeriod] = useRecoilState(measurementPeriodState);

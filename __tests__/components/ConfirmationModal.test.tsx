@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ConfirmationModal, { ConfirmationModalProps } from '../../components/ConfirmationModal';
+import ConfirmationModal, { ConfirmationModalProps } from '../../components/modals/ConfirmationModal';
 
 describe('Confirmation Modal', () => {
   it('should render a confirmation modal when set to open', () => {

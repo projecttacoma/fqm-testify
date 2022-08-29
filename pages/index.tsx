@@ -1,11 +1,11 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { AppShell, Grid, Header } from '@mantine/core';
-import AbacusHeader from '../components/AbacusHeader';
-import MeasureUpload from '../components/MeasureUpload';
-import DateSelectors from '../components/DateSelectors';
-import ResourceCreationPanel from '../components/ResourceCreation/ResourceCreationPanel';
-import PopulationCalculation from '../components/PopulationCalculation';
+import AppHeader from '../components/utils/AppHeader';
+import MeasureUpload from '../components/measure-upload/MeasureUpload';
+import DateSelectors from '../components/measure-upload/DateSelectors';
+import TestCaseEditor from '../components/TestCaseEditor';
+import PopulationCalculation from '../components/calculation/PopulationCalculation';
 
 const Home: NextPage = () => {
   return (
@@ -13,7 +13,7 @@ const Home: NextPage = () => {
       <Head>
         <title>FQM Testify: an eCQM Analysis Tool</title>
       </Head>
-      <AppShell padding="md" header={<Header height={60}>{<AbacusHeader></AbacusHeader>}</Header>}>
+      <AppShell padding="md" header={<Header height={60}>{<AppHeader></AppHeader>}</Header>}>
         <Grid>
           <Grid.Col span={12}>
             <MeasureUpload />
@@ -23,7 +23,7 @@ const Home: NextPage = () => {
           </Grid.Col>
         </Grid>
         <div style={{ paddingTop: '24px' }}>
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </div>
         <PopulationCalculation />
       </AppShell>

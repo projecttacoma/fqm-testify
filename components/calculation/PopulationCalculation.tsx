@@ -1,13 +1,13 @@
 import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
-import { patientTestCaseState } from '../state/atoms/patientTestCase';
-import { measureBundleState } from '../state/atoms/measureBundle';
 import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
-import { createPatientBundle, getPatientInfoString } from '../util/fhir';
+import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { createPatientBundle, getPatientInfoString } from '../../util/fhir';
 import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
 import { fhirJson } from '@fhir-typescript/r4-core';
-import { measurementPeriodState } from '../state/atoms/measurementPeriod';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import Link from 'next/link';

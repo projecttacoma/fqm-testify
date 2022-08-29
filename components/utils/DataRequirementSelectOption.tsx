@@ -1,14 +1,14 @@
 import { Text } from '@mantine/core';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
-import { valueSetMapState } from '../state/selectors/valueSetsMap';
-import { getDataRequirementFiltersString } from '../util/fhir';
+import { valueSetMapState } from '../../state/selectors/valueSetsMap';
+import { getDataRequirementFiltersString } from '../../util/fhir';
 
-interface DataRequirementCardProps {
+interface DataRequirementSelectOptionProps {
   dataRequirement: fhir4.DataRequirement;
 }
 
-export default function DataRequirementCard({ dataRequirement }: DataRequirementCardProps) {
+export default function DataRequirementSelectOption({ dataRequirement }: DataRequirementSelectOptionProps) {
   const valueSetMap = useRecoilValue(valueSetMapState);
 
   const displayString = getDataRequirementFiltersString(dataRequirement, valueSetMap);

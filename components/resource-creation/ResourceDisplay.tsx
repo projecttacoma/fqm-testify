@@ -2,17 +2,17 @@ import { Stack } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import CodeEditorModal from '../CodeEditorModal';
+import CodeEditorModal from '../modals/CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import ConfirmationModal from '../ConfirmationModal';
-import ResourceInfoCard from '../ResourceInfoCard';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import ResourceInfoCard from '../utils/ResourceInfoCard';
 
-function TestResourceCreation() {
+function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [selectedDataRequirement, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
@@ -179,4 +179,4 @@ function TestResourceCreation() {
   );
 }
 
-export default TestResourceCreation;
+export default ResourceDisplay;

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
-import TestResourceCreation from '../../../components/ResourceCreation/TestResourceCreation';
+import ResourceDisplay from '../../../components/resource-creation/ResourceDisplay';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { selectedDataRequirementState } from '../../../state/atoms/selectedDataRequirement';
@@ -29,7 +29,7 @@ describe('TestResourceCreation', () => {
           <MockResources />
           <MockSelectedDataRequirement />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );
@@ -66,7 +66,7 @@ describe('TestResourceCreation', () => {
           <MockResources />
           <MockSelectedDataRequirement />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );
@@ -99,7 +99,7 @@ describe('TestResourceCreation', () => {
         <>
           <MockResources />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );
@@ -128,7 +128,7 @@ describe('TestResourceCreation', () => {
         <>
           <MockResources />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );
@@ -169,7 +169,7 @@ describe('TestResourceCreation', () => {
         <>
           <MockResources />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );
@@ -215,7 +215,7 @@ describe('TestResourceCreation', () => {
         <>
           <MockPatients />
           <MockSelectedPatient />
-          <TestResourceCreation />
+          <ResourceDisplay />
         </>
       )
     );

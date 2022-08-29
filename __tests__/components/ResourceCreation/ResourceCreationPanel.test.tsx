@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import React from 'react';
-import ResourceCreationPanel from '../../../components/ResourceCreation/ResourceCreationPanel';
+import TestCaseEditor from '../../../components/TestCaseEditor';
 import { downloadZip } from '../../../util/downloadUtil';
 
 jest.mock('../../../util/downloadUtil', () => ({
@@ -15,7 +15,7 @@ describe('ResourceCreationPanel', () => {
     render(
       mantineRecoilWrap(
         <>
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );
@@ -28,7 +28,7 @@ describe('ResourceCreationPanel', () => {
     render(
       mantineRecoilWrap(
         <>
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );
@@ -44,7 +44,7 @@ describe('ResourceCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockCurrentPatients />
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );
@@ -68,7 +68,7 @@ describe('ResourceCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockCurrentPatients />
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );
@@ -92,7 +92,7 @@ describe('ResourceCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockCurrentPatients />
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );
@@ -108,7 +108,7 @@ describe('ResourceCreationPanel', () => {
     render(
       mantineRecoilWrap(
         <>
-          <ResourceCreationPanel />
+          <TestCaseEditor />
         </>
       )
     );

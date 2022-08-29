@@ -1,7 +1,7 @@
 import { Calculator } from 'fqm-execution';
 import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
-import { measureBundleState } from '../state/atoms/measureBundle';
+import { measureBundleState } from '../../state/atoms/measureBundle';
 import { Modal, Alert, Text, List } from '@mantine/core';
 import { AlertCircle } from 'tabler-icons-react';
 import { useState } from 'react';

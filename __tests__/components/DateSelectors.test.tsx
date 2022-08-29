@@ -1,4 +1,4 @@
-import DateSelectors from '../../components/DateSelectors';
+import DateSelectors from '../../components/measure-upload/DateSelectors';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';

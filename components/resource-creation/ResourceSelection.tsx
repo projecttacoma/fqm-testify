@@ -1,4 +1,4 @@
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Select } from '@mantine/core';
 import { getDataRequirementFiltersString } from '../../util/fhir';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
@@ -6,28 +6,30 @@ import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import React, { forwardRef, useRef } from 'react';
-import DataRequirementCard from '../DataRequirementCard';
+import DataRequirementSelectOption from '../utils/DataRequirementSelectOption';
 import { dataRequirementsLookupState } from '../../state/selectors/dataRequirementsLookup';
 
-interface ItemProps extends React.ComponentPropsWithoutRef<'div'> {
+interface DataRequirementsItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
   description: string;
   dataRequirement: fhir4.DataRequirement;
 }
 
-const DataRequirementSelectItem = forwardRef<HTMLDivElement, ItemProps>(
-  ({ dataRequirement, ...others }: ItemProps, ref) => (
-    <div ref={ref} {...others}>
-      <DataRequirementCard dataRequirement={dataRequirement} />
+// Use forwardRef for custom SelectItem to ensure proper native select behavior
+// E.g. arrow keys/enter to select items
+const DataRequirementSelectItem = forwardRef<HTMLDivElement, DataRequirementsItemProps>(
+  ({ dataRequirement, ...rest }: DataRequirementsItemProps, ref) => (
+    <div ref={ref} {...rest}>
+      <DataRequirementSelectOption dataRequirement={dataRequirement} />
     </div>
   )
 );
 
 DataRequirementSelectItem.displayName = 'DataRequirementSelectItem';
 
-export default function TestResourcesDisplay() {
+export default function ResourceSelection() {
   const dataRequirements = useRecoilValue(dataRequirementsState);
-  const [, setSelectedDataRequirement] = useRecoilState(selectedDataRequirementState);
+  const setSelectedDataRequirement = useSetRecoilState(selectedDataRequirementState);
   const valueSetMap = useRecoilValue(valueSetMapState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const dataRequirementsLookup = useRecoilValue(dataRequirementsLookupState);
@@ -40,7 +42,6 @@ export default function TestResourcesDisplay() {
         ref={drSelectRef}
         maxDropdownHeight={500}
         searchable
-        clearable
         placeholder="Select FHIR Resource"
         value=""
         data={

@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import { downloadZip } from '../../util/downloadUtil';
 import { Button, Group, Stack } from '@mantine/core';
 import produce from 'immer';
-import CodeEditorModal from '../CodeEditorModal';
+import CodeEditorModal from '../modals/CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { createPatientResourceString, getPatientNameString, createPatientBundle } from '../../util/fhir';
@@ -10,13 +10,13 @@ import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import React, { ReactNode, useState } from 'react';
 import { download } from '../../util/downloadUtil';
-import ConfirmationModal from '../ConfirmationModal';
+import ConfirmationModal from '../modals/ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
-import ImportModal from './ImportModal';
+import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
-import PatientInfoCard from '../PatientInfoCard';
+import PatientInfoCard from '../utils/PatientInfoCard';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -25,7 +25,7 @@ interface PatientCreationProps {
   currentPatient: string | null;
 }
 
-function PatientCreation({
+function PatientCreationPanel({
   openPatientModal,
   closePatientModal,
   isPatientModalOpen,
@@ -321,4 +321,4 @@ function PatientCreation({
   );
 }
 
-export default PatientCreation;
+export default PatientCreationPanel;

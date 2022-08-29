@@ -1,12 +1,12 @@
 import '@testing-library/jest-dom';
-import PopulationCalculation from '../../components/PopulationCalculation';
+import PopulationCalculation from '../../components/calculation/PopulationCalculation';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Calculator, MeasureReportBuilder } from 'fqm-execution';
-import MeasureUpload from '../../components/MeasureUpload';
-import PatientCreation from '../../components/ResourceCreation/PatientCreation';
+import MeasureUpload from '../../components/measure-upload/MeasureUpload';
+import PatientCreationPanel from '../../components/patient-creation/PatientCreationPanel';
 
 const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
   resourceType: 'MeasureReport',
@@ -149,7 +149,7 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload />
-            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+            <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
             <PopulationCalculation />
           </>
         )
@@ -221,7 +221,7 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload />
-            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
+            <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
             <PopulationCalculation />
           </>
         )

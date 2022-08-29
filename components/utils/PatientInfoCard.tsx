@@ -1,7 +1,7 @@
 import { Button, Center, Divider, Grid, Paper, Sx, Text, Tooltip } from '@mantine/core';
 import React, { MouseEvent } from 'react';
 import { Download, Edit, Trash } from 'tabler-icons-react';
-import { getPatientDOBString, getPatientNameString } from '../util/fhir';
+import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
 
 export interface PatientInfoCardProps {
   patient: fhir4.Patient;

@@ -1,7 +1,7 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Edit, Trash } from 'tabler-icons-react';
-import { getFhirResourceSummary } from '../util/fhir';
+import { getFhirResourceSummary } from '../../util/fhir';
 
 export interface ResourceInfoCardProps {
   resource: fhir4.FhirResource;

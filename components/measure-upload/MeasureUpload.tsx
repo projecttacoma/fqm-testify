@@ -3,9 +3,9 @@ import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { measureBundleState } from '../state/atoms/measureBundle';
-import MissingValueSetModal from './MissingValueSetModal';
-import { measurementPeriodState } from '../state/atoms/measurementPeriod';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import MissingValueSetModal from '../modals/MissingValueSetModal';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { DateTime } from 'luxon';
 
 export const DEFAULT_MEASUREMENT_PERIOD = {

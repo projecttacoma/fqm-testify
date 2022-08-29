@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
-import TestResourcesDisplay from '../../../components/ResourceCreation/TestResourcesDisplay';
+import ResourceSelection from '../../../components/resource-creation/ResourceSelection';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
@@ -81,7 +81,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -111,7 +111,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -136,7 +136,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -161,7 +161,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -186,7 +186,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -221,7 +221,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )
@@ -259,7 +259,7 @@ describe('TestResourcesDisplay', () => {
             <MockMB />
             <MockPatients />
             <Suspense>
-              <TestResourcesDisplay />
+              <ResourceSelection />
             </Suspense>
           </>
         )

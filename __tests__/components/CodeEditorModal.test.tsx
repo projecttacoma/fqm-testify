@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import CodeEditorModal, { CodeEditorModalProps } from '../../components/CodeEditorModal';
+import CodeEditorModal, { CodeEditorModalProps } from '../../components/modals/CodeEditorModal';
 import { mantineRecoilWrap } from '../helpers/testHelpers';
 
 describe('CodeEditorModal', () => {

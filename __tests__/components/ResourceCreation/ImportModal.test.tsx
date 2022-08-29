@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import ImportModal, { ImportModalProps } from '../../../components/ResourceCreation/ImportModal';
+import ImportModal, { ImportModalProps } from '../../../components/modals/ImportModal';
 
 describe('ImportModal', () => {
   it('should render a modal when set to open', () => {
