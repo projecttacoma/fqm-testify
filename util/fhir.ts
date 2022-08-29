@@ -7,6 +7,7 @@ import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
 import { dateFieldInfo } from '../scripts/parsePrimaryDatePath';
+import { access } from 'fs';
 
 const DEFAULT_PERIOD_LENGTH = 1;
 
@@ -85,16 +86,18 @@ export function getPatientNameString(patient: fhir4.Patient) {
  * @returns {String} displaying the valuesets referenced by a DataRequirement
  */
 export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetMap: ValueSetsMap): string {
+  let system, version, code, display;
   const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
     if (e.valueSet) {
       acc.push(`${valueSetMap[e.valueSet]} (${e.valueSet})`);
     }
-    if (e.path === 'code' && e.code) {
-      acc.push(...e.code.map(c => c.display ?? 'Un-named Code'));
+    if (e.code) {
+      acc.push(...e.code.map(c => (c.display ? `${c.code}: ${c.display}` : '')));
     }
     return acc;
   }, []);
-  if (valueSets) {
+  if (valueSets && valueSets.length > 0) {
+    console.log(`${valueSets?.join('\n')}`);
     return `${valueSets?.join('\n')}`;
   }
   return '';
