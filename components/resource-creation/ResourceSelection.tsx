@@ -7,7 +7,10 @@ import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import React, { forwardRef, useRef } from 'react';
 import DataRequirementSelectOption from '../utils/DataRequirementSelectOption';
-import { dataRequirementsLookupState } from '../../state/selectors/dataRequirementsLookup';
+import {
+  dataRequirementsLookupState,
+  getDataRequirementsLookupKey
+} from '../../state/selectors/dataRequirementsLookup';
 
 interface DataRequirementsItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -49,7 +52,7 @@ export default function ResourceSelection() {
             const displayString = getDataRequirementFiltersString(dr, valueSetMap);
             return {
               label: `${dr.type}: ${displayString}`,
-              value: `${dr.type}|${displayString}`,
+              value: getDataRequirementsLookupKey(dr, valueSetMap),
               dataRequirement: dr
             };
           }) ?? []
