@@ -25,11 +25,33 @@ const PERIOD_START = '2020-01-01T00:00:00.000Z';
 const PERIOD_END = '2020-12-31T00:00:00.000Z';
 
 const VS_MAP = { testvs: 'test vs name' };
-const DATA_REQUIREMENT_WITH_NO_VALUE_SETS = {
+
+// data requirement that does not have any valuesets or any direct reference codes
+const DATA_REQUIREMENT_WITH_NO_VALUESETS_OR_DRC = {
   type: 'Observation',
   status: 'draft'
 };
-const DATA_REQUIREMENT_WITH_VALUE_SETS = {
+
+// data requirement that does not have any valuesets but has a direct reference code
+const DATA_REQUIREMENT_WITH_NO_VALUESETS_WITH_DRC = {
+  type: 'Communication',
+  status: 'draft',
+  codeFilter: [
+    {
+      path: 'reasonCode',
+      code: [
+        {
+          system: 'http://snomed.info/sct/731000124108',
+          version: 'http://snomed.info/sct/731000124108/version/201709',
+          display: 'test display 2',
+          code: '456'
+        }
+      ]
+    }
+  ]
+};
+
+const DATA_REQUIREMENT_WITH_VALUESETS = {
   type: 'Observation',
   status: 'draft',
   codeFilter: [
@@ -58,7 +80,7 @@ const DATA_REQUIREMENT_WITH_CODE = {
   ]
 };
 
-// example data requirement for resource type with primaryCodeType FHIR.CodeableConcept
+// example data requirement for resource type with primaryCodeType FHIR.CodeableConcept and valueset
 const OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET = {
   type: 'Observation',
   status: 'draft',
@@ -68,7 +90,7 @@ const OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET = {
       valueSet: 'testvs'
     },
     {
-      path: 'code',
+      path: 'category',
       code: [
         {
           system: 'http://snomed.info/sct/731000124108',
@@ -87,7 +109,7 @@ const MESSAGEDEFINITION_DATA_REQUIREMENT = {
   status: 'draft',
   codeFilter: [
     {
-      path: 'code',
+      path: 'event',
       valueSet: 'testvs'
     }
   ]
@@ -111,7 +133,7 @@ const ACTIVITYDEFINITION_DATA_REQUIREMENT = {
   status: 'draft',
   codeFilter: [
     {
-      path: 'code',
+      path: 'topic',
       valueSet: 'testvs'
     }
   ]
@@ -297,18 +319,23 @@ const EXAMPLE_FIELD_CHOICE_TYPE_DATE: dateFieldInfo = {
 const EXAMPLE_PATH = 'testPath';
 
 describe('getDataRequirementFiltersString', () => {
-  test('returns an empty string for resource with no valuesets', () => {
-    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUE_SETS, VS_MAP)).toEqual('');
+  test('returns an empty string for resource with no valuesets and no direct reference code', () => {
+    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUESETS_OR_DRC, VS_MAP)).toEqual('');
+  });
+  test('returns name of code and display when there is a direct reference code but no valuesets', () => {
+    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUESETS_WITH_DRC, VS_MAP)).toEqual(
+      '456: test display 2'
+    );
   });
   test('returns name of valueset when codefilter includes valueset', () => {
-    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_VALUE_SETS, VS_MAP)).toEqual('test vs name (testvs)');
+    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_VALUESETS, VS_MAP)).toEqual('test vs name (testvs)');
   });
   test('returns display when code filter is of path code', () => {
-    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_CODE, VS_MAP)).toEqual('test display');
+    expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_CODE, VS_MAP)).toEqual('37687000: test display');
   });
   test('returns display and name when both code and valueset exist', () => {
     expect(getDataRequirementFiltersString(OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET, VS_MAP)).toEqual(
-      'test vs name (testvs)\ntest display'
+      'test vs name (testvs)\n37687000: test display'
     );
   });
 });
@@ -394,7 +421,7 @@ describe('createFHIRResourceString', () => {
     expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
 
-  test('returns populated FHIR resource where primaryCodePath us 0..* or 1..* (multiple cardinality)', () => {
+  test('returns populated FHIR resource where primaryCodePath is 0..* or 1..* (multiple cardinality)', () => {
     const createdResource = createFHIRResourceString(
       ACTIVITYDEFINITION_DATA_REQUIREMENT,
       TEST_MEASURE_BUNDLE,
@@ -402,6 +429,7 @@ describe('createFHIRResourceString', () => {
       PERIOD_START,
       PERIOD_END
     );
+    console.log(createdResource);
     expect(Array.isArray(JSON.parse(createdResource).topic)).toBe(true);
     expect(JSON.parse(createdResource).subject).toBeUndefined();
   });

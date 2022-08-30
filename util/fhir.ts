@@ -7,7 +7,6 @@ import _ from 'lodash';
 import { ReferencesMap } from './referencesMap';
 import fhirpath from 'fhirpath';
 import { dateFieldInfo } from '../scripts/parsePrimaryDatePath';
-import { access } from 'fs';
 
 const DEFAULT_PERIOD_LENGTH = 1;
 
@@ -42,12 +41,24 @@ export function createPatientResourceString(birthDate: string): string {
 
 /**
  * Identifies the primary code path of a resource and constructs a string which displays
- * resource summary information depending on what is a available
+ * resource summary information depending on what is a available. If a resource
+ * does not include a path for it's primaryCodePath, then it finds a path on that resource
+ * that has coding (if available) and display resource summary information depending on
+ * what is available.
  * @param resource {fhir4.Resource} a fhir Resource object
  * @returns {String} displaying the code and display text, code, or id of the resource or nothing
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
-  const primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
+  let primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
+
+  if (fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] === undefined) {
+    const paths = parsedCodePaths[resource.resourceType]?.paths;
+    for (var p in paths) {
+      if (fhirpath.evaluate(resource, `${p}.coding`)[0]) {
+        primaryCodePath = p;
+      }
+    }
+  }
 
   if (primaryCodePath) {
     const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
@@ -80,24 +91,24 @@ export function getPatientNameString(patient: fhir4.Patient) {
 
 /**
  * Identifies the valuesets referenced in a DataRequirement and constructs a string which displays
- * those valuesets
+ * those valuesets. If a DataRequirement does not reference a valueset, then a string of the direct reference
+ * code and display is constructed.
  * @param dr {Object} a fhir DataRequirement object
  * @param valueSetsMap {Object} a mapping of valueset urls to valueset names and titles
- * @returns {String} displaying the valuesets referenced by a DataRequirement
+ * @returns {String} displaying the valuesets referenced by a DataRequirement or the direct reference code and display
  */
 export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetMap: ValueSetsMap): string {
-  let system, version, code, display;
   const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
     if (e.valueSet) {
       acc.push(`${valueSetMap[e.valueSet]} (${e.valueSet})`);
     }
     if (e.code) {
-      acc.push(...e.code.map(c => (c.display ? `${c.code}: ${c.display}` : '')));
+      const directCodes = e.code.filter(c => c.display);
+      acc.push(...directCodes.map(c => `${c.code}: ${c.display}`));
     }
     return acc;
   }, []);
   if (valueSets && valueSets.length > 0) {
-    console.log(`${valueSets?.join('\n')}`);
     return `${valueSets?.join('\n')}`;
   }
   return '';

@@ -27,7 +27,7 @@ export async function parse(xml: string) {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
   const elementInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType == 'FHIR.Element');
-  const systemString = elementInfo.filter((e: any) => e.element.length === 1);
+  const elementOneValue = elementInfo.filter((e: any) => e.element.length === 1);
 
   const results: { [key: string]: ResourceCodeInfo } = {};
 
@@ -42,6 +42,7 @@ export async function parse(xml: string) {
       let multipleCardinality: boolean;
       let choiceType: boolean;
 
+      // go through every element in the domainInfo
       di.element.forEach((elem: any) => {
         if (elem.elementTypeSpecifier) {
           // length of element.elementTypeSpecifier is always 1, so we can index it at 0
@@ -87,11 +88,13 @@ export async function parse(xml: string) {
           // indicate that this is not a choice type
           choiceType = false;
         }
+        // add elements of these three types to the paths of that resource
         if (codeType === 'FHIR.CodeableConcept' || codeType === 'FHIR.Coding' || codeType === 'FHIR.code') {
           paths[elem.$.name] = { codeType, multipleCardinality, choiceType };
         } else if (codeType && codeType !== 'FHIR.string') {
-          let codeTypeName = codeType.split('R.');
-          const name = systemString.filter((e: any) => e.$.name === codeTypeName[1]);
+          // if the codeType is not one of those three but also not a FHIR.string it may be within a FHIR.Element
+          const codeTypeName = codeType.split('R.');
+          const name = elementOneValue.filter((e: any) => e.$.name === codeTypeName[1]);
           if (name.length === 1) {
             if (name[0].element[0].$.elementType === 'System.String') {
               codeType = 'FHIR.code';
