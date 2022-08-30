@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap } from '../helpers/testHelpers';
-import AppHeader from '../../components/utils/AppHeader';
+import { mantineRecoilWrap } from '../../helpers/testHelpers';
+import AppHeader from '../../../components/utils/AppHeader';
 
 describe('AbacusHeader', () => {
   it('renders a heading with title and theme switcher', () => {

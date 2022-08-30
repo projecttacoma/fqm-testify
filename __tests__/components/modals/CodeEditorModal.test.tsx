@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import CodeEditorModal, { CodeEditorModalProps } from '../../components/modals/CodeEditorModal';
-import { mantineRecoilWrap } from '../helpers/testHelpers';
+import CodeEditorModal, { CodeEditorModalProps } from '../../../components/modals/CodeEditorModal';
+import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
 describe('CodeEditorModal', () => {
   it('should render codemirror with provided value', () => {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import SearchBar, { SearchBarProps } from '../../../components/ResourceCreation/SearchBar';
+import SearchBar, { SearchBarProps } from '../../../components/utils/SearchBar';
 
 describe('SearchBar', () => {
   const testSearchBarProps: SearchBarProps = {

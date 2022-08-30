@@ -1,8 +1,8 @@
-import MissingValueSetModal from '../../components/modals/MissingValueSetModal';
+import MissingValueSetModal from '../../../components/modals/MissingValueSetModal';
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import { measureBundleState } from '../../state/atoms/measureBundle';
+import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
 
 const MOCK_BUNDLE: fhir4.Bundle = {

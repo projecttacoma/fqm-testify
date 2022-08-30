@@ -39,7 +39,7 @@ export default function ResourceSelection() {
 
   const drSelectRef = useRef<HTMLInputElement>(null);
 
-  return dataRequirements?.length && Object.keys(currentPatients).length ? (
+  return dataRequirements?.length && Object.keys(currentPatients).length > 0 ? (
     <div>
       <Select
         ref={drSelectRef}

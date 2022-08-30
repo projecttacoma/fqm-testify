@@ -1,7 +1,6 @@
 import { createStyles, Grid, Text } from '@mantine/core';
-import React, { useState } from 'react';
+import React from 'react';
 import { useRecoilValue } from 'recoil';
-import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
 import ResourcePanel from './resource-creation/ResourcePanel';
@@ -20,28 +19,9 @@ const useStyles = createStyles({
 });
 
 export default function TestCaseEditor() {
-  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
-  const [currentPatient, setCurrentPatient] = useState<string | null>(null);
-
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const currentPatients = useRecoilValue(patientTestCaseState);
 
   const { classes } = useStyles();
-
-  const openPatientModal = (patientId?: string) => {
-    if (patientId && Object.keys(currentPatients).includes(patientId)) {
-      setCurrentPatient(patientId);
-    } else {
-      setCurrentPatient(null);
-    }
-
-    setIsPatientModalOpen(true);
-  };
-
-  const closePatientModal = () => {
-    setIsPatientModalOpen(false);
-    setCurrentPatient(null);
-  };
 
   const renderPanelPlaceholderText = () => {
     return (
@@ -55,7 +35,7 @@ export default function TestCaseEditor() {
     <>
       <Grid style={{ height: '70vh' }}>
         <Grid.Col span={3} className={classes.panel}>
-          <PatientCreationPanel {...{ openPatientModal, closePatientModal, isPatientModalOpen, currentPatient }} />
+          <PatientCreationPanel />
         </Grid.Col>
         <Grid.Col
           span={3}

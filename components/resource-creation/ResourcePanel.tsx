@@ -24,6 +24,7 @@ export default function ResourcePanel() {
     if (Object.keys(currentPatients).length === 0 || selectedPatient == null) {
       return renderPanelPlaceholderText();
     }
+
     return (
       <Suspense
         fallback={

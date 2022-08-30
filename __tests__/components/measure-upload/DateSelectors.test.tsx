@@ -1,8 +1,8 @@
-import DateSelectors from '../../components/measure-upload/DateSelectors';
+import DateSelectors from '../../../components/measure-upload/DateSelectors';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import { measurementPeriodState } from '../../../state/atoms/measurementPeriod';
 import { act } from 'react-dom/test-utils';
 import { DateTime } from 'luxon';
 

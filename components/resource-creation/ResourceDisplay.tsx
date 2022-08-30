@@ -164,7 +164,7 @@ function ResourceDisplay() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <Stack>
+        <Stack data-testid="resource-display-stack">
           {currentTestCases[selectedPatient].resources.map(resource => (
             <ResourceInfoCard
               key={resource.id}

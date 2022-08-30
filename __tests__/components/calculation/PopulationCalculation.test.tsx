@@ -1,12 +1,11 @@
 import '@testing-library/jest-dom';
-import PopulationCalculation from '../../components/calculation/PopulationCalculation';
-import { measureBundleState } from '../../state/atoms/measureBundle';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
+import PopulationCalculation from '../../../components/calculation/PopulationCalculation';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
+import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
+import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Calculator, MeasureReportBuilder } from 'fqm-execution';
-import MeasureUpload from '../../components/measure-upload/MeasureUpload';
-import PatientCreationPanel from '../../components/patient-creation/PatientCreationPanel';
+import MeasureUpload from '../../../components/measure-upload/MeasureUpload';
 
 const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
   resourceType: 'MeasureReport',
@@ -98,11 +97,6 @@ describe('PopulationCalculation', () => {
   });
 
   it('should run calculation on all patients when Calculate Population Results button is clicked', async () => {
-    const DEFAULT_PROPS = {
-      closePatientModal: jest.fn(),
-      openPatientModal: jest.fn()
-    };
-
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -149,7 +143,6 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload />
-            <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
             <PopulationCalculation />
           </>
         )
@@ -170,11 +163,6 @@ describe('PopulationCalculation', () => {
   });
 
   it('should render Show Table button once calculation has finished so user can revisit table results', async () => {
-    const DEFAULT_PROPS = {
-      closePatientModal: jest.fn(),
-      openPatientModal: jest.fn()
-    };
-
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -221,7 +209,6 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload />
-            <PatientCreationPanel {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
             <PopulationCalculation />
           </>
         )
@@ -242,11 +229,6 @@ describe('PopulationCalculation', () => {
   });
 
   it('should render Show Clause Coverage button once calculation has finished', async () => {
-    const DEFAULT_PROPS = {
-      closePatientModal: jest.fn(),
-      openPatientModal: jest.fn()
-    };
-
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -293,7 +275,6 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload />
-            <PatientCreation {...DEFAULT_PROPS} isPatientModalOpen={false} currentPatient={null} />
             <PopulationCalculation />
           </>
         )

@@ -1,9 +1,9 @@
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Calculator } from 'fqm-execution';
-import { mantineRecoilWrap, getMockRecoilState } from '../helpers/testHelpers';
-import { measureBundleState } from '../../state/atoms/measureBundle';
-import MeasureUpload from '../../components/measure-upload/MeasureUpload';
+import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
+import MeasureUpload from '../../../components/measure-upload/MeasureUpload';
 
 const MOCK_BUNDLE: fhir4.Bundle = {
   resourceType: 'Bundle',

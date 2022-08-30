@@ -19,25 +19,31 @@ import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
 
-interface PatientCreationProps {
-  openPatientModal: (patientId?: string) => void;
-  closePatientModal: () => void;
-  isPatientModalOpen: boolean;
-  currentPatient: string | null;
-}
-
-function PatientCreationPanel({
-  openPatientModal,
-  closePatientModal,
-  isPatientModalOpen,
-  currentPatient
-}: PatientCreationProps) {
+function PatientCreationPanel() {
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [currentPatient, setCurrentPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const measureBundle = useRecoilValue(measureBundleState);
+
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
-  const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
+  const measureBundle = useRecoilValue(measureBundleState);
+  const measurementPeriod = useRecoilValue(measurementPeriodState);
+
+  const openPatientModal = (patientId?: string) => {
+    if (patientId && Object.keys(currentPatients).includes(patientId)) {
+      setCurrentPatient(patientId);
+    } else {
+      setCurrentPatient(null);
+    }
+
+    setIsPatientModalOpen(true);
+  };
+
+  const closePatientModal = () => {
+    setIsPatientModalOpen(false);
+    setCurrentPatient(null);
+  };
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -294,7 +300,7 @@ function PatientCreationPanel({
       </Group>
       {Object.keys(currentPatients).length > 0 && (
         <div data-testid="patient-panel">
-          <Stack data-testid="patient-stack">
+          <Stack>
             {Object.entries(currentPatients).map(([id, testCase]) => (
               <div
                 key={id}
