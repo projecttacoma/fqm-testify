@@ -5,7 +5,6 @@ import AppHeader from '../components/utils/AppHeader';
 import MeasureUpload from '../components/measure-upload/MeasureUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
 import TestCaseEditor from '../components/TestCaseEditor';
-import PopulationCalculation from '../components/calculation/PopulationCalculation';
 
 const Home: NextPage = () => {
   return (
@@ -25,7 +24,6 @@ const Home: NextPage = () => {
         <div style={{ paddingTop: '24px' }}>
           <TestCaseEditor />
         </div>
-        <PopulationCalculation />
       </AppShell>
     </>
   );

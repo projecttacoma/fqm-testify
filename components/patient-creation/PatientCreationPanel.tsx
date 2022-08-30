@@ -17,6 +17,7 @@ import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, Icon
 import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
+import PopulationCalculation from '../calculation/PopulationCalculation';
 
 interface PatientCreationProps {
   openPatientModal: (patientId?: string) => void;
@@ -317,6 +318,7 @@ function PatientCreationPanel({
           </Stack>
         </div>
       )}
+      <PopulationCalculation />
     </>
   );
 }
