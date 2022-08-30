@@ -299,11 +299,7 @@ function PatientCreationPanel({
               <div
                 key={id}
                 onClick={() => {
-                  if (selectedPatient !== id) {
-                    setSelectedPatient(id);
-                  } else {
-                    setSelectedPatient(null);
-                  }
+                  setSelectedPatient(id);
                 }}
               >
                 <PatientInfoCard
