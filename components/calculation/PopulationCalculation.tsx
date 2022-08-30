@@ -119,6 +119,7 @@ export default function PopulationCalculation() {
                   aria-label="Calculate Population Results"
                   styles={{ root: { marginTop: 20 } }}
                   onClick={() => runCalculation()}
+                  variant="outline"
                 >
                   &nbsp;Calculate Population Results
                 </Button>
