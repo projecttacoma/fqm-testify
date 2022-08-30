@@ -15,6 +15,7 @@ export default function ResourceInfoCard({ resource, onEditClick, onDeleteClick 
     <Paper withBorder p="sm" shadow="sm">
       <Grid align="center">
         <Grid.Col span={9}>
+          <Text>{resource.resourceType}</Text>
           <Tooltip
             wrapLines
             width={500}
@@ -24,7 +25,6 @@ export default function ResourceInfoCard({ resource, onEditClick, onDeleteClick 
             label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
             disabled={getFhirResourceSummary(resource) === ''}
           >
-            <Text>{resource.resourceType}</Text>
             <Text lineClamp={2} color="dimmed">
               {getFhirResourceSummary(resource)}
             </Text>

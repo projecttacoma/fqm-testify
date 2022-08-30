@@ -1,4 +1,4 @@
-import { createStyles, Button } from '@mantine/core';
+import { createStyles, Button, Grid, Center } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { CalculatorTypes, Calculator } from 'fqm-execution';
@@ -9,7 +9,7 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { createPatientBundle } from '../../util/fhir';
+import { createPatientBundle, getPatientNameString } from '../../util/fhir';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -77,21 +77,21 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
 
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end'
-        }}
-      >
-        <Button
-          onClick={() => {
-            clickCalculateButton(selectedPatient);
-          }}
-          variant="outline"
-        >
-          Calculate
-        </Button>
-      </div>
+      <Grid>
+        <Grid.Col span={4}>Patient Calculation: {getPatientNameString(currentPatients[patientId].patient)}</Grid.Col>
+        <Grid.Col span={3} offset={5}>
+          <Center>
+            <Button
+              onClick={() => {
+                clickCalculateButton(selectedPatient);
+              }}
+              variant="outline"
+            >
+              Calculate
+            </Button>
+          </Center>
+        </Grid.Col>
+      </Grid>
       <div className={classes.highlightedMarkup}>
         {parse(currentPatients[patientId].measureReport?.text?.div || '')}
       </div>

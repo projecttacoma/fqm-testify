@@ -1,5 +1,5 @@
 import { Button, Center, Divider, Grid, Paper, Sx, Text, Tooltip } from '@mantine/core';
-import React, { MouseEvent } from 'react';
+import React from 'react';
 import { Download, Edit, Trash } from 'tabler-icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
 
@@ -53,8 +53,7 @@ export default function PatientInfoCard({
                 size="xs"
                 data-testid="export-patient-button"
                 aria-label={'Export Patient'}
-                onClick={(e: MouseEvent) => {
-                  e.stopPropagation();
+                onClick={() => {
                   onExportClick();
                 }}
                 variant="subtle"
@@ -66,8 +65,7 @@ export default function PatientInfoCard({
               <Button
                 data-testid="edit-patient-button"
                 aria-label={'Edit Patient'}
-                onClick={(e: MouseEvent) => {
-                  e.stopPropagation();
+                onClick={() => {
                   onEditClick();
                 }}
                 variant="subtle"
@@ -82,8 +80,7 @@ export default function PatientInfoCard({
                 size="xs"
                 data-testid="delete-patient-button"
                 aria-label={'Delete Patient'}
-                onClick={(e: MouseEvent) => {
-                  e.stopPropagation();
+                onClick={() => {
                   onDeleteClick();
                 }}
                 color="red"
