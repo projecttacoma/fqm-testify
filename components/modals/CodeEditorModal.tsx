@@ -30,14 +30,14 @@ export default function CodeEditorModal({
       zIndex={2}
       data-testid="code-editor-modal"
       centered
-      size="xl"
+      size={1000}
       withCloseButton={false}
       opened={open}
       onClose={onClose}
       overflow="outside"
       styles={{
         body: {
-          height: '600px'
+          height: '800px'
         }
       }}
       title={title}
@@ -46,7 +46,7 @@ export default function CodeEditorModal({
         {open && (
           <CodeMirror
             data-testid="codemirror"
-            height="500px"
+            height="700px"
             value={initialValue}
             extensions={[json(), linter(jsonLinter)]}
             theme={colorScheme}
