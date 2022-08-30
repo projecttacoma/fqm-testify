@@ -7,7 +7,6 @@ export interface PatientInfoCardProps {
   patient: fhir4.Patient;
   onExportClick: (...args: unknown[]) => void;
   onEditClick: (...args: unknown[]) => void;
-  // TODO (MATT): Fix delete
   onDeleteClick: (...args: unknown[]) => void;
   selected?: boolean;
 }

@@ -6,7 +6,6 @@ import { getFhirResourceSummary } from '../../util/fhir';
 export interface ResourceInfoCardProps {
   resource: fhir4.FhirResource;
   onEditClick: (...args: unknown[]) => void;
-  // TODO (MATT): Fix delete
   onDeleteClick: (...args: unknown[]) => void;
 }
 
