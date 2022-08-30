@@ -133,7 +133,7 @@ export default function PopulationCalculation() {
                     styles={{ root: { marginTop: 20 } }}
                     disabled={!enableTableButton}
                     onClick={() => setOpened(true)}
-                    variant="default"
+                    variant="outline"
                   >
                     &nbsp;Show Table
                   </Button>

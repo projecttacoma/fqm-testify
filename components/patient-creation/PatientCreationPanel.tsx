@@ -274,7 +274,7 @@ function PatientCreationPanel({
         onImportSubmit={handleSubmittedImport}
       />
       <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-        <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="default">
+        <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="outline">
           <IconFileUpload />
           &nbsp;Import
         </Button>
@@ -282,7 +282,7 @@ function PatientCreationPanel({
           aria-label="Download All Patients"
           disabled={Object.keys(currentPatients).length === 0}
           onClick={exportAllPatients}
-          variant="default"
+          variant="outline"
         >
           <IconFileDownload />
           &nbsp;Download All
