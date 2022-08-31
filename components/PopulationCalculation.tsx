@@ -1,8 +1,8 @@
-import { Button, Center, Grid, Drawer, Group } from '@mantine/core';
+import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { measureBundleState } from '../state/atoms/measureBundle';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
 import { createPatientBundle, getPatientInfoString } from '../util/fhir';
 import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
+import Link from 'next/link';
 
 interface PatientLabel {
   [patientId: string]: string;
@@ -21,7 +22,9 @@ export default function PopulationCalculation() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
   const [opened, setOpened] = useState(false);
-  const [showTableButton, setShowTableButton] = useState(false);
+  const [enableTableButton, setEnableTableButton] = useState(false);
+  const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
+  const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -46,6 +49,7 @@ export default function PopulationCalculation() {
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: false,
       calculateSDEs: false,
+      calculateClauseCoverage: true,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString()
@@ -59,8 +63,12 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
-      const measureReports = await Calculator.calculateMeasureReports(measureBundle.content, patientBundles, options);
-      return measureReports.results as fhir4.MeasureReport[];
+      const { results, coverageHTML } = await Calculator.calculate(measureBundle.content, patientBundles, options);
+      if (coverageHTML) {
+        setClauseCoverageHTML(coverageHTML);
+      }
+      const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
+      return measureReports as fhir4.MeasureReport[];
     } else return;
   };
 
@@ -83,7 +91,8 @@ export default function PopulationCalculation() {
           });
           setMeasureReports(labeledMeasureReports);
           setOpened(true);
-          setShowTableButton(true);
+          setEnableTableButton(true);
+          setEnableClauseCoverageButton(true);
         }
       })
       .catch(e => {
@@ -113,16 +122,43 @@ export default function PopulationCalculation() {
                 >
                   &nbsp;Calculate Population Results
                 </Button>
-                <Button
-                  data-testid="show-table-button"
-                  aria-label="Show Table"
-                  styles={{ root: { marginTop: 20 } }}
-                  hidden={!showTableButton}
-                  onClick={() => setOpened(true)}
-                  variant="default"
+                <Tooltip
+                  label="Disabled until calculation results are available"
+                  openDelay={1000}
+                  disabled={enableTableButton ? true : false}
                 >
-                  &nbsp;Show Table
-                </Button>
+                  <Button
+                    data-testid="show-table-button"
+                    aria-label="Show Table"
+                    styles={{ root: { marginTop: 20 } }}
+                    disabled={!enableTableButton}
+                    onClick={() => setOpened(true)}
+                    variant="default"
+                  >
+                    &nbsp;Show Table
+                  </Button>
+                </Tooltip>
+                <Link
+                  href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { clauseCoverageHTML } }}
+                  key={'coverage'}
+                  passHref
+                >
+                  <Tooltip
+                    label="Disabled until calculation results are available"
+                    openDelay={1000}
+                    disabled={enableClauseCoverageButton ? true : false}
+                  >
+                    <Button
+                      data-testid="show-coverage-button"
+                      aria-label="Show Clause Coverage"
+                      styles={{ root: { marginTop: 20 } }}
+                      disabled={!enableClauseCoverageButton}
+                      variant="default"
+                    >
+                      &nbsp;Show Clause Coverage
+                    </Button>
+                  </Tooltip>
+                </Link>
               </Group>
               {measureReports.length > 0 && (
                 <>
@@ -136,7 +172,6 @@ export default function PopulationCalculation() {
                     size="lg"
                   >
                     <h2>Population Results</h2>
-
                     <div
                       data-testid="results-table"
                       style={{

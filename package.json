@@ -35,7 +35,7 @@
     "ecqm-visualizers": "0.0.1",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
-    "fqm-execution": "^1.0.0-beta.2",
+    "fqm-execution": "^1.0.0-beta.3",
     "fuse.js": "^6.6.2",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
