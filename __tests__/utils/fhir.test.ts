@@ -429,7 +429,6 @@ describe('createFHIRResourceString', () => {
       PERIOD_START,
       PERIOD_END
     );
-    console.log(createdResource);
     expect(Array.isArray(JSON.parse(createdResource).topic)).toBe(true);
     expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
