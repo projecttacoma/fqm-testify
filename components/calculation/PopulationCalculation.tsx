@@ -141,6 +141,7 @@ export default function PopulationCalculation() {
                 </Tooltip>
                 <Link
                   href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { clauseCoverageHTML } }}
+                  as={`/${measureBundle.content.id}/coverage`}
                   key={'coverage'}
                   passHref
                 >
