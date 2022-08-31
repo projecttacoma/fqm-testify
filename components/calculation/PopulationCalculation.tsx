@@ -154,7 +154,7 @@ export default function PopulationCalculation() {
                       aria-label="Show Clause Coverage"
                       styles={{ root: { marginTop: 20 } }}
                       disabled={!enableClauseCoverageButton}
-                      variant="default"
+                      variant="outline"
                     >
                       &nbsp;Show Clause Coverage
                     </Button>
