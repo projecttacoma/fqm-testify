@@ -26,7 +26,7 @@ interface elementChoice {
 export async function parse(xml: string) {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
-  const elementInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType == 'FHIR.Element' && !ti.$.identifier);
+  const elementInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.Element' && !ti.$.identifier);
   const elementOneValue = elementInfo.filter((e: any) => e.element.length === 1);
 
   const results: { [key: string]: ResourceCodeInfo } = {};
