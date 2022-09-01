@@ -167,7 +167,7 @@ export function createFHIRResourceString(
     resourceType: dr.type,
     id: uuidv4()
   };
-  getResourcePrimaryCode(resource, dr, mb);
+  getResourceCode(resource, dr, mb);
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);
   return JSON.stringify(resource, null, 2);
@@ -185,12 +185,12 @@ function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, p
   }
 }
 
-function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
+function getResourceCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
   // go through each of the elements in the codeFilter array on the data requirement, if it exists
 
   dr.codeFilter?.forEach(cf => {
     let system, version, display, code;
-    const path = cf.path;
+    let path = cf.path;
     // check to see if the code filter has a value set
     if (cf.valueSet) {
       const vsResource = mb?.entry?.filter(
@@ -226,19 +226,29 @@ function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fh
           display
         };
         let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
+        let multipleCardinality: boolean = parsedCodePaths[dr.type].paths[path].multipleCardinality;
         if (codeType === 'FHIR.CodeableConcept') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'CodeableConcept';
+          }
           // Need to add coding as an array for codeable concept
           codeData = {
             coding: [coding]
           };
         } else if (codeType === 'FHIR.Coding') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'Coding';
+          }
           codeData = coding;
         } else if (codeType === 'FHIR.code') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'Code';
+          }
           codeData = code;
         } else {
           codeData = null;
         }
-        resource[path] = parsedCodePaths[dr.type].paths[path].multipleCardinality ? [codeData] : codeData;
+        resource[path] = multipleCardinality ? [codeData] : codeData;
       }
     }
   });

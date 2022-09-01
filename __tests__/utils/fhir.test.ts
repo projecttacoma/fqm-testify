@@ -139,6 +139,24 @@ const ACTIVITYDEFINITION_DATA_REQUIREMENT = {
   ]
 };
 
+const DATA_REQUIREMENT_WITH_CHOICETYPE_CODEABLE_CONCEPT = {
+  type: 'DeviceRequest',
+  status: 'draft',
+  codeFilter: [
+    {
+      path: 'code',
+      code: [
+        {
+          system: 'http://snomed.info/sct/731000124108',
+          version: 'http://snomed.info/sct/731000124108/version/201709',
+          display: 'test display',
+          code: '37687000'
+        }
+      ]
+    }
+  ]
+};
+
 // example data requirement for resource type with `subject` not used as the patient reference
 const COVERAGE_DATA_REQUIREMENT = {
   type: 'Coverage',
@@ -400,7 +418,7 @@ describe('createFHIRResourceString', () => {
       PERIOD_START,
       PERIOD_END
     );
-    expect(JSON.parse(createdResource).event).toEqual({
+    expect(JSON.parse(createdResource).eventCoding).toEqual({
       system: 'test-system',
       version: 'test-version',
       code: '123',
@@ -409,7 +427,7 @@ describe('createFHIRResourceString', () => {
     expect(JSON.parse(createdResource).subject).toBeUndefined();
   });
 
-  test('returns populated FHIR resource for primaryCodeType FHIR.code', () => {
+  test('returns populated FHIR resource for codeType FHIR.code', () => {
     const createdResource = createFHIRResourceString(
       OPERATIONDEFINITION_DATA_REQUIREMENT,
       TEST_MEASURE_BUNDLE,
@@ -419,6 +437,26 @@ describe('createFHIRResourceString', () => {
     );
     expect(JSON.parse(createdResource).code).toEqual('123');
     expect(JSON.parse(createdResource).subject).toBeUndefined();
+  });
+
+  test('returns populated FHIR resource for choiceType codeable concept', () => {
+    const createdResource = createFHIRResourceString(
+      DATA_REQUIREMENT_WITH_CHOICETYPE_CODEABLE_CONCEPT,
+      TEST_MEASURE_BUNDLE,
+      'Patient1',
+      PERIOD_START,
+      PERIOD_END
+    );
+    expect(JSON.parse(createdResource).codeCodeableConcept).toEqual({
+      coding: [
+        {
+          system: 'http://snomed.info/sct/731000124108',
+          version: 'http://snomed.info/sct/731000124108/version/201709',
+          code: '37687000',
+          display: 'test display'
+        }
+      ]
+    });
   });
 
   test('returns populated FHIR resource where primaryCodePath is 0..* or 1..* (multiple cardinality)', () => {
