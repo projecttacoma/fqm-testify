@@ -26,7 +26,7 @@ interface elementChoice {
 export async function parse(xml: string) {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
-  const elementInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType == 'FHIR.Element');
+  const elementInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType == 'FHIR.Element' && !ti.$.identifier);
   const elementOneValue = elementInfo.filter((e: any) => e.element.length === 1);
 
   const results: { [key: string]: ResourceCodeInfo } = {};
@@ -91,6 +91,7 @@ export async function parse(xml: string) {
         // add elements of these three types to the paths of that resource
         if (codeType === 'FHIR.CodeableConcept' || codeType === 'FHIR.Coding' || codeType === 'FHIR.code') {
           paths[elem.$.name] = { codeType, multipleCardinality, choiceType };
+          codeType = '';
         } else if (codeType && codeType !== 'FHIR.string') {
           // if the codeType is not one of those three but also not a FHIR.string it may be within a FHIR.Element
           const codeTypeName = codeType.split('R.');
@@ -99,6 +100,7 @@ export async function parse(xml: string) {
             if (name[0].element[0].$.elementType === 'System.String') {
               codeType = 'FHIR.code';
               paths[elem.$.name] = { codeType, multipleCardinality, choiceType };
+              codeType = '';
             }
           }
         }

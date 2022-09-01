@@ -19,11 +19,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   ActivityDefinition: {
     primaryCodePath: 'topic',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -219,11 +214,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   CarePlan: {
     primaryCodePath: 'category',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -264,11 +254,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   ChargeItem: {
     primaryCodePath: 'code',
     paths: {
-      definitionUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -299,16 +284,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   ChargeItemDefinition: {
     primaryCodePath: 'code',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
-      derivedFromUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -379,11 +354,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
         multipleCardinality: false,
         choiceType: false
       },
-      protocol: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       prognosisCodeableConcept: {
         codeType: 'FHIR.CodeableConcept',
         multipleCardinality: true,
@@ -394,11 +364,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Communication: {
     primaryCodePath: 'category',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -593,11 +558,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
         codeType: 'FHIR.code',
         multipleCardinality: false,
         choiceType: false
-      },
-      reference: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
       }
     }
   },
@@ -616,11 +576,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
       },
       type: {
         codeType: 'FHIR.CodeableConcept',
-        multipleCardinality: false,
-        choiceType: false
-      },
-      url: {
-        codeType: 'FHIR.code',
         multipleCardinality: false,
         choiceType: false
       },
@@ -664,11 +619,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   DeviceRequest: {
     primaryCodePath: 'code',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1044,11 +994,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Library: {
     primaryCodePath: 'topic',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1139,11 +1084,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Measure: {
     primaryCodePath: 'topic',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1229,11 +1169,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   MedicationAdministration: {
     primaryCodePath: 'medication',
     paths: {
-      instantiates: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1364,11 +1299,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
         multipleCardinality: true,
         choiceType: false
       },
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       courseOfTherapyType: {
         codeType: 'FHIR.CodeableConcept',
         multipleCardinality: false,
@@ -1409,11 +1339,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   MessageDefinition: {
     primaryCodePath: 'event',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1514,11 +1439,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   OperationDefinition: {
     primaryCodePath: 'code',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1568,11 +1488,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Procedure: {
     primaryCodePath: 'code',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1628,11 +1543,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Questionnaire: {
     primaryCodePath: 'name',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1673,11 +1583,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   RequestGroup: {
     primaryCodePath: 'code',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1733,11 +1638,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   SearchParameter: {
     primaryCodePath: 'target',
     paths: {
-      url: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1788,11 +1688,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   ServiceRequest: {
     primaryCodePath: 'code',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: true,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
@@ -1822,11 +1717,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
         codeType: 'FHIR.CodeableConcept',
         multipleCardinality: true,
         choiceType: false
-      },
-      quantity: {
-        codeType: 'FHIR.CodeableConcept',
-        multipleCardinality: false,
-        choiceType: true
       },
       asNeeded: {
         codeType: 'FHIR.CodeableConcept',
@@ -1943,11 +1833,6 @@ export const parsedCodePaths: Record<string, ResourceCodeInfo> = {
   Task: {
     primaryCodePath: 'code',
     paths: {
-      instantiatesUri: {
-        codeType: 'FHIR.code',
-        multipleCardinality: false,
-        choiceType: false
-      },
       status: {
         codeType: 'FHIR.code',
         multipleCardinality: false,
