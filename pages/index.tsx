@@ -27,7 +27,14 @@ const Home: NextPage = () => {
           </Grid.Col>
         </Grid>
         <Link href={'generateTestCases'}>
-          <Button disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}>Next</Button>
+          <Button
+            sx={() => ({
+              marginTop: 10
+            })}
+            disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}
+          >
+            Next
+          </Button>
         </Link>
       </AppShell>
     </>
