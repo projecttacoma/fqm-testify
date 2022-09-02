@@ -7,11 +7,6 @@ import ResourcePanel from './resource-creation/ResourcePanel';
 import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
 
 const useStyles = createStyles({
-  highlightedMarkup: {
-    '& pre': {
-      whiteSpace: 'pre-wrap'
-    }
-  },
   panel: {
     maxHeight: '100%',
     overflow: 'scroll'

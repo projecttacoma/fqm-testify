@@ -31,7 +31,11 @@ export default function PatientInfoCard({
           }
         };
         if (selected) {
-          style.borderColor = theme.primaryColor;
+          // Use the configured primary color that the app already uses
+          const shade =
+            typeof theme.primaryShade === 'number' ? theme.primaryShade : theme.primaryShade[theme.colorScheme];
+
+          style.borderColor = theme.colors[theme.primaryColor][shade];
         }
         return style;
       }}

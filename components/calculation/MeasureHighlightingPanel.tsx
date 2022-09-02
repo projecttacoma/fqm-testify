@@ -54,8 +54,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
   const calculate = async (id: string | null) => {
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: true,
-      // TODO: Flip this to true once a new fqm-execution version is released/dependency is updated
-      calculateSDEs: false,
+      calculateSDEs: true,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString()
