@@ -20,7 +20,7 @@ export default function ResourcePanel() {
     );
   };
 
-  const renderDataElements = () => {
+  const renderResourceSelectBox = () => {
     if (Object.keys(currentPatients).length === 0 || selectedPatient == null) {
       return renderPanelPlaceholderText();
     }
@@ -51,7 +51,7 @@ export default function ResourcePanel() {
 
   return (
     <>
-      {renderDataElements()}
+      {renderResourceSelectBox()}
       <ResourceDisplay />
     </>
   );
