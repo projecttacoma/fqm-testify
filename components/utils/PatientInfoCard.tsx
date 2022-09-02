@@ -54,7 +54,6 @@ export default function PatientInfoCard({
             <Tooltip label="Export Patient" openDelay={1000}>
               <Button
                 size="xs"
-                data-testid="export-patient-button"
                 aria-label={'Export Patient'}
                 onClick={() => {
                   onExportClick();
@@ -66,7 +65,6 @@ export default function PatientInfoCard({
             </Tooltip>
             <Tooltip label="Edit Patient" openDelay={1000}>
               <Button
-                data-testid="edit-patient-button"
                 aria-label={'Edit Patient'}
                 onClick={() => {
                   onEditClick();
@@ -81,7 +79,6 @@ export default function PatientInfoCard({
             <Tooltip label="Delete Patient" openDelay={1000}>
               <Button
                 size="xs"
-                data-testid="delete-patient-button"
                 aria-label={'Delete Patient'}
                 onClick={() => {
                   onDeleteClick();

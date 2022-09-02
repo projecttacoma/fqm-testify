@@ -3,8 +3,8 @@ import '@testing-library/jest-dom';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import PatientCreationPanel from '../../../components/patient-creation/PatientCreationPanel';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
-import { download } from '../../../util/downloadUtil';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
+import { download } from '../../../util/downloadUtil';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
@@ -23,7 +23,7 @@ describe('PatientCreationPanel', () => {
       )
     );
 
-    const modal = screen.queryByTestId('code-editor-modal');
+    const modal = screen.queryByRole('dialog');
     expect(modal).not.toBeInTheDocument();
   });
 
@@ -49,7 +49,7 @@ describe('PatientCreationPanel', () => {
       fireEvent.click(createButton);
     });
 
-    const modal = screen.getByTestId('code-editor-modal');
+    const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
   });
 
@@ -116,7 +116,7 @@ describe('PatientCreationPanel', () => {
       )
     );
 
-    const deleteButton = screen.getByTestId('delete-patient-button') as HTMLButtonElement;
+    const deleteButton = screen.getByLabelText(/delete patient/i) as HTMLButtonElement;
     expect(deleteButton).toBeInTheDocument();
 
     fireEvent.click(deleteButton);
@@ -152,7 +152,7 @@ describe('PatientCreationPanel', () => {
       )
     );
 
-    const exportButton = screen.getByTestId('export-patient-button') as HTMLButtonElement;
+    const exportButton = screen.getByLabelText(/export patient/i) as HTMLButtonElement;
     expect(exportButton).toBeInTheDocument();
 
     fireEvent.click(exportButton);
