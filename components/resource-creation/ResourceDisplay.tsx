@@ -168,7 +168,8 @@ function ResourceDisplay() {
           {currentTestCases[selectedPatient].resources.map(resource => (
             <ResourceInfoCard
               key={resource.id}
-              resource={resource}
+              resourceType={resource.resourceType}
+              label={getFhirResourceSummary(resource)}
               onEditClick={() => openResourceModal(resource.id)}
               onDeleteClick={() => openConfirmationModal(resource.id)}
             />

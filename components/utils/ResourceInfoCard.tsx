@@ -1,31 +1,31 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Edit, Trash } from 'tabler-icons-react';
-import { getFhirResourceSummary } from '../../util/fhir';
 
 export interface ResourceInfoCardProps {
-  resource: fhir4.FhirResource;
+  resourceType: string;
+  label: string;
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
 }
 
-export default function ResourceInfoCard({ resource, onEditClick, onDeleteClick }: ResourceInfoCardProps) {
+export default function ResourceInfoCard({ resourceType, label, onEditClick, onDeleteClick }: ResourceInfoCardProps) {
   return (
     <Paper withBorder p="sm" shadow="sm">
       <Grid align="center">
         <Grid.Col span={9}>
-          <Text>{resource.resourceType}</Text>
+          <Text>{resourceType}</Text>
           <Tooltip
             wrapLines
             width={500}
             withArrow
             transition="fade"
             transitionDuration={200}
-            label={<Text align="center">{getFhirResourceSummary(resource)} </Text>}
-            disabled={getFhirResourceSummary(resource) === ''}
+            label={<Text align="center">{label}</Text>}
+            disabled={label === ''}
           >
             <Text lineClamp={2} color="dimmed">
-              {getFhirResourceSummary(resource)}
+              {label}
             </Text>
           </Tooltip>
         </Grid.Col>
@@ -36,7 +36,7 @@ export default function ResourceInfoCard({ resource, onEditClick, onDeleteClick 
                 onEditClick();
               }}
               variant="subtle"
-              data-testid="edit-resource-button"
+              aria-label="Edit Resource"
             >
               <Edit />
             </Button>
@@ -48,7 +48,7 @@ export default function ResourceInfoCard({ resource, onEditClick, onDeleteClick 
               }}
               color="red"
               variant="subtle"
-              data-testid="delete-resource-button"
+              aria-label="Delete Resource"
             >
               <Trash />
             </Button>
