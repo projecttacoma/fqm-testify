@@ -4,7 +4,7 @@ import { useRecoilValue } from 'recoil';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { getDataRequirementFiltersString } from '../../util/fhir';
 
-interface DataRequirementSelectOptionProps {
+export interface DataRequirementSelectOptionProps {
   dataRequirement: fhir4.DataRequirement;
 }
 
