@@ -1,12 +1,17 @@
 import type { NextPage } from 'next';
+import Link from 'next/link';
 import Head from 'next/head';
-import { AppShell, Grid, Header } from '@mantine/core';
+import { AppShell, Button, Grid, Header } from '@mantine/core';
 import AppHeader from '../components/utils/AppHeader';
 import MeasureUpload from '../components/measure-upload/MeasureUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
-import TestCaseEditor from '../components/TestCaseEditor';
+import { measureBundleState } from '../state/atoms/measureBundle';
+import { measurementPeriodState } from '../state/atoms/measurementPeriod';
+import { useRecoilValue } from 'recoil';
 
 const Home: NextPage = () => {
+  const measureBundle = useRecoilValue(measureBundleState);
+  const measurementPeriod = useRecoilValue(measurementPeriodState);
   return (
     <>
       <Head>
@@ -21,9 +26,9 @@ const Home: NextPage = () => {
             <DateSelectors />
           </Grid.Col>
         </Grid>
-        <div style={{ paddingTop: '24px' }}>
-          <TestCaseEditor />
-        </div>
+        <Link href={'generateTestCases'}>
+          <Button disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}>Next</Button>
+        </Link>
       </AppShell>
     </>
   );
