@@ -41,12 +41,24 @@ export function createPatientResourceString(birthDate: string): string {
 
 /**
  * Identifies the primary code path of a resource and constructs a string which displays
- * resource summary information depending on what is a available
+ * resource summary information depending on what is a available. If a resource
+ * does not include a path for it's primaryCodePath, then it finds a path on that resource
+ * that has coding (if available) and display resource summary information depending on
+ * what is available.
  * @param resource {fhir4.Resource} a fhir Resource object
  * @returns {String} displaying the code and display text, code, or id of the resource or nothing
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
-  const primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
+  let primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
+
+  if (fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] === undefined) {
+    const paths = parsedCodePaths[resource.resourceType]?.paths;
+    for (var p in paths) {
+      if (fhirpath.evaluate(resource, `${p}.coding`)[0]) {
+        primaryCodePath = p;
+      }
+    }
+  }
 
   if (primaryCodePath) {
     const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
@@ -79,22 +91,24 @@ export function getPatientNameString(patient: fhir4.Patient) {
 
 /**
  * Identifies the valuesets referenced in a DataRequirement and constructs a string which displays
- * those valuesets
+ * those valuesets. If a DataRequirement does not reference a valueset, then a string of the direct reference
+ * code and display is constructed.
  * @param dr {Object} a fhir DataRequirement object
  * @param valueSetsMap {Object} a mapping of valueset urls to valueset names and titles
- * @returns {String} displaying the valuesets referenced by a DataRequirement
+ * @returns {String} displaying the valuesets referenced by a DataRequirement or the direct reference code and display
  */
 export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, valueSetMap: ValueSetsMap): string {
   const valueSets = dr.codeFilter?.reduce((acc: string[], e) => {
     if (e.valueSet) {
       acc.push(`${valueSetMap[e.valueSet]} (${e.valueSet})`);
     }
-    if (e.path === 'code' && e.code) {
-      acc.push(...e.code.map(c => c.display ?? 'Un-named Code'));
+    if (e.code) {
+      const directCodes = e.code.filter(c => c.display);
+      acc.push(...directCodes.map(c => `${c.code}: ${c.display}`));
     }
     return acc;
   }, []);
-  if (valueSets) {
+  if (valueSets && valueSets.length > 0) {
     return `${valueSets?.join('\n')}`;
   }
   return '';
@@ -153,7 +167,7 @@ export function createFHIRResourceString(
     resourceType: dr.type,
     id: uuidv4()
   };
-  getResourcePrimaryCode(resource, dr, mb);
+  getResourceCode(resource, dr, mb);
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);
   return JSON.stringify(resource, null, 2);
@@ -171,66 +185,73 @@ function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, p
   }
 }
 
-function getResourcePrimaryCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
-  // resource properties retrieved from data requirements
+function getResourceCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
+  // go through each of the elements in the codeFilter array on the data requirement, if it exists
+
   dr.codeFilter?.forEach(cf => {
-    if (!cf.valueSet && cf.path && cf.code) {
-      resource[cf.path] = cf.code[0].code;
+    let system, version, display, code;
+    let path = cf.path;
+    // check to see if the code filter has a value set
+    if (cf.valueSet) {
+      const vsResource = mb?.entry?.filter(
+        r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === cf.valueSet
+      )[0].resource as fhir4.ValueSet;
+
+      // assume ValueSet resource will either contain compose or expansion
+      if (vsResource?.expansion?.contains) {
+        // randomly select ValueSetExpansionContains to add to resource
+        const contains = _.sample(vsResource.expansion.contains);
+        ({ system, version, code, display } = contains || {});
+      } else if (vsResource?.compose) {
+        // randomly select ValueSetComposeInclude to add to resource
+        const include = _.sample(vsResource.compose.include);
+        // randomly select concept from ValueSetComposeInclude to add to resource
+        const codeAndDisplay = _.sample(include?.concept);
+        ({ system, version } = include || {});
+        ({ code, display } = codeAndDisplay || {});
+      }
+    } else {
+      // it doesn't have a valueSet, see if there is a direct reference code
+      const directCode = cf.code as fhir4.Coding[];
+      ({ system, version, code, display } = directCode[0] || {});
+    }
+
+    if (path) {
+      if (parsedCodePaths[dr.type].paths[path] !== undefined) {
+        const codeType = parsedCodePaths[dr.type].paths[path].codeType;
+        const coding = {
+          system,
+          version,
+          code,
+          display
+        };
+        let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
+        let multipleCardinality: boolean = parsedCodePaths[dr.type].paths[path].multipleCardinality;
+        if (codeType === 'FHIR.CodeableConcept') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'CodeableConcept';
+          }
+          // Need to add coding as an array for codeable concept
+          codeData = {
+            coding: [coding]
+          };
+        } else if (codeType === 'FHIR.Coding') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'Coding';
+          }
+          codeData = coding;
+        } else if (codeType === 'FHIR.code') {
+          if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
+            path += 'Code';
+          }
+          codeData = code;
+        } else {
+          codeData = null;
+        }
+        resource[path] = multipleCardinality ? [codeData] : codeData;
+      }
     }
   });
-
-  let vsUrl: string | undefined;
-
-  // resource properties retrieved from parsed primary code path script
-  if (dr.codeFilter) {
-    vsUrl =
-      dr.codeFilter?.filter(cf => cf.valueSet).length > 0 ? dr.codeFilter?.filter(cf => cf.valueSet)[0].valueSet : '';
-  }
-  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vsUrl)[0]
-    .resource as fhir4.ValueSet;
-
-  // assume ValueSet resource will either contain compose or expansion
-  let system, version, display, code;
-  if (vsResource?.expansion?.contains) {
-    // randomly select ValueSetExpansionContains to add to resource
-    const contains = _.sample(vsResource.expansion.contains);
-    ({ system, version, code, display } = contains || {});
-  } else if (vsResource?.compose) {
-    // randomly select ValueSetComposeInclude to add to resource
-    const include = _.sample(vsResource.compose.include);
-    // randomly select concept from ValueSetComposeInclude to add to resource
-    const codeAndDisplay = _.sample(include?.concept);
-    ({ system, version } = include || {});
-    ({ code, display } = codeAndDisplay || {});
-  }
-
-  const primaryCodePath = parsedCodePaths[dr.type].primaryCodePath;
-  const primaryCodeType = parsedCodePaths[dr.type].paths[primaryCodePath].codeType;
-
-  const coding = {
-    system,
-    version,
-    code,
-    display
-  };
-
-  let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
-  if (primaryCodeType === 'FHIR.CodeableConcept') {
-    codeData = {
-      // Need to add coding as an array for codeable concept
-      coding: [coding]
-    };
-  } else if (primaryCodeType === 'FHIR.Coding') {
-    codeData = coding;
-  } else if (primaryCodeType === 'FHIR.code') {
-    codeData = code;
-  } else {
-    codeData = null;
-  }
-
-  resource[primaryCodePath] = parsedCodePaths[dr.type].paths[primaryCodePath].multipleCardinality
-    ? [codeData]
-    : codeData;
 }
 
 /**
