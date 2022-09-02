@@ -48,11 +48,11 @@ export default function ResourceSelection() {
         placeholder="Select FHIR Resource"
         value=""
         data={
-          dataRequirements?.map(dr => {
+          dataRequirements?.map((dr, i) => {
             const displayString = getDataRequirementFiltersString(dr, valueSetMap);
             return {
               label: `${dr.type}: ${displayString}`,
-              value: getDataRequirementsLookupKey(dr, valueSetMap),
+              value: getDataRequirementsLookupKey(dr, valueSetMap, i),
               dataRequirement: dr
             };
           }) ?? []
