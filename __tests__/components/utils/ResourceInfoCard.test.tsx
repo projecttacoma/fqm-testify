@@ -4,7 +4,7 @@ import ResourceInfoCard, { ResourceInfoCardProps } from '../../../components/uti
 import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
 const EXAMPLE_RESOURCE_TYPE = 'Procedure';
-const EXAMPLE_LABEL = 'Colonoscopy (http://example.com/ValueSet/example-vs';
+const EXAMPLE_LABEL = 'Colonoscopy (http://example.com/ValueSet/example-vs)';
 
 const MOCK_CALLBACK_PROPS: Omit<ResourceInfoCardProps, 'resourceType' | 'label'> = {
   onEditClick: jest.fn(),
