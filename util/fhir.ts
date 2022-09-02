@@ -53,7 +53,7 @@ export function getFhirResourceSummary(resource: fhir4.Resource) {
 
   if (fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] === undefined) {
     const paths = parsedCodePaths[resource.resourceType]?.paths;
-    for (var p in paths) {
+    for (const p in paths) {
       if (fhirpath.evaluate(resource, `${p}.coding`)[0]) {
         primaryCodePath = p;
       }
@@ -82,7 +82,11 @@ export function getFhirResourceSummary(resource: fhir4.Resource) {
 }
 
 export function getPatientInfoString(patient: fhir4.Patient) {
-  return `${getPatientNameString(patient)} (DOB: ${patient.birthDate})`;
+  return `${getPatientNameString(patient)} (${getPatientDOBString(patient)})`;
+}
+
+export function getPatientDOBString(patient: fhir4.Patient) {
+  return `DOB: ${patient.birthDate}`;
 }
 
 export function getPatientNameString(patient: fhir4.Patient) {
@@ -226,7 +230,7 @@ function getResourceCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bun
           display
         };
         let codeData: fhir4.CodeableConcept | fhir4.Coding | string | null | undefined;
-        let multipleCardinality: boolean = parsedCodePaths[dr.type].paths[path].multipleCardinality;
+        const multipleCardinality: boolean = parsedCodePaths[dr.type].paths[path].multipleCardinality;
         if (codeType === 'FHIR.CodeableConcept') {
           if (parsedCodePaths[dr.type].paths[path].choiceType === true) {
             path += 'CodeableConcept';
@@ -268,7 +272,7 @@ export function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement
     if (dr.dateFilter && dr.dateFilter.length > 0) {
       dr.dateFilter?.forEach(df => {
         // pull path off date filter
-        let path = df.path?.split('.')[0] ?? '';
+        const path = df.path?.split('.')[0] ?? '';
         // check if path exists on primary date info
         if (Object.keys(primaryDateInfo).includes(path)) {
           const fieldTypeInfo = primaryDateInfo[path];
@@ -373,7 +377,7 @@ export function getRandomDateInPeriod(start: string, end: string) {
   const endDate = new Date(end);
   endDate.setDate(endDate.getDate() - 1);
 
-  var date = new Date(+startDate + Math.random() * (endDate.getTime() - startDate.getTime()));
+  const date = new Date(+startDate + Math.random() * (endDate.getTime() - startDate.getTime()));
   return date;
 }
 
