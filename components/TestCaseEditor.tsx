@@ -28,7 +28,7 @@ export default function TestCaseEditor() {
 
   return (
     <>
-      <Grid style={{ height: '70vh' }}>
+      <Grid style={{ height: '85vh' }}>
         <Grid.Col span={3} className={classes.panel}>
           <PatientCreationPanel />
         </Grid.Col>
