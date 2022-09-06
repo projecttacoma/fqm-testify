@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, act } from '@testing-library/react';
 import { Calculator } from 'fqm-execution';
 import DataRequirementSelectOption from '../../../components/utils/DataRequirementSelectOption';
+import { MOCK_MEASURE_BUNDLE } from '../../../fixtures/test/measureBundle';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 
@@ -34,32 +35,6 @@ const MOCK_DATA_REQUIREMENTS: fhir4.Library & { dataRequirement: fhir4.DataRequi
       ]
     }
   ]
-};
-
-const MOCK_MEASURE_BUNDLE = {
-  name: 'measureBundle',
-  content: {
-    resourceType: 'Bundle',
-    type: 'collection',
-    entry: [
-      {
-        resource: {
-          resourceType: 'ValueSet',
-          name: 'Test ValueSet',
-          status: 'draft',
-          url: 'http://example.com/ValueSet/test-vs'
-        }
-      },
-      {
-        resource: {
-          resourceType: 'ValueSet',
-          name: 'Test ValueSet 2',
-          status: 'draft',
-          url: 'http://example.com/ValueSet/test-vs-2'
-        }
-      }
-    ]
-  } as fhir4.Bundle
 };
 
 describe('DataRequirementsSelectOption', () => {
