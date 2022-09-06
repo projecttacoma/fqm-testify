@@ -26,7 +26,7 @@ const Home: NextPage = () => {
             <DateSelectors />
           </Grid.Col>
         </Grid>
-        <Link href={'generateTestCases'}>
+        <Link href={'generate-test-cases'}>
           <Button
             sx={() => ({
               marginTop: 10
