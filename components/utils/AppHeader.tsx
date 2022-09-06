@@ -1,15 +1,62 @@
-import { ActionIcon, Group, useMantineColorScheme } from '@mantine/core';
-import { MoonStars, Sun } from 'tabler-icons-react';
+import { Card, Button, Text } from '@mantine/core';
+import React from 'react';
+import { useRecoilValue } from 'recoil';
+import Link from 'next/link';
+import { Edit } from 'tabler-icons-react';
+import { useRouter } from 'next/router';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 
 export default function AppHeader() {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-
+  const { start, end } = useRecoilValue(measurementPeriodState);
+  const measureBundle = useRecoilValue(measureBundleState);
+  const router = useRouter();
   return (
-    <Group sx={{ height: '100%' }} px={20} position="apart">
-      <h2>FQM Testify: an eCQM Analysis Tool</h2>
-      <ActionIcon variant="default" onClick={() => toggleColorScheme()} size={30}>
-        {colorScheme === 'dark' ? <Sun size={16} /> : <MoonStars size={16} />}
-      </ActionIcon>
-    </Group>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'black',
+        height: '100%',
+        width: '100%',
+        padding: 20
+      }}
+    >
+      {router.pathname !== '/' && start && end && measureBundle.content && (
+        <div style={{ flexGrow: 2 }}>
+          <Card sx={() => ({ width: 'fit-content', justifySelf: 'start' })}>
+            <div style={{ display: 'flex', justifyContent: 'space-around', gap: 10, alignItems: 'center' }}>
+              <div>
+                <Text size="md" color="dimmed">
+                  {measureBundle.name}
+                </Text>
+                <Text size="sm" color="dimmed">
+                  {retrieveMeasurementPeriodString(start, end)}
+                </Text>
+              </div>
+              <Link href={'/'}>
+                <Button variant="subtle" color="gray">
+                  <Edit />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      )}
+      <Text color="dimmed" size="xl" sx={() => ({ justifySelf: 'flex-end' })}>
+        FQM Testify: an eCQM Analysis Tool
+      </Text>
+    </div>
   );
 }
+const retrieveDateString = (date: Date) => {
+  return date.toLocaleString('default', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+const retrieveMeasurementPeriodString = (start: Date, end: Date) => {
+  return `${retrieveDateString(start)} - ${retrieveDateString(end)}`;
+};

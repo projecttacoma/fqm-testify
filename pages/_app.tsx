@@ -1,9 +1,10 @@
 import { AppProps } from 'next/app';
 import { RecoilRoot } from 'recoil';
 import Head from 'next/head';
-import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import { useState } from 'react';
+import { AppShell, ColorScheme, ColorSchemeProvider, Header, MantineProvider } from '@mantine/core';
+import React, { useState } from 'react';
 import { NotificationsProvider } from '@mantine/notifications';
+import AppHeader from '../components/utils/AppHeader';
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
@@ -21,7 +22,9 @@ export default function App(props: AppProps) {
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
         <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme }}>
           <NotificationsProvider position="top-center">
-            <Component {...pageProps} />
+            <AppShell padding="md" header={<Header height={120}>{<AppHeader></AppHeader>}</Header>}>
+              <Component {...pageProps} />
+            </AppShell>
           </NotificationsProvider>
         </MantineProvider>
       </ColorSchemeProvider>
