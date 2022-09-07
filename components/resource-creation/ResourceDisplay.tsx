@@ -11,6 +11,7 @@ import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
+import { calculateMeasureReport } from '../calculation/MeasureCalculation';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -81,19 +82,26 @@ function ResourceDisplay() {
       // Create a new state object using immer without needing to shallow clone the entire previous object
       if (selectedPatient) {
         const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-        let nextResourceState;
-        if (resourceIndexToUpdate < 0) {
-          // add new resource
-          nextResourceState = produce(currentTestCases, draftState => {
+        produce(currentTestCases, async draftState => {
+          if (resourceIndexToUpdate < 0) {
+            // add new resource
             draftState[selectedPatient].resources.push(updatedResource);
-          });
-        } else {
-          // update existing resource
-          nextResourceState = produce(currentTestCases, draftState => {
+          } else {
+            // update existing resource
             draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
-          });
-        }
-        setCurrentTestCases(nextResourceState);
+          }
+          // re-run measure report calculations for updated state
+          if (measureBundle.content) {
+            draftState[selectedPatient].measureReport = await calculateMeasureReport(
+              draftState[selectedPatient],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          }
+        }).then(nextResourceState => {
+          setCurrentTestCases(nextResourceState);
+        });
       }
     }
     closeResourceModal();
@@ -103,10 +111,20 @@ function ResourceDisplay() {
     if (id && selectedPatient) {
       const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
       if (resourceIndexToDelete >= 0) {
-        const nextResourceState = produce(currentTestCases, draftState => {
+        produce(currentTestCases, async draftState => {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
+          // re-run measure report calculations for updated state
+          if (measureBundle.content) {
+            draftState[selectedPatient].measureReport = await calculateMeasureReport(
+              draftState[selectedPatient],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          }
+        }).then(nextResourceState => {
+          setCurrentTestCases(nextResourceState);
         });
-        setCurrentTestCases(nextResourceState);
       }
     }
     closeConfirmationModal();

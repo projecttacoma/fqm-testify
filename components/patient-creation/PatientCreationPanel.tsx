@@ -24,6 +24,7 @@ import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
+import { calculateMeasureReport } from '../calculation/MeasureCalculation';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -73,10 +74,23 @@ function PatientCreationPanel() {
         resources = currentPatients[patientId]?.resources ?? [];
       }
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = { patient: pt, resources: resources };
+      produce(currentPatients, async draftState => {
+        draftState[patientId] = {
+          patient: pt,
+          resources: currentPatients[patientId]?.resources ?? []
+        };
+
+        if (measureBundle.content) {
+          draftState[patientId].measureReport = await calculateMeasureReport(
+            draftState[patientId],
+            measureBundle.content,
+            measurementPeriod.start?.toISOString(),
+            measurementPeriod.end?.toISOString()
+          );
+        }
+      }).then(nextPatientState => {
+        setCurrentPatients(nextPatientState);
       });
-      setCurrentPatients(nextPatientState);
     }
 
     closePatientModal();
