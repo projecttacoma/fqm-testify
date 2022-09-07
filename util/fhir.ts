@@ -39,6 +39,55 @@ export function createPatientResourceString(birthDate: string): string {
   return JSON.stringify(pt, null, 2);
 }
 
+export function createCopiedResources(
+  copyResources: fhir4.FhirResource[],
+  oldId: string,
+  newId: string
+): fhir4.FhirResource[] {
+  const resources: fhir4.FhirResource[] = copyResources.map(cr => {
+    let resourceString = JSON.stringify(cr);
+    const idRegexp = new RegExp(`Patient/${oldId}`, 'g');
+    resourceString = resourceString.replace(idRegexp, `Patient/${newId}`);
+    const resource: fhir4.FhirResource = JSON.parse(resourceString);
+    resource.id = uuidv4();
+    // Note: this does not update potential cross-resource references, which we may want to support in the future
+    return resource;
+  });
+  return resources;
+}
+
+export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.Patient {
+  const patient: fhir4.Patient = _.cloneDeep(copyPatient);
+  const identifier = patient.identifier?.find(id => id.system === 'http://example.com/test-id');
+  patient.id = uuidv4();
+  if (identifier) {
+    identifier.value = `test-patient-${patient.id}`;
+  } else {
+    if (patient.identifier) {
+      patient.identifier.push({
+        use: 'usual',
+        system: 'http://example.com/test-id',
+        value: `test-patient-${patient.id}`
+      });
+    } else {
+      patient.identifier = [
+        {
+          use: 'usual',
+          system: 'http://example.com/test-id',
+          value: `test-patient-${patient.id}`
+        }
+      ];
+    }
+  }
+  if (patient.name && patient.name.length > 0) {
+    patient.name[0] = {
+      family: getRandomLastName(),
+      given: [getRandomFirstName(patient.gender === 'male' ? 'male' : 'female')] // future should handle non-binary
+    };
+  }
+  return patient;
+}
+
 /**
  * Identifies the primary code path of a resource and constructs a string which displays
  * resource summary information depending on what is a available. If a resource
