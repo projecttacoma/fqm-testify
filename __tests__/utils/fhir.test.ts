@@ -8,7 +8,9 @@ import {
   getRandomDateInPeriod,
   jsDateToFHIRDate,
   getDateType,
-  getResourcePrimaryDates
+  getResourcePrimaryDates,
+  createCopiedResources,
+  createCopiedPatientResource
 } from '../../util/fhir';
 import {
   EXAMPLE_DR_CHOICE_TYPE_PERIOD_TO_PERIOD,
@@ -244,7 +246,7 @@ const PROCEDURE_RESOURCE_WITH_FULL_SUMMARY: fhir4.Procedure = {
     ]
   },
   subject: {
-    reference: 'procedure-reference'
+    reference: 'Patient/procedure-reference'
   }
 };
 
@@ -528,6 +530,24 @@ const PATIENT_RESOURCE: fhir4.Patient = {
   id: 'Patient1'
 };
 
+const PATIENT_RESOURCE_W_DETAILS: fhir4.Patient = {
+  resourceType: 'Patient',
+  id: 'Patient2',
+  identifier: [
+    {
+      system: 'http://example.com/test-id',
+      value: `test-patient-Patient2`
+    }
+  ],
+  gender: 'male',
+  name: [
+    {
+      family: 'Smith',
+      given: ['John']
+    }
+  ]
+};
+
 const ENCOUNTER_RESOURCE: fhir4.Encounter = {
   resourceType: 'Encounter',
   id: 'Encounter1',
@@ -611,6 +631,34 @@ describe('createPatientBundle', () => {
     };
 
     expect(createPatientBundle(PATIENT_RESOURCE, [ENCOUNTER_RESOURCE, OBSERVATION_RESOURCE])).toEqual(expectedBundle);
+  });
+});
+
+describe('createCopiedResources', () => {
+  test('copy resources change ids and patient references', () => {
+    const resources = createCopiedResources(
+      [PROCEDURE_RESOURCE_WITH_FULL_SUMMARY],
+      'procedure-reference',
+      'new-reference'
+    );
+    const procedure: fhir4.Procedure = resources[0] as fhir4.Procedure;
+    expect(procedure.id).not.toEqual(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY.id);
+    expect(procedure.subject.reference).toEqual('Patient/new-reference');
+    expect(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY.subject.reference).toEqual('Patient/procedure-reference');
+  });
+});
+
+describe('createCopiedPatientResource', () => {
+  test('copy patient has new identifying fields', () => {
+    const patient = createCopiedPatientResource(PATIENT_RESOURCE_W_DETAILS);
+    expect(patient.id).not.toEqual(PATIENT_RESOURCE_W_DETAILS.id);
+    expect(patient.name).not.toEqual(PATIENT_RESOURCE_W_DETAILS.name);
+    expect(patient.identifier).not.toEqual(PATIENT_RESOURCE_W_DETAILS.identifier);
+    expect(PATIENT_RESOURCE_W_DETAILS.id).toEqual('Patient2');
+  });
+  test('copy patient has new id for minimal patient', () => {
+    const patient = createCopiedPatientResource(PATIENT_RESOURCE);
+    expect(patient.id).not.toEqual(PATIENT_RESOURCE.id);
   });
 });
 

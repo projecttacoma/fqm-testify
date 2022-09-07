@@ -39,6 +39,14 @@ export function createPatientResourceString(birthDate: string): string {
   return JSON.stringify(pt, null, 2);
 }
 
+/**
+ * Creates copies of all passed in resources (without references maintained) and gives them
+ * new resource ids. Replaces all patient references to the patient oldId with newId
+ * @param copyResources {fhir4.FhirResource[]} array of fhir resources to be copied
+ * @param oldId {String} a patient id that the copyResources may reference
+ * @param newId {String} a patient id that should replace oldId in references
+ * @returns {fhir4.FhirResource[]} array of new resource copies
+ */
 export function createCopiedResources(
   copyResources: fhir4.FhirResource[],
   oldId: string,
@@ -56,6 +64,12 @@ export function createCopiedResources(
   return resources;
 }
 
+/**
+ * Creates a copy of the passed in patient object (without references maintained) and updates the
+ * id and identifier as well as creating a new name to differentiate the new patient copy
+ * @param copyPatient {fhir4.Patient} a fhir Patient object to copy
+ * @returns {fhir4.Patient} the new fhir patient copy
+ */
 export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.Patient {
   const patient: fhir4.Patient = _.cloneDeep(copyPatient);
   const identifier = patient.identifier?.find(id => id.system === 'http://example.com/test-id');
@@ -63,20 +77,15 @@ export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.P
   if (identifier) {
     identifier.value = `test-patient-${patient.id}`;
   } else {
+    const newIdentifier: fhir4.Identifier = {
+      use: 'usual',
+      system: 'http://example.com/test-id',
+      value: `test-patient-${patient.id}`
+    };
     if (patient.identifier) {
-      patient.identifier.push({
-        use: 'usual',
-        system: 'http://example.com/test-id',
-        value: `test-patient-${patient.id}`
-      });
+      patient.identifier.push(newIdentifier);
     } else {
-      patient.identifier = [
-        {
-          use: 'usual',
-          system: 'http://example.com/test-id',
-          value: `test-patient-${patient.id}`
-        }
-      ];
+      patient.identifier = [newIdentifier];
     }
   }
   if (patient.name && patient.name.length > 0) {

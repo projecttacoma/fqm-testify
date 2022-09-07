@@ -125,6 +125,38 @@ describe('PatientCreationPanel', () => {
     expect(confirmationModal).toBeInTheDocument();
   });
 
+  it('should render modal when copy button is clicked', () => {
+    const MockPatients = getMockRecoilState(patientTestCaseState, {
+      'example-pt': {
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        resources: []
+      }
+    });
+
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
+
+    render(
+      mantineRecoilWrap(
+        <>
+          <MockPatients />
+          <MockSelectedPatient />
+          <PatientCreationPanel />
+        </>
+      )
+    );
+
+    const copyButton = screen.getByLabelText(/copy patient/i) as HTMLButtonElement;
+    expect(copyButton).toBeInTheDocument();
+
+    fireEvent.click(copyButton);
+
+    const modal = screen.getByRole('dialog');
+    expect(modal).toBeInTheDocument();
+  });
+
   it('should have download function called when download patient button is clicked', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
