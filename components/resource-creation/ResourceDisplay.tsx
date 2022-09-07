@@ -1,7 +1,7 @@
 import { Stack } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
@@ -12,6 +12,9 @@ import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
 import { calculateMeasureReport } from '../calculation/MeasureCalculation';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { showNotification } from '@mantine/notifications';
+import { IconAlertCircle } from '@tabler/icons';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -22,6 +25,7 @@ function ResourceDisplay() {
   const selectedPatient = useRecoilValue(selectedPatientState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const setIsCalculationLoading = useSetRecoilState(calculationLoading);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -82,6 +86,7 @@ function ResourceDisplay() {
       // Create a new state object using immer without needing to shallow clone the entire previous object
       if (selectedPatient) {
         const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+        setIsCalculationLoading(true);
         produce(currentTestCases, async draftState => {
           if (resourceIndexToUpdate < 0) {
             // add new resource
@@ -92,15 +97,29 @@ function ResourceDisplay() {
           }
           // re-run measure report calculations for updated state
           if (measureBundle.content) {
-            draftState[selectedPatient].measureReport = await calculateMeasureReport(
-              draftState[selectedPatient],
-              measureBundle.content,
-              measurementPeriod.start?.toISOString(),
-              measurementPeriod.end?.toISOString()
-            );
+            try {
+              draftState[selectedPatient].measureReport = await calculateMeasureReport(
+                draftState[selectedPatient],
+                measureBundle.content,
+                measurementPeriod.start?.toISOString(),
+                measurementPeriod.end?.toISOString()
+              );
+            } catch (error) {
+              if (error instanceof Error) {
+                showNotification({
+                  icon: <IconAlertCircle />,
+                  title: 'Calculation Error',
+                  message: error.message,
+                  color: 'red'
+                });
+              }
+            }
           }
         }).then(nextResourceState => {
-          setCurrentTestCases(nextResourceState);
+          setTimeout(() => {
+            setCurrentTestCases(nextResourceState);
+            setIsCalculationLoading(false);
+          }, 2000);
         });
       }
     }
@@ -111,19 +130,32 @@ function ResourceDisplay() {
     if (id && selectedPatient) {
       const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
       if (resourceIndexToDelete >= 0) {
+        setIsCalculationLoading(true);
         produce(currentTestCases, async draftState => {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
           // re-run measure report calculations for updated state
           if (measureBundle.content) {
-            draftState[selectedPatient].measureReport = await calculateMeasureReport(
-              draftState[selectedPatient],
-              measureBundle.content,
-              measurementPeriod.start?.toISOString(),
-              measurementPeriod.end?.toISOString()
-            );
+            try {
+              draftState[selectedPatient].measureReport = await calculateMeasureReport(
+                draftState[selectedPatient],
+                measureBundle.content,
+                measurementPeriod.start?.toISOString(),
+                measurementPeriod.end?.toISOString()
+              );
+            } catch (error) {
+              if (error instanceof Error) {
+                showNotification({
+                  icon: <IconAlertCircle />,
+                  title: 'Calculation Error',
+                  message: error.message,
+                  color: 'red'
+                });
+              }
+            }
           }
         }).then(nextResourceState => {
           setCurrentTestCases(nextResourceState);
+          setIsCalculationLoading(false);
         });
       }
     }

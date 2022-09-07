@@ -3,7 +3,7 @@ import { downloadZip } from '../../util/downloadUtil';
 import { Button, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import {
   createPatientResourceString,
@@ -25,6 +25,7 @@ import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
 import { calculateMeasureReport } from '../calculation/MeasureCalculation';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -37,6 +38,7 @@ function PatientCreationPanel() {
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const setIsCalculationLoading = useSetRecoilState(calculationLoading);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -73,6 +75,7 @@ function PatientCreationPanel() {
       } else {
         resources = currentPatients[patientId]?.resources ?? [];
       }
+      setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
       produce(currentPatients, async draftState => {
         draftState[patientId] = {
@@ -81,15 +84,27 @@ function PatientCreationPanel() {
         };
 
         if (measureBundle.content) {
-          draftState[patientId].measureReport = await calculateMeasureReport(
-            draftState[patientId],
-            measureBundle.content,
-            measurementPeriod.start?.toISOString(),
-            measurementPeriod.end?.toISOString()
-          );
+          try {
+            draftState[patientId].measureReport = await calculateMeasureReport(
+              draftState[patientId],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              showNotification({
+                icon: <IconAlertCircle />,
+                title: 'Calculation Error',
+                message: error.message,
+                color: 'red'
+              });
+            }
+          }
         }
       }).then(nextPatientState => {
         setCurrentPatients(nextPatientState);
+        setIsCalculationLoading(false);
       });
     }
 

@@ -1,8 +1,10 @@
-import { createStyles, Grid } from '@mantine/core';
-import { useRecoilState } from 'recoil';
+import { Center, createStyles, Grid, Loader, Text } from '@mantine/core';
+import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { getPatientNameString } from '../../util/fhir';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { CircleCheck } from 'tabler-icons-react';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -21,14 +23,31 @@ export interface MeasureHighlightingPanelProps {
 }
 
 export default function MeasureHighlightingPanel({ patientId }: MeasureHighlightingPanelProps) {
-  const [currentPatients] = useRecoilState(patientTestCaseState);
+  const currentPatients = useRecoilValue(patientTestCaseState);
   const { classes } = useStyles();
+  const isCalculationLoading = useRecoilValue(calculationLoading);
 
   return (
     <>
-      <Grid>
+      <Grid justify="space-between">
         <Grid.Col span={4}>Patient Calculation: {getPatientNameString(currentPatients[patientId].patient)}</Grid.Col>
-        <Grid.Col span={3} offset={5}></Grid.Col>
+        <Center style={{ paddingRight: 5 }}>
+          {isCalculationLoading ? (
+            <Center>
+              <Loader size={40} />
+              <Text color="dimmed">
+                <i>Calculating...</i>
+              </Text>
+            </Center>
+          ) : (
+            <Center>
+              <CircleCheck color="green" size={40} />
+              <Text color="dimmed">
+                <i>Up to date</i>
+              </Text>
+            </Center>
+          )}
+        </Center>
       </Grid>
       <div className={classes.highlightedMarkup}>
         {parse(currentPatients[patientId].measureReport?.text?.div || '')}
