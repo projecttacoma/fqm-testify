@@ -338,6 +338,60 @@ const EXAMPLE_FIELD_CHOICE_TYPE_DATE: dateFieldInfo = {
 
 const EXAMPLE_PATH = 'testPath';
 
+const PATIENT_RESOURCE: fhir4.Patient = {
+  resourceType: 'Patient',
+  id: 'Patient1'
+};
+
+const PATIENT_RESOURCE_W_DETAILS: fhir4.Patient = {
+  resourceType: 'Patient',
+  id: 'Patient2',
+  identifier: [
+    {
+      system: 'http://example.com/test-id',
+      value: `test-patient-Patient2`
+    }
+  ],
+  gender: 'male',
+  name: [
+    {
+      family: 'Smith',
+      given: ['John']
+    }
+  ]
+};
+
+const ENCOUNTER_RESOURCE: fhir4.Encounter = {
+  resourceType: 'Encounter',
+  id: 'Encounter1',
+  status: 'finished',
+  class: { code: 'AMB' },
+  type: [
+    {
+      coding: [
+        {
+          system: 'https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html',
+          version: '2018',
+          code: 'G0438',
+          display: 'Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit'
+        }
+      ]
+    }
+  ]
+};
+
+const OBSERVATION_RESOURCE: fhir4.Observation = {
+  resourceType: 'Observation',
+  id: 'Observation1',
+  code: {
+    coding: [
+      {
+        code: 'Test Obs'
+      }
+    ]
+  },
+  status: 'final'
+};
 describe('getDataRequirementFiltersString', () => {
   test('returns an empty string for resource with no valuesets and no direct reference code', () => {
     expect(getDataRequirementFiltersString(DATA_REQUIREMENT_WITH_NO_VALUESETS_OR_DRC, VS_MAP)).toEqual('');
@@ -524,61 +578,6 @@ describe('createFHIRResourceString', () => {
     });
   });
 });
-
-const PATIENT_RESOURCE: fhir4.Patient = {
-  resourceType: 'Patient',
-  id: 'Patient1'
-};
-
-const PATIENT_RESOURCE_W_DETAILS: fhir4.Patient = {
-  resourceType: 'Patient',
-  id: 'Patient2',
-  identifier: [
-    {
-      system: 'http://example.com/test-id',
-      value: `test-patient-Patient2`
-    }
-  ],
-  gender: 'male',
-  name: [
-    {
-      family: 'Smith',
-      given: ['John']
-    }
-  ]
-};
-
-const ENCOUNTER_RESOURCE: fhir4.Encounter = {
-  resourceType: 'Encounter',
-  id: 'Encounter1',
-  status: 'finished',
-  class: { code: 'AMB' },
-  type: [
-    {
-      coding: [
-        {
-          system: 'https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html',
-          version: '2018',
-          code: 'G0438',
-          display: 'Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit'
-        }
-      ]
-    }
-  ]
-};
-
-const OBSERVATION_RESOURCE: fhir4.Observation = {
-  resourceType: 'Observation',
-  id: 'Observation1',
-  code: {
-    coding: [
-      {
-        code: 'Test Obs'
-      }
-    ]
-  },
-  status: 'final'
-};
 
 describe('createPatientBundle', () => {
   test('can create bundle just patient', () => {

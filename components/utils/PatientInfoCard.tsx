@@ -51,7 +51,7 @@ export default function PatientInfoCard({
             </Text>
           </div>
         </Grid.Col>
-        <Grid.Col span={5} offset={2} style={{ paddingRight: 0 }}>
+        <Grid.Col span={5} offset={2} style={{ paddingRight: 25 }}>
           <Center>
             <Tooltip label="Export Patient" openDelay={1000}>
               <Button
