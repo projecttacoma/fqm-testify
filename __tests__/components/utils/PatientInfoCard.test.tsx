@@ -13,7 +13,8 @@ const EXAMPLE_PATIENT: fhir4.Patient = {
 const MOCK_CALLBACK_PROPS: Omit<PatientInfoCardProps, 'patient'> = {
   onEditClick: jest.fn(),
   onDeleteClick: jest.fn(),
-  onExportClick: jest.fn()
+  onExportClick: jest.fn(),
+  onCopyClick: jest.fn()
 };
 
 describe('PatientInfoCard', () => {
@@ -45,6 +46,12 @@ describe('PatientInfoCard', () => {
     expect(screen.getByLabelText(/edit patient/i)).toBeInTheDocument();
   });
 
+  it('should render copy button', () => {
+    render(mantineRecoilWrap(<PatientInfoCard patient={EXAMPLE_PATIENT} {...MOCK_CALLBACK_PROPS} />));
+
+    expect(screen.getByLabelText(/copy patient/i)).toBeInTheDocument();
+  });
+
   it('should render delete button', () => {
     render(mantineRecoilWrap(<PatientInfoCard patient={EXAMPLE_PATIENT} {...MOCK_CALLBACK_PROPS} />));
 
@@ -61,6 +68,7 @@ describe('PatientInfoCard', () => {
     expect(MOCK_CALLBACK_PROPS.onExportClick).toHaveBeenCalledTimes(1);
     expect(MOCK_CALLBACK_PROPS.onEditClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onDeleteClick).toHaveBeenCalledTimes(0);
+    expect(MOCK_CALLBACK_PROPS.onCopyClick).toHaveBeenCalledTimes(0);
   });
 
   it('should call edit callback when button clicked', () => {
@@ -71,6 +79,20 @@ describe('PatientInfoCard', () => {
     fireEvent.click(editButton);
 
     expect(MOCK_CALLBACK_PROPS.onEditClick).toHaveBeenCalledTimes(1);
+    expect(MOCK_CALLBACK_PROPS.onExportClick).toHaveBeenCalledTimes(0);
+    expect(MOCK_CALLBACK_PROPS.onDeleteClick).toHaveBeenCalledTimes(0);
+    expect(MOCK_CALLBACK_PROPS.onCopyClick).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call copy callback when button clicked', () => {
+    render(mantineRecoilWrap(<PatientInfoCard patient={EXAMPLE_PATIENT} {...MOCK_CALLBACK_PROPS} />));
+
+    const editButton = screen.getByLabelText(/copy patient/i) as HTMLButtonElement;
+
+    fireEvent.click(editButton);
+
+    expect(MOCK_CALLBACK_PROPS.onCopyClick).toHaveBeenCalledTimes(1);
+    expect(MOCK_CALLBACK_PROPS.onEditClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onExportClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onDeleteClick).toHaveBeenCalledTimes(0);
   });
@@ -85,5 +107,6 @@ describe('PatientInfoCard', () => {
     expect(MOCK_CALLBACK_PROPS.onDeleteClick).toHaveBeenCalledTimes(1);
     expect(MOCK_CALLBACK_PROPS.onExportClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onEditClick).toHaveBeenCalledTimes(0);
+    expect(MOCK_CALLBACK_PROPS.onCopyClick).toHaveBeenCalledTimes(0);
   });
 });

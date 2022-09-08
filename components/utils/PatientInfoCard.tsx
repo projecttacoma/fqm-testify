@@ -1,10 +1,11 @@
 import { Button, Center, Divider, Grid, Paper, Sx, Text, Tooltip } from '@mantine/core';
 import React from 'react';
-import { Download, Edit, Trash } from 'tabler-icons-react';
+import { Copy, Download, Edit, Trash } from 'tabler-icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
 
 export interface PatientInfoCardProps {
   patient: fhir4.Patient;
+  onCopyClick: (...args: unknown[]) => void;
   onExportClick: (...args: unknown[]) => void;
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
@@ -13,6 +14,7 @@ export interface PatientInfoCardProps {
 
 export default function PatientInfoCard({
   patient,
+  onCopyClick,
   onExportClick,
   onEditClick,
   onDeleteClick,
@@ -49,7 +51,7 @@ export default function PatientInfoCard({
             </Text>
           </div>
         </Grid.Col>
-        <Grid.Col span={5} offset={2} style={{ paddingRight: 0 }}>
+        <Grid.Col span={5} offset={2} style={{ paddingRight: 25 }}>
           <Center>
             <Tooltip label="Export Patient" openDelay={1000}>
               <Button
@@ -73,6 +75,18 @@ export default function PatientInfoCard({
                 size="xs"
               >
                 <Edit />
+              </Button>
+            </Tooltip>
+            <Tooltip label="Copy Patient" openDelay={1000}>
+              <Button
+                size="xs"
+                aria-label={'Copy Patient'}
+                onClick={() => {
+                  onCopyClick();
+                }}
+                variant="subtle"
+              >
+                <Copy />
               </Button>
             </Tooltip>
             <Divider sx={{ height: '48px' }} size="xs" orientation="vertical" />

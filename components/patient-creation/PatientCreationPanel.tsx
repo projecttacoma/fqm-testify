@@ -5,7 +5,13 @@ import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
-import { createPatientResourceString, getPatientNameString, createPatientBundle } from '../../util/fhir';
+import {
+  createPatientResourceString,
+  getPatientNameString,
+  createPatientBundle,
+  createCopiedPatientResource,
+  createCopiedResources
+} from '../../util/fhir';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import React, { ReactNode, useState } from 'react';
@@ -22,6 +28,7 @@ import PopulationCalculation from '../calculation/PopulationCalculation';
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [currentPatient, setCurrentPatient] = useState<string | null>(null);
+  const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -30,9 +37,14 @@ function PatientCreationPanel() {
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
 
-  const openPatientModal = (patientId?: string) => {
+  const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
-      setCurrentPatient(patientId);
+      if (copy) {
+        setCurrentPatient(null);
+        setCopiedPatient(patientId);
+      } else {
+        setCurrentPatient(patientId);
+      }
     } else {
       setCurrentPatient(null);
     }
@@ -43,20 +55,27 @@ function PatientCreationPanel() {
   const closePatientModal = () => {
     setIsPatientModalOpen(false);
     setCurrentPatient(null);
+    setCopiedPatient(null);
   };
 
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
     const pt = JSON.parse(val.trim()) as fhir4.Patient;
-
     if (pt.id) {
       const patientId = pt.id;
 
+      let resources: fhir4.FhirResource[];
+      // save new resources for a copied patient
+      if (copiedPatient) {
+        const pat = currentPatients[copiedPatient];
+        resources = createCopiedResources(pat.resources, pat.patient.id ?? '', patientId);
+      } else {
+        resources = currentPatients[patientId]?.resources ?? [];
+      }
       // Create a new state object using immer without needing to shallow clone the entire previous object
       const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = { patient: pt, resources: currentPatients[patientId]?.resources ?? [] };
+        draftState[patientId] = { patient: pt, resources: resources };
       });
-
       setCurrentPatients(nextPatientState);
     }
 
@@ -98,6 +117,10 @@ function PatientCreationPanel() {
     if (isPatientModalOpen) {
       if (currentPatient) {
         return JSON.stringify(currentPatients[currentPatient].patient, null, 2);
+      } else if (copiedPatient) {
+        // Create copy of copiedPatient
+        const patient = createCopiedPatientResource(currentPatients[copiedPatient].patient);
+        return JSON.stringify(patient, null, 2);
       } else {
         // Default to age 21 at time of measurement period, if specified
         const birthDate = measurementPeriod.start ? new Date(measurementPeriod.start) : new Date();
@@ -310,6 +333,7 @@ function PatientCreationPanel() {
               >
                 <PatientInfoCard
                   patient={testCase.patient}
+                  onCopyClick={() => openPatientModal(id, true)}
                   onExportClick={() => exportPatientTestCase(id)}
                   onEditClick={() => openPatientModal(id)}
                   onDeleteClick={() => openConfirmationModal()}

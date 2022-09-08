@@ -40,6 +40,64 @@ export function createPatientResourceString(birthDate: string): string {
 }
 
 /**
+ * Creates copies of all passed in resources (without references maintained) and gives them
+ * new resource ids. Replaces all patient references to the patient oldId with newId
+ * @param copyResources {fhir4.FhirResource[]} array of fhir resources to be copied
+ * @param oldId {String} a patient id that the copyResources may reference
+ * @param newId {String} a patient id that should replace oldId in references
+ * @returns {fhir4.FhirResource[]} array of new resource copies
+ */
+export function createCopiedResources(
+  copyResources: fhir4.FhirResource[],
+  oldId: string,
+  newId: string
+): fhir4.FhirResource[] {
+  const resources: fhir4.FhirResource[] = copyResources.map(cr => {
+    let resourceString = JSON.stringify(cr);
+    const idRegexp = new RegExp(`Patient/${oldId}`, 'g');
+    resourceString = resourceString.replace(idRegexp, `Patient/${newId}`);
+    const resource: fhir4.FhirResource = JSON.parse(resourceString);
+    resource.id = uuidv4();
+    // Note: this does not update potential cross-resource references, which we may want to support in the future
+    return resource;
+  });
+  return resources;
+}
+
+/**
+ * Creates a copy of the passed in patient object (without references maintained) and updates the
+ * id and identifier as well as creating a new name to differentiate the new patient copy
+ * @param copyPatient {fhir4.Patient} a fhir Patient object to copy
+ * @returns {fhir4.Patient} the new fhir patient copy
+ */
+export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.Patient {
+  const patient: fhir4.Patient = _.cloneDeep(copyPatient);
+  const identifier = patient.identifier?.find(id => id.system === 'http://example.com/test-id');
+  patient.id = uuidv4();
+  if (identifier) {
+    identifier.value = `test-patient-${patient.id}`;
+  } else {
+    const newIdentifier: fhir4.Identifier = {
+      use: 'usual',
+      system: 'http://example.com/test-id',
+      value: `test-patient-${patient.id}`
+    };
+    if (patient.identifier) {
+      patient.identifier.push(newIdentifier);
+    } else {
+      patient.identifier = [newIdentifier];
+    }
+  }
+  if (patient.name && patient.name.length > 0) {
+    patient.name[0] = {
+      family: getRandomLastName(),
+      given: [getRandomFirstName(patient.gender === 'male' ? 'male' : 'female')] // future should handle non-binary
+    };
+  }
+  return patient;
+}
+
+/**
  * Identifies the primary code path of a resource and constructs a string which displays
  * resource summary information depending on what is a available. If a resource
  * does not include a path for it's primaryCodePath, then it finds a path on that resource
