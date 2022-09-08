@@ -80,7 +80,6 @@ export default function PatientInfoCard({
             <Tooltip label="Copy Patient" openDelay={1000}>
               <Button
                 size="xs"
-                data-testid="copy-patient-button"
                 aria-label={'Copy Patient'}
                 onClick={() => {
                   onCopyClick();
