@@ -24,7 +24,6 @@ import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
-import { FhirResource } from '@fhir-typescript/r4-core/dist/fhirJson';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
