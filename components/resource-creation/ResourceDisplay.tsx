@@ -101,6 +101,7 @@ function ResourceDisplay() {
   };
 
   const updateResource = (val: string) => {
+    closeResourceModal();
     const updatedResource = JSON.parse(val.trim());
 
     if (updatedResource.id) {
@@ -126,10 +127,10 @@ function ResourceDisplay() {
         });
       }
     }
-    closeResourceModal();
   };
 
   const deleteResource = (id: string | null) => {
+    closeConfirmationModal();
     if (id && selectedPatient) {
       const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
       if (resourceIndexToDelete >= 0) {
@@ -144,7 +145,6 @@ function ResourceDisplay() {
         });
       }
     }
-    closeConfirmationModal();
   };
 
   const getInitialResource = () => {

@@ -15,6 +15,7 @@ export async function calculateMeasureReport(
   const options: CalculatorTypes.CalculationOptions = {
     calculateHTML: true,
     calculateSDEs: true,
+    calculateClauseCoverage: false,
     reportType: 'individual',
     measurementPeriodStart: mpStart,
     measurementPeriodEnd: mpEnd
