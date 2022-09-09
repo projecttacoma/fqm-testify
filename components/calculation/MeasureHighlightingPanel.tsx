@@ -4,7 +4,7 @@ import parse from 'html-react-parser';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { getPatientNameString } from '../../util/fhir';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
-import { CircleCheck } from 'tabler-icons-react';
+import { AlignLeft, CircleCheck } from 'tabler-icons-react';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -31,7 +31,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
     <>
       <Grid justify="space-between">
         <Grid.Col span={4}>Patient Calculation: {getPatientNameString(currentPatients[patientId].patient)}</Grid.Col>
-        <Center style={{ paddingRight: 5 }}>
+        <Center style={{ paddingRight: 10, paddingTop: 10, right: 20, position: 'fixed' }}>
           {isCalculationLoading ? (
             <Center>
               <Loader size={40} />
