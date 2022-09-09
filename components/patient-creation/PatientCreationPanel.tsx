@@ -80,7 +80,7 @@ function PatientCreationPanel() {
       produce(currentPatients, async draftState => {
         draftState[patientId] = {
           patient: pt,
-          resources: currentPatients[patientId]?.resources ?? []
+          resources: resources
         };
 
         if (measureBundle.content) {

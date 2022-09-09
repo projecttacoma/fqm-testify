@@ -1,6 +1,6 @@
 import { Button, Center, Text } from '@mantine/core';
 import Link from 'next/link';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import TestCaseEditor from '../components/TestCaseEditor';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -20,8 +20,7 @@ const TestCaseEditorPage: NextPage = () => {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
 
   // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
-
-  const refreshMeasureReports = useCallback(() => {
+  useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
       setIsCalculationLoading(true);
@@ -50,12 +49,10 @@ const TestCaseEditorPage: NextPage = () => {
         setIsCalculationLoading(false);
       });
     }
-  }, [currentPatients, end, measureBundle.content, setCurrentPatients, setIsCalculationLoading, start]);
-
-  // have to disable eslint for the following line because we only want to run the effect once
-  // in order to do this, we have an empty dependencies array but that gives us a warning
-  // eslint-disable-next-line
-  useEffect(refreshMeasureReports, []);
+    // have to disable eslint for the following line because we only want to run the effect once
+    // in order to do this, we have an empty dependencies array but that gives us a warning
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <>

@@ -119,12 +119,10 @@ function ResourceDisplay() {
             draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
           }
           // re-run measure report calculations for updated state
-          measureReportCalculation(draftState, selectedPatient);
+          await measureReportCalculation(draftState, selectedPatient);
         }).then(nextResourceState => {
-          setTimeout(() => {
-            setCurrentTestCases(nextResourceState);
-            setIsCalculationLoading(false);
-          }, 2000);
+          setCurrentTestCases(nextResourceState);
+          setIsCalculationLoading(false);
         });
       }
     }
@@ -139,7 +137,7 @@ function ResourceDisplay() {
         produce(currentTestCases, async draftState => {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
           // re-run measure report calculations for updated state
-          measureReportCalculation(draftState, selectedPatient);
+          await measureReportCalculation(draftState, selectedPatient);
         }).then(nextResourceState => {
           setCurrentTestCases(nextResourceState);
           setIsCalculationLoading(false);
