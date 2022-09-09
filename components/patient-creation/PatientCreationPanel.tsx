@@ -24,7 +24,7 @@ import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
-import { calculateMeasureReport } from '../calculation/MeasureCalculation';
+import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 
 function PatientCreationPanel() {

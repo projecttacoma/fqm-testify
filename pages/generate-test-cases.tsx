@@ -7,7 +7,7 @@ import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import type { NextPage } from 'next';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
-import { calculateMeasureReport } from '../components/calculation/MeasureCalculation';
+import { calculateMeasureReport } from '../util/MeasureCalculation';
 import produce from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';

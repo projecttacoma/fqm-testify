@@ -1,10 +1,17 @@
-// A helper function that takes in a patient test case, a measure bundle
-
 import { Calculator, CalculatorTypes } from 'fqm-execution';
-import { TestCaseInfo } from '../../state/atoms/patientTestCase';
-import { createPatientBundle } from '../../util/fhir';
+import { TestCaseInfo } from '../state/atoms/patientTestCase';
+import { createPatientBundle } from './fhir';
 
-// and a measure period and returns a measureReport
+/**
+ * Takes in a patient's test case info, a measure bundle, and a measurement
+ * period start and end and returns a measureReport
+ * passed in filename and fileContents
+ * @param patientTestCase {TestCaseInfo}
+ * @param mb {fhir4.Bundle}
+ * @param mpStart {string}
+ * @param mpEnd {string}
+ * @returns MeasureReport
+ */
 export async function calculateMeasureReport(
   patientTestCase: TestCaseInfo,
   mb: fhir4.Bundle,

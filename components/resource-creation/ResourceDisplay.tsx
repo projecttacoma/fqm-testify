@@ -5,16 +5,17 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
-import { calculateMeasureReport } from '../calculation/MeasureCalculation';
+import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
+import { WritableDraft } from 'immer/dist/internal';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -77,6 +78,28 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
+  const measureReportCalculation = async (draftState: WritableDraft<TestCase>, selectedPatient: string) => {
+    if (measureBundle.content) {
+      try {
+        draftState[selectedPatient].measureReport = await calculateMeasureReport(
+          draftState[selectedPatient],
+          measureBundle.content,
+          measurementPeriod.start?.toISOString(),
+          measurementPeriod.end?.toISOString()
+        );
+      } catch (error) {
+        if (error instanceof Error) {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'Calculation Error',
+            message: error.message,
+            color: 'red'
+          });
+        }
+      }
+    }
+  };
+
   const updateResource = (val: string) => {
     const updatedResource = JSON.parse(val.trim());
 
@@ -96,25 +119,7 @@ function ResourceDisplay() {
             draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
           }
           // re-run measure report calculations for updated state
-          if (measureBundle.content) {
-            try {
-              draftState[selectedPatient].measureReport = await calculateMeasureReport(
-                draftState[selectedPatient],
-                measureBundle.content,
-                measurementPeriod.start?.toISOString(),
-                measurementPeriod.end?.toISOString()
-              );
-            } catch (error) {
-              if (error instanceof Error) {
-                showNotification({
-                  icon: <IconAlertCircle />,
-                  title: 'Calculation Error',
-                  message: error.message,
-                  color: 'red'
-                });
-              }
-            }
-          }
+          measureReportCalculation(draftState, selectedPatient);
         }).then(nextResourceState => {
           setTimeout(() => {
             setCurrentTestCases(nextResourceState);
@@ -134,25 +139,7 @@ function ResourceDisplay() {
         produce(currentTestCases, async draftState => {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
           // re-run measure report calculations for updated state
-          if (measureBundle.content) {
-            try {
-              draftState[selectedPatient].measureReport = await calculateMeasureReport(
-                draftState[selectedPatient],
-                measureBundle.content,
-                measurementPeriod.start?.toISOString(),
-                measurementPeriod.end?.toISOString()
-              );
-            } catch (error) {
-              if (error instanceof Error) {
-                showNotification({
-                  icon: <IconAlertCircle />,
-                  title: 'Calculation Error',
-                  message: error.message,
-                  color: 'red'
-                });
-              }
-            }
-          }
+          measureReportCalculation(draftState, selectedPatient);
         }).then(nextResourceState => {
           setCurrentTestCases(nextResourceState);
           setIsCalculationLoading(false);
