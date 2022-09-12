@@ -101,50 +101,54 @@ function ResourceDisplay() {
   };
 
   const updateResource = (val: string) => {
+    setIsResourceModalOpen(false);
     closeResourceModal();
-    const updatedResource = JSON.parse(val.trim());
+    setIsCalculationLoading(true);
+    setTimeout(() => {
+      const updatedResource = JSON.parse(val.trim());
+      if (updatedResource.id) {
+        const resourceId = updatedResource.id;
 
-    if (updatedResource.id) {
-      const resourceId = updatedResource.id;
-
-      // Create a new state object using immer without needing to shallow clone the entire previous object
-      if (selectedPatient) {
-        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-        setIsCalculationLoading(true);
-        produce(currentTestCases, async draftState => {
-          if (resourceIndexToUpdate < 0) {
-            // add new resource
-            draftState[selectedPatient].resources.push(updatedResource);
-          } else {
-            // update existing resource
-            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
-          }
-          // re-run measure report calculations for updated state
-          await measureReportCalculation(draftState, selectedPatient);
-        }).then(nextResourceState => {
-          setCurrentTestCases(nextResourceState);
-          setIsCalculationLoading(false);
-        });
+        // Create a new state object using immer without needing to shallow clone the entire previous object
+        if (selectedPatient) {
+          const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+          produce(currentTestCases, async draftState => {
+            if (resourceIndexToUpdate < 0) {
+              // add new resource
+              draftState[selectedPatient].resources.push(updatedResource);
+            } else {
+              // update existing resource
+              draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+            }
+            // re-run measure report calculations for updated state
+            await measureReportCalculation(draftState, selectedPatient);
+          }).then(nextResourceState => {
+            setCurrentTestCases(nextResourceState);
+            setIsCalculationLoading(false);
+          });
+        }
       }
-    }
+    }, 400);
   };
 
   const deleteResource = (id: string | null) => {
     closeConfirmationModal();
-    if (id && selectedPatient) {
-      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
-      if (resourceIndexToDelete >= 0) {
-        setIsCalculationLoading(true);
-        produce(currentTestCases, async draftState => {
-          draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
-          // re-run measure report calculations for updated state
-          await measureReportCalculation(draftState, selectedPatient);
-        }).then(nextResourceState => {
-          setCurrentTestCases(nextResourceState);
-          setIsCalculationLoading(false);
-        });
+    setIsCalculationLoading(true);
+    setTimeout(() => {
+      if (id && selectedPatient) {
+        const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+        if (resourceIndexToDelete >= 0) {
+          produce(currentTestCases, async draftState => {
+            draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
+            // re-run measure report calculations for updated state
+            await measureReportCalculation(draftState, selectedPatient);
+          }).then(nextResourceState => {
+            setCurrentTestCases(nextResourceState);
+            setIsCalculationLoading(false);
+          });
+        }
       }
-    }
+    }, 400);
   };
 
   const getInitialResource = () => {
