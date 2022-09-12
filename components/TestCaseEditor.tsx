@@ -14,6 +14,10 @@ const useStyles = createStyles({
   panel: {
     maxHeight: '100%',
     overflow: 'scroll'
+  },
+  header: {
+    maxHeight: '100%',
+    overflow: 'hidden'
   }
 });
 
@@ -48,7 +52,7 @@ export default function TestCaseEditor() {
         >
           <ResourcePanel />
         </Grid.Col>
-        <Grid.Col span={6} className={classes.panel} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
+        <Grid.Col span={6} className={classes.header} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
           {selectedPatient ? (
             <Grid justify="space-between">
               <Grid.Col span={4}>
