@@ -45,7 +45,7 @@ export default function ResourceSelection() {
         ref={drSelectRef}
         maxDropdownHeight={500}
         searchable
-        placeholder="Select FHIR Resource"
+        placeholder="Select FHIR Resource (from Data Requirements)"
         value=""
         data={
           dataRequirements?.map((dr, i) => {
