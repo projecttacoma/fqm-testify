@@ -40,9 +40,9 @@ export default function ResourcePanel() {
           draftState[selectedPatient].resources.push(newResource);
         });
         setCurrentPatients(nextResourceState);
+        setIsNewResourceModalOpen(false);
       }
     }
-    setIsNewResourceModalOpen(false);
   };
 
   const renderPanelPlaceholderText = () => {
