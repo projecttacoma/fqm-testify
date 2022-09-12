@@ -1,6 +1,6 @@
 import { Button, Center, Divider, Text } from '@mantine/core';
 import { v4 as uuidv4 } from 'uuid';
-import { IconCodePlus } from '@tabler/icons';
+import { IconAlertCircle, IconCodePlus } from '@tabler/icons';
 import { Suspense, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { Loader } from 'tabler-icons-react';
@@ -11,6 +11,7 @@ import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import ResourceDisplay from './ResourceDisplay';
 import ResourceSelection from './ResourceSelection';
+import { showNotification } from '@mantine/notifications';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
@@ -25,10 +26,21 @@ export default function ResourcePanel() {
       if (!newResource.id) {
         newResource.id = uuidv4();
       }
-      const nextResourceState = produce(currentPatients, draftState => {
-        draftState[selectedPatient].resources.push(newResource);
-      });
-      setCurrentPatients(nextResourceState);
+      const resourceIndex = currentPatients[selectedPatient].resources.findIndex(r => r.id === newResource.id);
+      if (resourceIndex >= 0) {
+        showNotification({
+          id: 'failed-upload',
+          icon: <IconAlertCircle />,
+          title: 'Resource Creation Failed',
+          message: `Resource ID ${newResource.id} is used for an existing resource for this patient.`,
+          color: 'red'
+        });
+      } else {
+        const nextResourceState = produce(currentPatients, draftState => {
+          draftState[selectedPatient].resources.push(newResource);
+        });
+        setCurrentPatients(nextResourceState);
+      }
     }
     setIsNewResourceModalOpen(false);
   };
@@ -70,7 +82,7 @@ export default function ResourcePanel() {
           }}
         >
           <ResourceSelection />
-          <Center>Or</Center>
+          <Center>or</Center>
           <Center>
             <Button
               aria-label="Add New Custom Resource"

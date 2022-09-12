@@ -91,7 +91,7 @@ describe('ResourcePanel', () => {
     expect(addNewResourceButton).toBeInTheDocument();
   });
 
-  it('should render modal when Add New Resource button is clicked', async () => {
+  it('should render modal when Add New Custom Resource button is clicked', async () => {
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
     const MockPatientState = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
