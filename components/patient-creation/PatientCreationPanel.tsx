@@ -61,6 +61,37 @@ function PatientCreationPanel() {
     setCopiedPatient(null);
   };
 
+  const measureReportCalculation = async (id: string) => {
+    if (!currentPatients[id].measureReport) {
+      setIsCalculationLoading(true);
+      // Create a new state object using immer without needing to shallow clone the entire previous object
+      produce(currentPatients, async draftState => {
+        if (measureBundle.content) {
+          try {
+            draftState[id].measureReport = await calculateMeasureReport(
+              draftState[id],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              showNotification({
+                icon: <IconAlertCircle />,
+                title: 'Calculation Error',
+                message: error.message,
+                color: 'red'
+              });
+            }
+          }
+        }
+      }).then(nextPatientState => {
+        setCurrentPatients(nextPatientState);
+        setIsCalculationLoading(false);
+      });
+    }
+  };
+
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
     const pt = JSON.parse(val.trim()) as fhir4.Patient;
@@ -82,7 +113,6 @@ function PatientCreationPanel() {
           patient: pt,
           resources: resources
         };
-
         if (measureBundle.content) {
           try {
             draftState[patientId].measureReport = await calculateMeasureReport(
@@ -358,6 +388,7 @@ function PatientCreationPanel() {
                 key={id}
                 onClick={() => {
                   setSelectedPatient(id);
+                  measureReportCalculation(id);
                 }}
               >
                 <PatientInfoCard

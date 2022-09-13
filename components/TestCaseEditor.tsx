@@ -1,4 +1,4 @@
-import { Center, createStyles, Grid, Loader, Text } from '@mantine/core';
+import { Center, createStyles, Grid, Loader, Stack, Text } from '@mantine/core';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
@@ -16,8 +16,11 @@ const useStyles = createStyles({
     overflow: 'scroll'
   },
   header: {
-    maxHeight: '100%',
-    overflow: 'hidden'
+    maxHeight: '100%'
+  },
+  highlighting: {
+    maxHeight: 'calc(100% - 50px)',
+    overflow: 'scroll'
   }
 });
 
@@ -53,35 +56,37 @@ export default function TestCaseEditor() {
           <ResourcePanel />
         </Grid.Col>
         <Grid.Col span={6} className={classes.header} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
-          {selectedPatient ? (
-            <Grid justify="space-between">
-              <Grid.Col span={4}>
-                Patient Calculation: {getPatientNameString(currentPatients[selectedPatient].patient)}
-              </Grid.Col>
-              <Center style={{ paddingRight: 20 }}>
-                {isCalculationLoading ? (
-                  <Center>
-                    <Loader size={40} />
-                    <Text color="dimmed">
-                      <i>Calculating...</i>
-                    </Text>
-                  </Center>
-                ) : (
-                  <Center>
-                    <CircleCheck color="green" size={40} />
-                    <Text color="dimmed">
-                      <i>Up to date</i>
-                    </Text>
-                  </Center>
-                )}
-              </Center>
-            </Grid>
-          ) : (
-            renderPanelPlaceholderText()
-          )}
-          <Grid.Col className={classes.panel}>
+          <Stack style={{ height: 50 }}>
+            {selectedPatient ? (
+              <Grid justify="space-between">
+                <Grid.Col span={4}>
+                  Patient Calculation: {getPatientNameString(currentPatients[selectedPatient].patient)}
+                </Grid.Col>
+                <Center style={{ paddingRight: 20 }}>
+                  {isCalculationLoading ? (
+                    <Center>
+                      <Loader size={40} />
+                      <Text color="dimmed">
+                        <i>Calculating...</i>
+                      </Text>
+                    </Center>
+                  ) : (
+                    <Center>
+                      <CircleCheck color="green" size={40} />
+                      <Text color="dimmed">
+                        <i>Up to date</i>
+                      </Text>
+                    </Center>
+                  )}
+                </Center>
+              </Grid>
+            ) : (
+              renderPanelPlaceholderText()
+            )}
+          </Stack>
+          <Stack className={classes.highlighting}>
             {selectedPatient ? <MeasureHighlightingPanel patientId={selectedPatient} /> : ''}
-          </Grid.Col>
+          </Stack>
         </Grid.Col>
       </Grid>
     </>
