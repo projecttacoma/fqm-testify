@@ -69,7 +69,7 @@ Test patients can be created in the app by clicking on the "Create" button in th
 
 #### Importing a Patient Bundle
 
-Test cases can be imported by clicking the "Import" button in the left panel, which will open a file dropzone which accepts JSON files of FHIR Patient Bundles and `.zip` files composed of FHIR Patient Bundles. Patient Bundles may contain additional FHIR resources. These FHIR resources are also loaded into the app and will belong to the patient contained in the Patient Bundle.
+Test cases can be imported by clicking the "Import" button in the left panel, which will open a file dropzone that accepts JSON files of FHIR Patient Bundles and `.zip` files composed of FHIR Patient Bundles. Patient Bundles may contain additional FHIR resources. These FHIR resources are also loaded into the app and will belong to the patient contained in the Patient Bundle.
 
 #### Creating Non-Patient Test Resources
 
@@ -87,11 +87,11 @@ FQM-Testify allows for exporting of all test cases by clicking the "Download All
 
 ### Running Measure Calculation on a Test Case
 
-FQM-Testify allows for running measure calculation on a single test case for a given measure. Selecting a patient entry triggers calculation and displays logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) in the right panel. The measure calculation will automatically be regenerated if non-patient test resources are added to the patient.
+FQM-Testify allows for running measure calculation on a single test case for a given measure. Selecting a patient entry triggers calculation and displays logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) in the right panel. The measure calculation automatically regenerates if non-patient test resources are added to the patient.
 
 ### Running Measure Calculation on All Test Cases
 
-FQM-Testify enables users to run measure calculation on all test cases in addition to just one test case. Once a FHIR Measure and at least one test case are uploaded, the user can run measure calculation on all the created patients by clicking the Calculate Population Results button. Using calcuation from [the fqm-execution library](https://github.com/projecttacoma/fqm-execution), the population results for each patient appear in a population results table, with a row for each patient, labeled with the patient's name and date of birth. The population result table can be hidden or shown as well as regenerated if test cases are added.
+FQM-Testify enables users to run measure calculation on all test cases in addition to just one test case. Once a FHIR Measure and at least one test case are uploaded, the user can run measure calculation on all the created patients by clicking the Calculate Population Results button in the left panel. Using calculation from [the fqm-execution library](https://github.com/projecttacoma/fqm-execution), the population results for each patient appear in a population results table, with a row for each patient, labeled with the patient's name and date of birth. The population result table can be hidden or shown as well as regenerated if test cases are added.
 
 Once calculation has finished, the user can access an HTML representation of the clauses covered by the test cases that were passed into the calculation. This can be accessed by clicking on the "Show Clause Coverage" button.
 
