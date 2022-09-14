@@ -73,7 +73,7 @@ Test cases can be imported by clicking the "Import" button in the left panel, wh
 
 #### Creating Non-Patient Test Resources
 
-FQM-Testify allows the user to create non-Patient FHIR resources after at least one Patient resource is created in or imported to the app. To create a FHIR resource for a test patient, first select the test patient from the left panel. Once selected, FHIR resources can be created from the middle panel in two ways.
+FQM-Testify allows the user to create non-patient FHIR resources after at least one patient resource is created in or imported to the app. To create a FHIR resource for a test patient, first select the test patient from the left panel. Once selected, FHIR resources can be created from the middle panel in two ways.
 
 (1) Resources can be created by selecting a resource from the dropdown list of resource templates. These resource templates are based on the FHIR `dataRequirements` of the uploaded measure (`dataRequirements` calculations and all other FHIR eCQM calculation in the app is done using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution)). Upon selection, a code editor modal will open, pre-populated with the resource. The user can edit the resource and save it for future use.
 
@@ -87,7 +87,11 @@ FQM-Testify allows for exporting of all test cases by clicking the "Download All
 
 ### Running Measure Calculation on a Test Case
 
-FQM-Testify allows for running measure calculation on a single test case for a given measure. Selecting a patient entry triggers calculation and displays logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) in the right panel. The measure calculation automatically regenerates if non-patient test resources are added to the patient.
+FQM-Testify can run measure calculation on a single test case for a given measure. Selecting a patient entry triggers calculation and displays logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) in the right panel. Measure calculation automatically regenerates for a patient if:
+- non-patient test resources are added for the patient
+- existing test resources that belong to the patient are edited
+- the patient resource itself is edited
+- the measure bundle and/or measurement period are changed
 
 ### Running Measure Calculation on All Test Cases
 
