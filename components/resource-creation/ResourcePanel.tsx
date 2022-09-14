@@ -2,7 +2,7 @@ import { Button, Center, Divider, Text } from '@mantine/core';
 import { v4 as uuidv4 } from 'uuid';
 import { IconAlertCircle, IconCodePlus } from '@tabler/icons';
 import { Suspense, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Loader } from 'tabler-icons-react';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -12,11 +12,18 @@ import CodeEditorModal from '../modals/CodeEditorModal';
 import ResourceDisplay from './ResourceDisplay';
 import ResourceSelection from './ResourceSelection';
 import { showNotification } from '@mantine/notifications';
+import { calculateMeasureReport } from '../../util/MeasureCalculation';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const [isNewResourceModalOpen, setIsNewResourceModalOpen] = useState(false);
+  const setIsCalculationLoading = useSetRecoilState(calculationLoading);
+  const measureBundle = useRecoilValue(measureBundleState);
+  const measurementPeriod = useRecoilValue(measurementPeriodState);
 
   const createNewResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -36,11 +43,33 @@ export default function ResourcePanel() {
           color: 'red'
         });
       } else {
-        const nextResourceState = produce(currentPatients, draftState => {
+        produce(currentPatients, async draftState => {
           draftState[selectedPatient].resources.push(newResource);
+          setIsCalculationLoading(true);
+          if (measureBundle.content) {
+            try {
+              draftState[selectedPatient].measureReport = await calculateMeasureReport(
+                draftState[selectedPatient],
+                measureBundle.content,
+                measurementPeriod.start?.toISOString(),
+                measurementPeriod.end?.toISOString()
+              );
+            } catch (error) {
+              if (error instanceof Error) {
+                showNotification({
+                  icon: <IconAlertCircle />,
+                  title: 'Calculation Error',
+                  message: error.message,
+                  color: 'red'
+                });
+              }
+            }
+          }
+        }).then(nextResourceState => {
+          setCurrentPatients(nextResourceState);
+          setIsCalculationLoading(false);
+          setIsNewResourceModalOpen(false);
         });
-        setCurrentPatients(nextResourceState);
-        setIsNewResourceModalOpen(false);
       }
     }
   };
