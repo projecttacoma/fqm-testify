@@ -1,16 +1,21 @@
 import { Stack } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
+import { calculateMeasureReport } from '../../util/MeasureCalculation';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { showNotification } from '@mantine/notifications';
+import { IconAlertCircle } from '@tabler/icons';
+import { WritableDraft } from 'immer/dist/internal';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -21,6 +26,7 @@ function ResourceDisplay() {
   const selectedPatient = useRecoilValue(selectedPatientState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const setIsCalculationLoading = useSetRecoilState(calculationLoading);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -72,44 +78,77 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const updateResource = (val: string) => {
-    const updatedResource = JSON.parse(val.trim());
-
-    if (updatedResource.id) {
-      const resourceId = updatedResource.id;
-
-      // Create a new state object using immer without needing to shallow clone the entire previous object
-      if (selectedPatient) {
-        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-        let nextResourceState;
-        if (resourceIndexToUpdate < 0) {
-          // add new resource
-          nextResourceState = produce(currentTestCases, draftState => {
-            draftState[selectedPatient].resources.push(updatedResource);
-          });
-        } else {
-          // update existing resource
-          nextResourceState = produce(currentTestCases, draftState => {
-            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+  const measureReportCalculation = async (draftState: WritableDraft<TestCase>, selectedPatient: string) => {
+    if (measureBundle.content) {
+      try {
+        draftState[selectedPatient].measureReport = await calculateMeasureReport(
+          draftState[selectedPatient],
+          measureBundle.content,
+          measurementPeriod.start?.toISOString(),
+          measurementPeriod.end?.toISOString()
+        );
+      } catch (error) {
+        if (error instanceof Error) {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'Calculation Error',
+            message: error.message,
+            color: 'red'
           });
         }
-        setCurrentTestCases(nextResourceState);
       }
     }
+  };
+
+  const updateResource = (val: string) => {
+    setIsResourceModalOpen(false);
     closeResourceModal();
+    setIsCalculationLoading(true);
+    setTimeout(() => {
+      const updatedResource = JSON.parse(val.trim());
+      if (updatedResource.id) {
+        const resourceId = updatedResource.id;
+
+        // Create a new state object using immer without needing to shallow clone the entire previous object
+        if (selectedPatient) {
+          const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+          produce(currentTestCases, async draftState => {
+            if (resourceIndexToUpdate < 0) {
+              // add new resource
+              draftState[selectedPatient].resources.push(updatedResource);
+            } else {
+              // update existing resource
+              draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+            }
+            // re-run measure report calculations for updated state
+            await measureReportCalculation(draftState, selectedPatient);
+          }).then(nextResourceState => {
+            setCurrentTestCases(nextResourceState);
+            setIsCalculationLoading(false);
+          });
+        }
+      }
+    }, 400);
   };
 
   const deleteResource = (id: string | null) => {
-    if (id && selectedPatient) {
-      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
-      if (resourceIndexToDelete >= 0) {
-        const nextResourceState = produce(currentTestCases, draftState => {
-          draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
-        });
-        setCurrentTestCases(nextResourceState);
-      }
-    }
     closeConfirmationModal();
+    setIsCalculationLoading(true);
+    setTimeout(() => {
+      if (id && selectedPatient) {
+        const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+        if (resourceIndexToDelete >= 0) {
+          produce(currentTestCases, async draftState => {
+            draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
+            // re-run measure report calculations for updated state
+            await measureReportCalculation(draftState, selectedPatient);
+          }).then(nextResourceState => {
+            setCurrentTestCases(nextResourceState);
+            setIsCalculationLoading(false);
+          });
+        }
+      }
+    }, 400);
   };
 
   const getInitialResource = () => {

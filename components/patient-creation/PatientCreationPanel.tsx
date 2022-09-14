@@ -3,7 +3,7 @@ import { downloadZip } from '../../util/downloadUtil';
 import { Button, Group, Stack } from '@mantine/core';
 import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import {
   createPatientResourceString,
@@ -24,6 +24,8 @@ import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
+import { calculateMeasureReport } from '../../util/MeasureCalculation';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -36,6 +38,7 @@ function PatientCreationPanel() {
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const setIsCalculationLoading = useSetRecoilState(calculationLoading);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -58,6 +61,37 @@ function PatientCreationPanel() {
     setCopiedPatient(null);
   };
 
+  const measureReportCalculation = async (id: string) => {
+    if (!currentPatients[id].measureReport) {
+      setIsCalculationLoading(true);
+      // Create a new state object using immer without needing to shallow clone the entire previous object
+      produce(currentPatients, async draftState => {
+        if (measureBundle.content) {
+          try {
+            draftState[id].measureReport = await calculateMeasureReport(
+              draftState[id],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              showNotification({
+                icon: <IconAlertCircle />,
+                title: 'Calculation Error',
+                message: error.message,
+                color: 'red'
+              });
+            }
+          }
+        }
+      }).then(nextPatientState => {
+        setCurrentPatients(nextPatientState);
+        setIsCalculationLoading(false);
+      });
+    }
+  };
+
   const updatePatientTestCase = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
     const pt = JSON.parse(val.trim()) as fhir4.Patient;
@@ -72,11 +106,36 @@ function PatientCreationPanel() {
       } else {
         resources = currentPatients[patientId]?.resources ?? [];
       }
+      setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      const nextPatientState = produce(currentPatients, draftState => {
-        draftState[patientId] = { patient: pt, resources: resources };
+      produce(currentPatients, async draftState => {
+        draftState[patientId] = {
+          patient: pt,
+          resources: resources
+        };
+        if (measureBundle.content) {
+          try {
+            draftState[patientId].measureReport = await calculateMeasureReport(
+              draftState[patientId],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              showNotification({
+                icon: <IconAlertCircle />,
+                title: 'Calculation Error',
+                message: error.message,
+                color: 'red'
+              });
+            }
+          }
+        }
+      }).then(nextPatientState => {
+        setCurrentPatients(nextPatientState);
+        setIsCalculationLoading(false);
       });
-      setCurrentPatients(nextPatientState);
     }
 
     closePatientModal();
@@ -329,6 +388,7 @@ function PatientCreationPanel() {
                 key={id}
                 onClick={() => {
                   setSelectedPatient(id);
+                  measureReportCalculation(id);
                 }}
               >
                 <PatientInfoCard
