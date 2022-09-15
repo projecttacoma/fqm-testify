@@ -27,7 +27,6 @@ export default function CodeEditorModal({
 
   return (
     <Modal
-      zIndex={2}
       centered
       size={1000}
       withCloseButton={false}

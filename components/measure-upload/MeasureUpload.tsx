@@ -70,10 +70,10 @@ export default function MeasureUpload() {
             color: 'red'
           })
         }
-        accept={['.json']}
+        accept={['application/json']}
         multiple={false}
       >
-        {DropzoneChildren}
+        <DropzoneChildren />
       </Dropzone>
     </>
   );

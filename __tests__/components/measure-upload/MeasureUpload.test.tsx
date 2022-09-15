@@ -14,8 +14,6 @@ describe('MeasureUpload', () => {
   it('renders a dropzone with generic label when no measure uploaded', () => {
     render(mantineRecoilWrap(<MeasureUpload />));
 
-    const dropzone = screen.getByRole('button');
-    expect(dropzone).toBeInTheDocument();
     const title = screen.getByText('Drag a Measure Bundle JSON file here or click to select files');
     expect(title).toBeInTheDocument();
   });
@@ -45,7 +43,7 @@ describe('MeasureUpload', () => {
       );
     });
 
-    const dropzone = screen.getByRole('button');
+    const dropzone = screen.getByRole('presentation');
     expect(dropzone).toBeInTheDocument();
     const title = screen.getByText('testName');
     expect(title).toBeInTheDocument();

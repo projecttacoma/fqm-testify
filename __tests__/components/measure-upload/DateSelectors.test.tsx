@@ -7,6 +7,14 @@ import { act } from 'react-dom/test-utils';
 import { DateTime } from 'luxon';
 
 describe('DateSelectors', () => {
+  beforeAll(() => {
+    window.ResizeObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn()
+    }));
+  });
+
   it('renders two date selectors with proper labels', () => {
     render(mantineRecoilWrap(<DateSelectors />));
 

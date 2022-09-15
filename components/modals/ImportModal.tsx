@@ -91,7 +91,6 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
 
   return (
     <Modal
-      zIndex={2}
       centered
       size="xl"
       withCloseButton={true}
@@ -102,17 +101,20 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
     >
       <Grid>
         <Grid.Col span={12}>
-          <Dropzone data-testid="import-dropzone" onDrop={handleDrop} accept={['.json', '.zip']} multiple={true}>
-            {() => (
-              <Grid justify="center">
-                <Grid.Col span={12}>
-                  <Center>{files.length === 0 ? <IconFileImport size={80} /> : <IconFileCheck size={80} />}</Center>
-                </Grid.Col>
-                <Grid.Col>
-                  <Center>{renderFileDisplay()}</Center>
-                </Grid.Col>
-              </Grid>
-            )}
+          <Dropzone
+            data-testid="import-dropzone"
+            onDrop={handleDrop}
+            accept={['application/json', 'application/zip']}
+            multiple={true}
+          >
+            <Grid justify="center">
+              <Grid.Col span={12}>
+                <Center>{files.length === 0 ? <IconFileImport size={80} /> : <IconFileCheck size={80} />}</Center>
+              </Grid.Col>
+              <Grid.Col>
+                <Center>{renderFileDisplay()}</Center>
+              </Grid.Col>
+            </Grid>
           </Dropzone>
           {showZipFileExpansion && (
             <>

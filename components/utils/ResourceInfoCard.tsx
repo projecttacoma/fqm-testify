@@ -16,7 +16,7 @@ export default function ResourceInfoCard({ resourceType, label, onEditClick, onD
         <Grid.Col span={9}>
           <Text>{resourceType}</Text>
           <Tooltip
-            wrapLines
+            multiline
             width={500}
             withArrow
             transition="fade"

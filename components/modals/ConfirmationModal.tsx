@@ -12,7 +12,6 @@ export default function ConfirmationModal({ open = true, onClose, title, onConfi
   return (
     <Modal
       data-testid="confirmation-modal"
-      zIndex={2}
       overflow="outside"
       opened={open}
       onClose={onClose}
