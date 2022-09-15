@@ -63,6 +63,16 @@ FQM-Testify is a React-based web application for analyzing FHIR-based electronic
 
 After starting up the app, begin by uploading a FHIR Measure Bundle JSON file from your local machine. The measurement period start and end pickers will update to reflect the `effectivePeriod` of the Measure resource in the uploaded bundle. There are two methods for adding test patients to the test case: in-app patient creation and Patient Bundle import.
 
+#### Adding ValueSets to FHIR Measure Bundle
+
+The user will see an error when uploading a FHIR Measure Bundle unless it has the following things: one measure resource, all dependent library resources used, and all ValueSets needed for measure calculation. If the Measure Bundle is missing ValueSets, then the user can add ValueSets by running [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) CLI with the following command:
+
+```bash
+./src/cli.ts valueSets -m <path to measure bundle> --vs-api-key <api key>
+```
+
+If you don't have a VSAC API key, look at the [fqm-execution README](https://github.com/projecttacoma/fqm-execution#valuesets) on how to get one.
+
 #### Creating a Test Patient
 
 Test patients can be created in the app by clicking on the "Create" button in the left panel. This opens a code editor modal with a pre-populated, randomly-generated FHIR Patient. The test patient can be edited from the modal and saved for future use.
