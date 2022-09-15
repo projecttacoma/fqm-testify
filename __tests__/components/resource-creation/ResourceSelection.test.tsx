@@ -154,7 +154,7 @@ describe('ResourceSelection', () => {
     const resourceSelector = screen.getByPlaceholderText(/select fhir resource/i) as HTMLInputElement;
 
     await act(async () => {
-      fireEvent.focus(resourceSelector);
+      fireEvent.click(resourceSelector);
     });
 
     expect(screen.getByText(/observation/i)).toBeInTheDocument();
