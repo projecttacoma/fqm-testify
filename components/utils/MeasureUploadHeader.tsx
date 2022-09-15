@@ -26,8 +26,10 @@ export default function MeasureUploadHeader() {
             <List.Item>All dependent library resources used</List.Item>
             <List.Item>
               All ValueSets needed for measure calculation (see{' '}
-              <Anchor href="https://github.com/projecttacoma/fqm-testify#adding-test-cases">here</Anchor> for more info
-              on how to obtain necessary ValueSets)
+              <Anchor href="https://github.com/projecttacoma/fqm-testify#adding-valuesets-to-fhir-measure-bundle">
+                here
+              </Anchor>{' '}
+              for more info on how to obtain necessary ValueSets)
             </List.Item>
           </List>
         </Popover>
