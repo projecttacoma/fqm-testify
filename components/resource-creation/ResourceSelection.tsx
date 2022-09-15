@@ -5,7 +5,7 @@ import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
-import React, { forwardRef, useRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import DataRequirementSelectOption from '../utils/DataRequirementSelectOption';
 import {
   dataRequirementsLookupState,
@@ -37,14 +37,15 @@ export default function ResourceSelection() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const dataRequirementsLookup = useRecoilValue(dataRequirementsLookupState);
 
-  const drSelectRef = useRef<HTMLInputElement>(null);
+  // Used to conditionally change the searchable prop of the select box
+  // Prevents a bug where the searchable prop caused dropdown to stay open after modal close
+  const [enableSearch, setEnableSearch] = useState(false);
 
   return dataRequirements?.length && Object.keys(currentPatients).length > 0 ? (
     <div>
       <Select
-        ref={drSelectRef}
+        searchable={enableSearch}
         maxDropdownHeight={500}
-        searchable
         placeholder="Select FHIR Resource (from Data Requirements)"
         value=""
         data={
@@ -60,11 +61,12 @@ export default function ResourceSelection() {
         onChange={val => {
           if (val) {
             const dr = dataRequirementsLookup[val];
-            if (drSelectRef.current) {
-              drSelectRef.current.blur();
-              setSelectedDataRequirement({ name: val, content: dr });
-            }
+            setSelectedDataRequirement({ name: val, content: dr });
+            setEnableSearch(false);
           }
+        }}
+        onDropdownOpen={() => {
+          setEnableSearch(true);
         }}
         itemComponent={DataRequirementSelectItem}
       />
