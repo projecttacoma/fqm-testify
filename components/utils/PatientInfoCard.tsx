@@ -2,6 +2,7 @@ import { Button, Center, Divider, Grid, Paper, Sx, Text, Tooltip } from '@mantin
 import React from 'react';
 import { Copy, Download, Edit, Trash } from 'tabler-icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
+import PopulationMultiSelect from './PopulationMultiSelect';
 
 export interface PatientInfoCardProps {
   patient: fhir4.Patient;
@@ -106,6 +107,7 @@ export default function PatientInfoCard({
           </Center>
         </Grid.Col>
       </Grid>
+      {selected && <PopulationMultiSelect />}
     </Paper>
   );
 }
