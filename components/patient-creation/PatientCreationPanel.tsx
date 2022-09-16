@@ -64,14 +64,15 @@ function PatientCreationPanel() {
   };
 
   const measureReportCalculation = async (id: string) => {
-    if (!currentPatients[id].measureReport) {
+    setSelectedPatient(id);
+    if (!measureReportLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(currentPatients, async draftState => {
+      produce(measureReportLookup, async draftState => {
         if (measureBundle.content) {
           try {
-            draftState[id].measureReport = await calculateMeasureReport(
-              draftState[id],
+            draftState[id] = await calculateMeasureReport(
+              currentPatients[id],
               measureBundle.content,
               measurementPeriod.start?.toISOString(),
               measurementPeriod.end?.toISOString()
@@ -87,8 +88,8 @@ function PatientCreationPanel() {
             }
           }
         }
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
+      }).then(nextMRLookupState => {
+        setMeasureReportLookup(nextMRLookupState);
         setIsCalculationLoading(false);
       });
     }

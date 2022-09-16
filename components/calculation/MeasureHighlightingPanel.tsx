@@ -25,7 +25,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
 
   return (
     <>
-      <div className={classes.highlightedMarkup}>{parse(measureReportLookup[patientId].text?.div || '')}</div>
+      <div className={classes.highlightedMarkup}>{parse(measureReportLookup[patientId]?.text?.div || '')}</div>
     </>
   );
 }
