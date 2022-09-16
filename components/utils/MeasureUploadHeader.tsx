@@ -22,7 +22,7 @@ export default function MeasureUploadHeader() {
         >
           The uploaded Measure Bundle must contain:
           <List>
-            <List.Item>One measure resource</List.Item>
+            <List.Item>Exactly one measure resource</List.Item>
             <List.Item>All dependent library resources used</List.Item>
             <List.Item>
               All ValueSets needed for measure calculation (see{' '}

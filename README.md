@@ -65,7 +65,7 @@ After starting up the app, begin by uploading a FHIR Measure Bundle JSON file fr
 
 #### Adding ValueSets to FHIR Measure Bundle
 
-The user will see an error when uploading a FHIR Measure Bundle unless it has the following things: one measure resource, all dependent library resources used, and all ValueSets needed for measure calculation. If the Measure Bundle is missing ValueSets, then the user can add ValueSets by running [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) CLI with the following command:
+The user will see an error when uploading a FHIR Measure Bundle unless it has the following things: exactly one measure resource, all dependent library resources used, and all ValueSets needed for measure calculation. If the Measure Bundle is missing ValueSets, then the user can add ValueSets by running [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) CLI with the following command:
 
 ```bash
 ./src/cli.ts valueSets -m <path to measure bundle> --vs-api-key <api key>
@@ -98,6 +98,7 @@ FQM-Testify allows for exporting of all test cases by clicking the "Download All
 ### Running Measure Calculation on a Test Case
 
 FQM-Testify can run measure calculation on a single test case for a given measure. Selecting a patient entry triggers calculation and displays logic highlighting using [the fqm-execution library](https://github.com/projecttacoma/fqm-execution) in the right panel. Measure calculation automatically regenerates for a patient if:
+
 - non-patient test resources are added for the patient
 - existing test resources that belong to the patient are edited
 - the patient resource itself is edited
