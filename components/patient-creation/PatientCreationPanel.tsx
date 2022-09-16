@@ -26,6 +26,7 @@ import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
 import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -39,6 +40,7 @@ function PatientCreationPanel() {
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
+  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -106,17 +108,21 @@ function PatientCreationPanel() {
       } else {
         resources = currentPatients[patientId]?.resources ?? [];
       }
-      setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(currentPatients, async draftState => {
+      const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
           resources: resources
         };
+      });
+      setCurrentPatients(nextPatientState);
+      setIsCalculationLoading(true);
+
+      produce(measureReportLookup, async draftState => {
         if (measureBundle.content) {
           try {
-            draftState[patientId].measureReport = await calculateMeasureReport(
-              draftState[patientId],
+            draftState[patientId] = await calculateMeasureReport(
+              nextPatientState[patientId],
               measureBundle.content,
               measurementPeriod.start?.toISOString(),
               measurementPeriod.end?.toISOString()
@@ -132,8 +138,8 @@ function PatientCreationPanel() {
             }
           }
         }
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
+      }).then(nextMRLookupState => {
+        setMeasureReportLookup(nextMRLookupState);
         setIsCalculationLoading(false);
       });
     }

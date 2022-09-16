@@ -1,7 +1,7 @@
 import { createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -20,14 +20,12 @@ export interface MeasureHighlightingPanelProps {
 }
 
 export default function MeasureHighlightingPanel({ patientId }: MeasureHighlightingPanelProps) {
-  const currentPatients = useRecoilValue(patientTestCaseState);
   const { classes } = useStyles();
+  const measureReportLookup = useRecoilValue(measureReportLookupState);
 
   return (
     <>
-      <div className={classes.highlightedMarkup}>
-        {parse(currentPatients[patientId].measureReport?.text?.div || '')}
-      </div>
+      <div className={classes.highlightedMarkup}>{parse(measureReportLookup[patientId].text?.div || '')}</div>
     </>
   );
 }

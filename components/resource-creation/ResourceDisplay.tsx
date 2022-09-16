@@ -16,6 +16,8 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { WritableDraft } from 'immer/dist/internal';
+import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
+import { MeasureReport } from 'fhir/r4';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -27,6 +29,7 @@ function ResourceDisplay() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
+  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -78,11 +81,15 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const measureReportCalculation = async (draftState: WritableDraft<TestCase>, selectedPatient: string) => {
+  const measureReportCalculation = async (
+    draftState: WritableDraft<Record<string, MeasureReport>>,
+    selectedPatient: string,
+    nextResourceState: TestCase
+  ) => {
     if (measureBundle.content) {
       try {
-        draftState[selectedPatient].measureReport = await calculateMeasureReport(
-          draftState[selectedPatient],
+        draftState[selectedPatient] = await calculateMeasureReport(
+          nextResourceState[selectedPatient],
           measureBundle.content,
           measurementPeriod.start?.toISOString(),
           measurementPeriod.end?.toISOString()
@@ -103,52 +110,56 @@ function ResourceDisplay() {
   const updateResource = (val: string) => {
     setIsResourceModalOpen(false);
     closeResourceModal();
-    setIsCalculationLoading(true);
-    setTimeout(() => {
-      const updatedResource = JSON.parse(val.trim());
-      if (updatedResource.id) {
-        const resourceId = updatedResource.id;
 
-        // Create a new state object using immer without needing to shallow clone the entire previous object
-        if (selectedPatient) {
-          const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-          produce(currentTestCases, async draftState => {
-            if (resourceIndexToUpdate < 0) {
-              // add new resource
-              draftState[selectedPatient].resources.push(updatedResource);
-            } else {
-              // update existing resource
-              draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
-            }
-            // re-run measure report calculations for updated state
-            await measureReportCalculation(draftState, selectedPatient);
-          }).then(nextResourceState => {
-            setCurrentTestCases(nextResourceState);
-            setIsCalculationLoading(false);
-          });
-        }
+    const updatedResource = JSON.parse(val.trim());
+    if (updatedResource.id) {
+      const resourceId = updatedResource.id;
+
+      // Create a new state object using immer without needing to shallow clone the entire previous object
+      if (selectedPatient) {
+        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+        const nextResourceState = produce(currentTestCases, draftState => {
+          if (resourceIndexToUpdate < 0) {
+            // add new resource
+            draftState[selectedPatient].resources.push(updatedResource);
+          } else {
+            // update existing resource
+            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+          }
+        });
+        setCurrentTestCases(nextResourceState);
+        setIsCalculationLoading(true);
+
+        produce(measureReportLookup, async draftState => {
+          await measureReportCalculation(draftState, selectedPatient, nextResourceState);
+        }).then(nextMRLookupState => {
+          setMeasureReportLookup(nextMRLookupState);
+          setIsCalculationLoading(false);
+        });
       }
-    }, 400);
+    }
   };
 
   const deleteResource = (id: string | null) => {
     closeConfirmationModal();
-    setIsCalculationLoading(true);
-    setTimeout(() => {
-      if (id && selectedPatient) {
-        const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+
+    if (id && selectedPatient) {
+      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+      const nextResourceState = produce(currentTestCases, draftState => {
         if (resourceIndexToDelete >= 0) {
-          produce(currentTestCases, async draftState => {
-            draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
-            // re-run measure report calculations for updated state
-            await measureReportCalculation(draftState, selectedPatient);
-          }).then(nextResourceState => {
-            setCurrentTestCases(nextResourceState);
-            setIsCalculationLoading(false);
-          });
+          draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
         }
-      }
-    }, 400);
+      });
+      setCurrentTestCases(nextResourceState);
+      setIsCalculationLoading(true);
+
+      produce(measureReportLookup, async draftState => {
+        await measureReportCalculation(draftState, selectedPatient, nextResourceState);
+      }).then(nextMRLookupState => {
+        setMeasureReportLookup(nextMRLookupState);
+        setIsCalculationLoading(false);
+      });
+    }
   };
 
   const getInitialResource = () => {
