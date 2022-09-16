@@ -1,6 +1,9 @@
 import { MultiSelect, Text } from '@mantine/core';
-import { useRecoilValue } from 'recoil';
+import produce from 'immer';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
+import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { selectedPatientState } from '../../state/atoms/selectedPatient';
 
 interface MultiSelectData {
   value: string;
@@ -8,6 +11,8 @@ interface MultiSelectData {
 }
 export default function PopulationMultiSelect() {
   const measureBundle = useRecoilValue(measureBundleState);
+  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
+  const selectedPatient = useRecoilValue(selectedPatientState);
   const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource;
 
   /**
@@ -31,6 +36,18 @@ export default function PopulationMultiSelect() {
     return measurePopulations;
   }
 
+  function updateDesiredPopulations(value: string[]){
+    console.log(value);
+    if (selectedPatient) {
+      produce(currentPatients, async draftState => {
+        draftState[selectedPatient].desiredPopulations = value;
+      }).then(nextPatientState => {
+        setCurrentPatients(nextPatientState);
+      })
+    }
+    console.log(currentPatients);
+  }
+
   if (measure) {
     const populations = getMeasurePopulations(measure as fhir4.Measure);
     return (
@@ -39,6 +56,9 @@ export default function PopulationMultiSelect() {
         label={'Desired Populations'}
         placeholder={'Select populations'}
         dropdownPosition="bottom"
+        clearable
+        onChange={updateDesiredPopulations}
+        value={selectedPatient ? currentPatients[selectedPatient].desiredPopulations : []}
       />
     );
   } else {
