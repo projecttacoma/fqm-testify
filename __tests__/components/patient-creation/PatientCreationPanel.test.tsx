@@ -93,7 +93,7 @@ describe('PatientCreationPanel', () => {
     expect(testPatientLabel).toBeInTheDocument();
   });
 
-  it('should render confirmation modal when delete button is clicked', () => {
+  it('should render confirmation modal when delete button is clicked', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -119,13 +119,15 @@ describe('PatientCreationPanel', () => {
     const deleteButton = screen.getByLabelText(/delete patient/i) as HTMLButtonElement;
     expect(deleteButton).toBeInTheDocument();
 
-    fireEvent.click(deleteButton);
+    await act(async () => {
+      fireEvent.click(deleteButton);
+    });
 
-    const confirmationModal = screen.getByRole('dialog');
+    const confirmationModal = screen.getByRole('dialog', { hidden: true });
     expect(confirmationModal).toBeInTheDocument();
   });
 
-  it('should render modal when copy button is clicked', () => {
+  it('should render modal when copy button is clicked', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -151,7 +153,9 @@ describe('PatientCreationPanel', () => {
     const copyButton = screen.getByLabelText(/copy patient/i) as HTMLButtonElement;
     expect(copyButton).toBeInTheDocument();
 
-    fireEvent.click(copyButton);
+    await act(async () => {
+      fireEvent.click(copyButton);
+    });
 
     const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
@@ -187,7 +191,10 @@ describe('PatientCreationPanel', () => {
     const exportButton = screen.getByLabelText(/export patient/i) as HTMLButtonElement;
     expect(exportButton).toBeInTheDocument();
 
-    fireEvent.click(exportButton);
+    await act(async () => {
+      fireEvent.click(exportButton);
+    });
+
     await waitFor(() => {
       expect(download).toBeCalledTimes(1);
     });

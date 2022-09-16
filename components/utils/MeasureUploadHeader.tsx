@@ -11,27 +11,26 @@ export default function MeasureUploadHeader() {
         <Text size="xl">Step 1: Upload a Measure Bundle</Text>
       </div>
       <div>
-        <Popover
-          opened={opened}
-          onClose={() => setOpened(false)}
-          target={
+        <Popover opened={opened} onClose={() => setOpened(false)}>
+          <Popover.Target>
             <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
               <InfoCircle size={20} />
             </ActionIcon>
-          }
-        >
-          The uploaded Measure Bundle must contain:
-          <List>
-            <List.Item>Exactly one measure resource</List.Item>
-            <List.Item>All dependent library resources used</List.Item>
-            <List.Item>
-              All ValueSets needed for measure calculation (see{' '}
-              <Anchor href="https://github.com/projecttacoma/fqm-testify#adding-valuesets-to-fhir-measure-bundle">
-                here
-              </Anchor>{' '}
-              for more info on how to obtain necessary ValueSets)
-            </List.Item>
-          </List>
+          </Popover.Target>
+          <Popover.Dropdown>
+            The uploaded Measure Bundle must contain:
+            <List>
+              <List.Item>Exactly one measure resource</List.Item>
+              <List.Item>All dependent library resources used</List.Item>
+              <List.Item>
+                All ValueSets needed for measure calculation (see{' '}
+                <Anchor href="https://github.com/projecttacoma/fqm-testify#adding-valuesets-to-fhir-measure-bundle">
+                  here
+                </Anchor>{' '}
+                for more info on how to obtain necessary ValueSets)
+              </List.Item>
+            </List>
+          </Popover.Dropdown>
         </Popover>
       </div>
     </Group>
