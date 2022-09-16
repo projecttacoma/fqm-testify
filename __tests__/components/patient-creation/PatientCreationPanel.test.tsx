@@ -123,7 +123,7 @@ describe('PatientCreationPanel', () => {
       fireEvent.click(deleteButton);
     });
 
-    const confirmationModal = screen.getByRole('dialog');
+    const confirmationModal = screen.getByRole('dialog', { hidden: true });
     expect(confirmationModal).toBeInTheDocument();
   });
 
