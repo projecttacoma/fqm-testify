@@ -161,7 +161,11 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         delete draftState[id];
       });
+      const nextResourceState = produce(measureReportLookup, draftState => {
+        delete draftState[id];
+      });
       setCurrentPatients(nextPatientState);
+      setMeasureReportLookup(nextResourceState);
       // Set the selected patient to null because the selected patient will not longer exist after it is deleted
       setSelectedPatient(null);
       closeConfirmationModal();
