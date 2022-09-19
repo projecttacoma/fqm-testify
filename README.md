@@ -81,6 +81,10 @@ Test patients can be created in the app by clicking on the "Create" button in th
 
 Test cases can be imported by clicking the "Import" button in the left panel, which will open a file dropzone that accepts JSON files of FHIR Patient Bundles and `.zip` files composed of FHIR Patient Bundles. Patient Bundles may contain additional FHIR resources. These FHIR resources are also loaded into the app and will belong to the patient contained in the Patient Bundle.
 
+#### Selecting Desired Measure Populations
+
+For each test patient, the user has the option to select the population(s) for which the patient should belong during testing. Use the dropdown to select the desired population(s). See the [eCQM documentation on population criteria](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria) for more information.
+
 #### Creating Non-Patient Test Resources
 
 FQM-Testify allows the user to create non-patient FHIR resources after at least one patient resource is created in or imported to the app. To create a FHIR resource for a test patient, first select the test patient from the left panel. Once selected, FHIR resources can be created from the middle panel in two ways.
