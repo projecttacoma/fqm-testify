@@ -1,4 +1,5 @@
-import { MultiSelect, Text } from '@mantine/core';
+import { Group, MultiSelect, Popover, Text, ActionIcon } from '@mantine/core';
+import { InfoCircle } from 'tabler-icons-react';
 import produce from 'immer';
 import { Enums } from 'fqm-execution';
 import { useState } from 'react';
@@ -12,16 +13,19 @@ interface MultiSelectData {
   label: string;
   disabled: boolean;
 }
+
 export default function PopulationMultiSelect() {
   const measureBundle = useRecoilValue(measureBundleState);
-  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
-  const [value, setValue] = useState<string[]>([]);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource;
+  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
+  const [value, setValue] = useState<string[]>(selectedPatient ? currentPatients[selectedPatient].desiredPopulations || []: []);
+  const [opened, setOpened] = useState(false);
 
   /**
    * Compiles an array of population codes from the measure resource,
-   * across all groups in the measure.
+   * across all groups in the measure. Excludes measure-population, measure-population-exclusion,
+   * and measure-observation (used for CV measures);
    * @param {fhir4.Measure} measure - FHIR measure resource
    * @returns {Array} array of strings representing all measure populations
    */
@@ -48,6 +52,11 @@ export default function PopulationMultiSelect() {
     return measurePopulations;
   };
 
+  /**
+   * Sets desired populations state based on measure populations selected from
+   * MultiSelect component, and includes relevant supset populations.
+   * @param value array of selected options from MultiSelect component
+   */
   const updateDesiredPopulations = (value: string[]) => {
     const newDesiredPopulations = value;
     if (selectedPatient) {
@@ -65,7 +74,6 @@ export default function PopulationMultiSelect() {
         newDesiredPopulations.push(Enums.PopulationType.DENOM);
       }
       produce(currentPatients, async draftState => {
-        // change this to be concatenated with whatever is needed with the logic
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
       }).then(nextPatientState => {
         setCurrentPatients(nextPatientState);
@@ -74,6 +82,14 @@ export default function PopulationMultiSelect() {
     }
   };
 
+  /**
+   * Uses the selected populations from the MultiSelect component to determine which
+   * populations can be selected, based on population criteria. If a population cannot
+   * be selected because it cannot be selected in conjunction with a population that has
+   * already been selected, the population will become disabled in the dropdown.
+   * @param populations all measure populations available for the measure
+   * @returns array of filtered populations that can be selected
+   */
   const updateMeasurePopulations = (populations: MultiSelectData[]): MultiSelectData[] => {
     // disable denominator exclusion if denominator selected
     if (value.includes(Enums.PopulationType.DENOM)) {
@@ -114,7 +130,6 @@ export default function PopulationMultiSelect() {
       );
       disabledPops.forEach(pop => (pop.disabled = true));
     }
-
     return populations;
   };
 
@@ -123,13 +138,27 @@ export default function PopulationMultiSelect() {
     return (
       <MultiSelect
         data={populations}
-        label={'Desired Populations'}
+        label={
+          <Group>
+          Desired Populations
+          <div>
+          <Popover opened={opened} onClose={() => setOpened(false)}>
+            <Popover.Target>
+              <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
+                <InfoCircle size={20} />
+              </ActionIcon>
+            </Popover.Target>
+            <Popover.Dropdown>
+              A measure population is disabled if a patient cannot belong to both the disabled population and the selected population(s).
+            </Popover.Dropdown>
+          </Popover>
+        </div></Group>}
         placeholder={'Select populations'}
         dropdownPosition="bottom"
         clearable
         onChange={updateDesiredPopulations}
         value={value}
-      />
+      /> 
     );
   } else {
     return <Text>Measure populations not available</Text>;
