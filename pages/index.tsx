@@ -8,7 +8,7 @@ import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { useRecoilValue } from 'recoil';
 import MeasureUploadHeader from '../components/utils/MeasureUploadHeader';
-import DateSelectorHeader from '../components/utils/DateSelectorsHeader';
+import DateSelectorsHeader from '../components/utils/DateSelectorsHeader';
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
             <MeasureUploadHeader />
             <MeasureUpload />
             <Space />
-            <DateSelectorHeader />
+            <DateSelectorsHeader />
             <DateSelectors />
             <Link href={'/generate-test-cases'}>
               <Group position="right">

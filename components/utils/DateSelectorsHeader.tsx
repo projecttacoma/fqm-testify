@@ -1,7 +1,7 @@
 import { Text, Group } from '@mantine/core';
 import React from 'react';
 
-export default function DateSelectorHeader() {
+export default function DateSelectorsHeader() {
   return (
     <Group>
       <div style={{ paddingRight: 5 }}>
