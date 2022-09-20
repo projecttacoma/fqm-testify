@@ -26,9 +26,9 @@ export default function PopulationMultiSelect() {
   const [opened, setOpened] = useState(false);
 
   /**
-   * Compiles an array of data for the MultiSelect component, using population codes 
-   * from the measure resource, across all groups in the measure. 
-   * 
+   * Compiles an array of data for the MultiSelect component, using population codes
+   * from the measure resource, across all groups in the measure.
+   *
    * Excludes measure-population, measure-population-exclusion, and measure-observation
    * (used for CV measures).
    * @param {fhir4.Measure} measure - FHIR measure resource
@@ -60,7 +60,7 @@ export default function PopulationMultiSelect() {
   };
 
   /**
-   * Sets desired populations state (for the selected patient) based on the measure 
+   * Sets desired populations state (for the selected patient) based on the measure
    * populations selected from MultiSelect component and their relevant supset populations.
    * @param value array of selected options from MultiSelect component
    */
@@ -95,12 +95,12 @@ export default function PopulationMultiSelect() {
   /**
    * Uses the selected populations from the MultiSelect component to determine which
    * populations can be selected, based on the population criteria.
-   * If a population cannot be selected in conjunction with a population that has already been selected, 
+   * If a population cannot be selected in conjunction with a population that has already been selected,
    * the population will become disabled in the dropdown.
-   * 
-   * Based on population criteria for proportion measures: 
+   *
+   * Based on population criteria for proportion measures:
    * https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria
-   * 
+   *
    * @param populations all measure populations available for the measure
    * @returns array of filtered populations that can be selected
    */
