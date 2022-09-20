@@ -17,9 +17,12 @@ interface MultiSelectData {
 export default function PopulationMultiSelect() {
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource;
+  const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')
+    ?.resource as fhir4.Measure;
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
-  const [value, setValue] = useState<string[]>(selectedPatient ? currentPatients[selectedPatient].desiredPopulations || []: []);
+  const [value, setValue] = useState<string[]>(
+    selectedPatient ? currentPatients[selectedPatient].desiredPopulations || [] : []
+  );
   const [opened, setOpened] = useState(false);
 
   /**
@@ -134,31 +137,36 @@ export default function PopulationMultiSelect() {
   };
 
   if (measure) {
-    const populations = updateMeasurePopulations(getMeasurePopulations(measure as fhir4.Measure));
+    const populations = updateMeasurePopulations(getMeasurePopulations(measure));
     return (
       <MultiSelect
         data={populations}
+        aria-expanded={true}
         label={
           <Group>
-          Desired Populations
-          <div>
-          <Popover opened={opened} onClose={() => setOpened(false)}>
-            <Popover.Target>
-              <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
-                <InfoCircle size={20} />
-              </ActionIcon>
-            </Popover.Target>
-            <Popover.Dropdown>
-              A measure population is disabled if a patient cannot belong to both the disabled population and the selected population(s).
-            </Popover.Dropdown>
-          </Popover>
-        </div></Group>}
+            Desired Populations
+            <div>
+              <Popover opened={opened} onClose={() => setOpened(false)}>
+                <Popover.Target>
+                  <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
+                    <InfoCircle size={20} />
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  A measure population is disabled if a patient cannot belong to both the disabled population and the
+                  selected population(s).
+                </Popover.Dropdown>
+              </Popover>
+            </div>
+          </Group>
+        }
         placeholder={'Select populations'}
         dropdownPosition="bottom"
+        searchable={true}
         clearable
         onChange={updateDesiredPopulations}
         value={value}
-      /> 
+      />
     );
   } else {
     return <Text>Measure populations not available</Text>;

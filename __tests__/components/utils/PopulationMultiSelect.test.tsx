@@ -1,13 +1,11 @@
 import '@testing-library/jest-dom';
 import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import { Suspense } from 'react';
-import PatientCreationPanel from '../../../components/patient-creation/PatientCreationPanel';
-import PatientInfoCard, { PatientInfoCardProps } from '../../../components/utils/PatientInfoCard';
 import PopulationMultiSelect from '../../../components/utils/PopulationMultiSelect';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
-import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
+import { getMockRecoilState, mantineRecoilWrap, mockResizeObserver } from '../../helpers/testHelpers';
 
 const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
   resourceType: 'Bundle',
@@ -33,21 +31,6 @@ const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
                 criteria: {
                   language: 'text/cql.identifier',
                   expression: 'Denominator'
-                }
-              },
-              {
-                code: {
-                  coding: [
-                    {
-                      system: 'test-system',
-                      code: 'numerator',
-                      display: 'Numerator'
-                    }
-                  ]
-                },
-                criteria: {
-                  language: 'text/cql.identifier',
-                  expression: 'Numerator'
                 }
               }
             ]
@@ -77,15 +60,27 @@ const MOCK_TEST_CASE: TestCase = {
   }
 };
 
-const MOCK_CALLBACK_PROPS: Omit<PatientInfoCardProps, 'patient'> = {
-  onEditClick: jest.fn(),
-  onDeleteClick: jest.fn(),
-  onExportClick: jest.fn(),
-  onCopyClick: jest.fn()
-};
-
 describe('PopulationMultiSelect', () => {
-  it('should show populations as options', async () => {
+  it('should render an information popover', () => {
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
+    const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
+
+    render(
+      mantineRecoilWrap(
+        <>
+          <MockMB />
+          <MockPatients />
+          <MockSelectedPatient />
+          <PopulationMultiSelect />
+        </>
+      )
+    );
+
+    expect(screen.getByLabelText(/more information/i)).toBeInTheDocument();
+  });
+
+  it('should render a select box for selecting measure populations', async () => {
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
@@ -95,21 +90,52 @@ describe('PopulationMultiSelect', () => {
         mantineRecoilWrap(
           <>
             <MockMB />
-            <PopulationMultiSelect />
+            <MockPatients />
+            <MockSelectedPatient />
+            <Suspense>
+              <PopulationMultiSelect />
+            </Suspense>
           </>
         )
       );
     });
 
-    const populationSelector = screen.getByPlaceholderText(/select populations/i) as HTMLInputElement;
+    const populationSelector = screen.getByRole('combobox');
+    expect(populationSelector).toBeInTheDocument();
+  });
+
+  it('should show populations as options', async () => {
+    window.ResizeObserver = mockResizeObserver;
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
+    const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
+    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
+
     await act(async () => {
-      fireEvent.click(populationSelector);
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <MockSelectedPatient />
+            <Suspense>
+              <PopulationMultiSelect />
+            </Suspense>
+          </>
+        )
+      );
     });
 
-    // const options = screen.getAllByRole('option');
-    // expect(options[0].textContent).toBe('denominator');
+    const autocomplete = screen.getByRole('combobox');
+    const input = within(autocomplete).getByRole('searchbox');
+    autocomplete.focus();
 
-    //expect(within(populationSelector).getByText(/denominator/i)).toBeInTheDocument();
-    //expect(screen.getByText(/numerator/i)).toBeInTheDocument();
+    //mocks user key clicks to test the input fields and drop down menus
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'D' } });
+      fireEvent.keyDown(autocomplete, { key: 'ArrowDown' });
+      fireEvent.keyDown(autocomplete, { key: 'Enter' });
+    });
+
+    expect(screen.getByText(/denominator/i)).toBeInTheDocument();
   });
 });
