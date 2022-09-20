@@ -26,23 +26,27 @@ export default function PopulationMultiSelect() {
   const [opened, setOpened] = useState(false);
 
   /**
-   * Compiles an array of population codes from the measure resource,
-   * across all groups in the measure. Excludes measure-population, measure-population-exclusion,
-   * and measure-observation (used for CV measures);
+   * Compiles an array of data for the MultiSelect component, using population codes 
+   * from the measure resource, across all groups in the measure. 
+   * 
+   * Excludes measure-population, measure-population-exclusion, and measure-observation
+   * (used for CV measures).
    * @param {fhir4.Measure} measure - FHIR measure resource
-   * @returns {Array} array of strings representing all measure populations
+   * @returns {Array} array of strings representing all unique measure populations
    */
   const getMeasurePopulations = (measure: fhir4.Measure): Array<MultiSelectData> => {
     const measurePopulations: MultiSelectData[] = [];
+    const EXCLUDED_MEASURES = ['measure-population', 'measure-population-exclusion', 'measure-observation'];
     // Iterate over measure population groups
     measure.group?.forEach(group => {
       group.population?.forEach(population => {
         const populationCode = population.code?.coding?.[0].code;
         const populationDisplay = population.code?.coding?.[0].display;
+        // TODO: determine handling of populations that are not permitted for proportion measures
         if (
           populationCode &&
           !measurePopulations.map(p => p.value).includes(populationCode) &&
-          !['measure-population', 'measure-population-exclusion', 'measure-observation'].includes(populationCode)
+          !EXCLUDED_MEASURES.includes(populationCode)
         ) {
           measurePopulations.push({
             value: populationCode,
@@ -56,8 +60,8 @@ export default function PopulationMultiSelect() {
   };
 
   /**
-   * Sets desired populations state based on measure populations selected from
-   * MultiSelect component, and includes relevant supset populations.
+   * Sets desired populations state (for the selected patient) based on the measure 
+   * populations selected from MultiSelect component and their relevant supset populations.
    * @param value array of selected options from MultiSelect component
    */
   const updateDesiredPopulations = (value: string[]) => {
@@ -67,7 +71,7 @@ export default function PopulationMultiSelect() {
       if (value.length > 0 && !value.includes(Enums.PopulationType.IPP)) {
         newDesiredPopulations.push(Enums.PopulationType.IPP);
       }
-      // add denominator if numerator, numer exclusion, or denom exception are selected
+      // add denominator if numerator, numerator exclusion, or denominator exception are selected
       if (
         [Enums.PopulationType.NUMER, Enums.PopulationType.NUMEX, Enums.PopulationType.DENEXCEP].some(p =>
           value.includes(p)
@@ -76,20 +80,27 @@ export default function PopulationMultiSelect() {
       ) {
         newDesiredPopulations.push(Enums.PopulationType.DENOM);
       }
+
+      // update the desired populations state
       produce(currentPatients, async draftState => {
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
       }).then(nextPatientState => {
         setCurrentPatients(nextPatientState);
       });
+      // update value that appears in MultiSelect component
       setValue(newDesiredPopulations);
     }
   };
 
   /**
    * Uses the selected populations from the MultiSelect component to determine which
-   * populations can be selected, based on population criteria. If a population cannot
-   * be selected because it cannot be selected in conjunction with a population that has
-   * already been selected, the population will become disabled in the dropdown.
+   * populations can be selected, based on the population criteria.
+   * If a population cannot be selected in conjunction with a population that has already been selected, 
+   * the population will become disabled in the dropdown.
+   * 
+   * Based on population criteria for proportion measures: 
+   * https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria
+   * 
    * @param populations all measure populations available for the measure
    * @returns array of filtered populations that can be selected
    */
@@ -100,7 +111,7 @@ export default function PopulationMultiSelect() {
       if (denex) denex.disabled = true;
     }
 
-    // disable all other populations if denominator exclusion selected
+    // disable all other populations (aside from IPP) if denominator exclusion selected
     if (value.includes(Enums.PopulationType.DENEX)) {
       const disabledPops = populations.filter(e => e.value !== Enums.PopulationType.IPP);
       disabledPops.forEach(pop => (pop.disabled = true));
@@ -141,7 +152,6 @@ export default function PopulationMultiSelect() {
     return (
       <MultiSelect
         data={populations}
-        aria-expanded={true}
         label={
           <Group>
             Desired Populations

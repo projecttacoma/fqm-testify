@@ -104,7 +104,7 @@ describe('PopulationMultiSelect', () => {
     expect(populationSelector).toBeInTheDocument();
   });
 
-  it('should show populations as options', async () => {
+  it('should show population from measure group as a dropdown option', async () => {
     window.ResizeObserver = mockResizeObserver;
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
@@ -125,15 +125,15 @@ describe('PopulationMultiSelect', () => {
       );
     });
 
-    const autocomplete = screen.getByRole('combobox');
-    const input = within(autocomplete).getByRole('searchbox');
-    autocomplete.focus();
+    const multiselect = screen.getByRole('combobox');
+    const input = within(multiselect).getByRole('searchbox');
+    multiselect.focus();
 
-    //mocks user key clicks to test the input fields and drop down menus
+    // mock user key clicks to test input fields and drop down menus
     await act(async () => {
       fireEvent.change(input, { target: { value: 'D' } });
-      fireEvent.keyDown(autocomplete, { key: 'ArrowDown' });
-      fireEvent.keyDown(autocomplete, { key: 'Enter' });
+      fireEvent.keyDown(multiselect, { key: 'ArrowDown' });
+      fireEvent.keyDown(multiselect, { key: 'Enter' });
     });
 
     expect(screen.getByText(/denominator/i)).toBeInTheDocument();

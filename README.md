@@ -83,7 +83,7 @@ Test cases can be imported by clicking the "Import" button in the left panel, wh
 
 #### Selecting Desired Measure Populations
 
-For each test patient, the user has the option to select the population(s) for which the patient should belong during testing. Use the dropdown to select the desired population(s). See the [eCQM documentation on population criteria](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria) for more information.
+For each test patient, the user has the option to select the population(s) for which the patient should belong during measure calculation. Use the dropdown on the selected patient's information card to select the desired population(s). See the [eCQM documentation on population criteria](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria) for more information.
 
 #### Creating Non-Patient Test Resources
 
