@@ -108,7 +108,6 @@ function ResourceDisplay() {
   };
 
   const updateResource = (val: string) => {
-    setIsResourceModalOpen(false);
     closeResourceModal();
 
     const updatedResource = JSON.parse(val.trim());
@@ -130,12 +129,14 @@ function ResourceDisplay() {
         setCurrentTestCases(nextResourceState);
         setIsCalculationLoading(true);
 
-        produce(measureReportLookup, async draftState => {
-          await measureReportCalculation(draftState, selectedPatient, nextResourceState);
-        }).then(nextMRLookupState => {
-          setMeasureReportLookup(nextMRLookupState);
-          setIsCalculationLoading(false);
-        });
+        setTimeout(() => {
+          produce(measureReportLookup, async draftState => {
+            await measureReportCalculation(draftState, selectedPatient, nextResourceState);
+          }).then(nextMRLookupState => {
+            setMeasureReportLookup(nextMRLookupState);
+            setIsCalculationLoading(false);
+          });
+        }, 400);
       }
     }
   };
@@ -153,12 +154,14 @@ function ResourceDisplay() {
       setCurrentTestCases(nextResourceState);
       setIsCalculationLoading(true);
 
-      produce(measureReportLookup, async draftState => {
-        await measureReportCalculation(draftState, selectedPatient, nextResourceState);
-      }).then(nextMRLookupState => {
-        setMeasureReportLookup(nextMRLookupState);
-        setIsCalculationLoading(false);
-      });
+      setTimeout(() => {
+        produce(measureReportLookup, async draftState => {
+          await measureReportCalculation(draftState, selectedPatient, nextResourceState);
+        }).then(nextMRLookupState => {
+          setMeasureReportLookup(nextMRLookupState);
+          setIsCalculationLoading(false);
+        });
+      }, 400);
     }
   };
 
