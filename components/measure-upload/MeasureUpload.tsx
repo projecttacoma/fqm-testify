@@ -1,6 +1,6 @@
 import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
-import { Grid, Center, Text, Group, Stack } from '@mantine/core';
+import { Grid, Center, Text, Stack } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -72,7 +72,7 @@ export default function MeasureUpload() {
         }
         accept={['application/json']}
         multiple={false}
-        style={{ height: 350 }}
+        style={{ minHeight: 200 }}
       >
         <DropzoneChildren />
       </Dropzone>
@@ -83,7 +83,7 @@ export default function MeasureUpload() {
 function DropzoneChildren() {
   const measureBundle = useRecoilValue(measureBundleState);
   return (
-    <Grid justify="center" align="center" style={{ height: 350 }}>
+    <Grid justify="center" align="center" style={{ minHeight: 200 }}>
       <Stack>
         <Center>{measureBundle.name ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}</Center>
         <Center>
