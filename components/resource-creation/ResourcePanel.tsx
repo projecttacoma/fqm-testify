@@ -51,33 +51,35 @@ export default function ResourcePanel() {
         setCurrentPatients(nextResourceState);
         setIsCalculationLoading(true);
 
-        produce(measureReportLookup, async draftState => {
-          if (measureBundle.content) {
-            try {
-              draftState[selectedPatient] = await calculateMeasureReport(
-                nextResourceState[selectedPatient],
-                measureBundle.content,
-                measurementPeriod.start?.toISOString(),
-                measurementPeriod.end?.toISOString()
-              );
-            } catch (error) {
-              if (error instanceof Error) {
-                showNotification({
-                  icon: <IconAlertCircle />,
-                  title: 'Calculation Error',
-                  message: error.message,
-                  color: 'red'
-                });
+        setTimeout(() => {
+          produce(measureReportLookup, async draftState => {
+            if (measureBundle.content) {
+              try {
+                draftState[selectedPatient] = await calculateMeasureReport(
+                  nextResourceState[selectedPatient],
+                  measureBundle.content,
+                  measurementPeriod.start?.toISOString(),
+                  measurementPeriod.end?.toISOString()
+                );
+              } catch (error) {
+                if (error instanceof Error) {
+                  showNotification({
+                    icon: <IconAlertCircle />,
+                    title: 'Calculation Error',
+                    message: error.message,
+                    color: 'red'
+                  });
+                }
               }
             }
-          }
-        }).then(nextMRLookupState => {
-          setMeasureReportLookup(nextMRLookupState);
-          setIsCalculationLoading(false);
-          setIsNewResourceModalOpen(false);
-        });
+          }).then(nextMRLookupState => {
+            setMeasureReportLookup(nextMRLookupState);
+            setIsCalculationLoading(false);
+          });
+        }, 400);
       }
     }
+    setIsNewResourceModalOpen(false);
   };
 
   const renderPanelPlaceholderText = () => {
