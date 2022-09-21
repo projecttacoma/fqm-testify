@@ -16,6 +16,7 @@ import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
@@ -24,6 +25,7 @@ export default function ResourcePanel() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
 
   const createNewResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -43,35 +45,41 @@ export default function ResourcePanel() {
           color: 'red'
         });
       } else {
-        produce(currentPatients, async draftState => {
+        const nextResourceState = produce(currentPatients, draftState => {
           draftState[selectedPatient].resources.push(newResource);
-          setIsCalculationLoading(true);
-          if (measureBundle.content) {
-            try {
-              draftState[selectedPatient].measureReport = await calculateMeasureReport(
-                draftState[selectedPatient],
-                measureBundle.content,
-                measurementPeriod.start?.toISOString(),
-                measurementPeriod.end?.toISOString()
-              );
-            } catch (error) {
-              if (error instanceof Error) {
-                showNotification({
-                  icon: <IconAlertCircle />,
-                  title: 'Calculation Error',
-                  message: error.message,
-                  color: 'red'
-                });
+        });
+        setCurrentPatients(nextResourceState);
+        setIsCalculationLoading(true);
+
+        setTimeout(() => {
+          produce(measureReportLookup, async draftState => {
+            if (measureBundle.content) {
+              try {
+                draftState[selectedPatient] = await calculateMeasureReport(
+                  nextResourceState[selectedPatient],
+                  measureBundle.content,
+                  measurementPeriod.start?.toISOString(),
+                  measurementPeriod.end?.toISOString()
+                );
+              } catch (error) {
+                if (error instanceof Error) {
+                  showNotification({
+                    icon: <IconAlertCircle />,
+                    title: 'Calculation Error',
+                    message: error.message,
+                    color: 'red'
+                  });
+                }
               }
             }
-          }
-        }).then(nextResourceState => {
-          setCurrentPatients(nextResourceState);
-          setIsCalculationLoading(false);
-          setIsNewResourceModalOpen(false);
-        });
+          }).then(nextMRLookupState => {
+            setMeasureReportLookup(nextMRLookupState);
+            setIsCalculationLoading(false);
+          });
+        }, 400);
       }
     }
+    setIsNewResourceModalOpen(false);
   };
 
   const renderPanelPlaceholderText = () => {

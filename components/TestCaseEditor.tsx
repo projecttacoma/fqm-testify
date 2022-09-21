@@ -23,11 +23,35 @@ const useStyles = createStyles({
     overflow: 'scroll'
   }
 });
+function LoadingSpinner() {
+  const isCalculationLoading = useRecoilValue(calculationLoading);
+
+  return (
+    <>
+      <Center style={{ paddingRight: 20 }}>
+        {isCalculationLoading ? (
+          <Center>
+            <Loader size={40} />
+            <Text color="dimmed">
+              <i>Calculating...</i>
+            </Text>
+          </Center>
+        ) : (
+          <Center>
+            <CircleCheck color="green" size={40} />
+            <Text color="dimmed">
+              <i>Up to date</i>
+            </Text>
+          </Center>
+        )}
+      </Center>
+    </>
+  );
+}
 
 export default function TestCaseEditor() {
   const selectedPatient = useRecoilValue(selectedPatientState);
   const currentPatients = useRecoilValue(patientTestCaseState);
-  const isCalculationLoading = useRecoilValue(calculationLoading);
   const { classes } = useStyles();
 
   const renderPanelPlaceholderText = () => {
@@ -62,23 +86,7 @@ export default function TestCaseEditor() {
                 <Grid.Col span={4}>
                   Patient Calculation: {getPatientNameString(currentPatients[selectedPatient].patient)}
                 </Grid.Col>
-                <Center style={{ paddingRight: 20 }}>
-                  {isCalculationLoading ? (
-                    <Center>
-                      <Loader size={40} />
-                      <Text color="dimmed">
-                        <i>Calculating...</i>
-                      </Text>
-                    </Center>
-                  ) : (
-                    <Center>
-                      <CircleCheck color="green" size={40} />
-                      <Text color="dimmed">
-                        <i>Up to date</i>
-                      </Text>
-                    </Center>
-                  )}
-                </Center>
+                <LoadingSpinner />
               </Grid>
             ) : (
               renderPanelPlaceholderText()

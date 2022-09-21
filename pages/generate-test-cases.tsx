@@ -12,22 +12,24 @@ import produce from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
+import { measureReportLookupState } from '../state/atoms/measureReportLookup';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
   const measureBundle = useRecoilValue(measureBundleState);
-  const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
+  const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
+  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
 
   // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
       setIsCalculationLoading(true);
-      produce(currentPatients, async draftState => {
+      produce(measureReportLookup, async draftState => {
         for (const [patientId, testCaseInfo] of Object.entries(currentPatients)) {
           try {
-            draftState[patientId].measureReport = await calculateMeasureReport(
+            draftState[patientId] = await calculateMeasureReport(
               testCaseInfo,
               mb,
               start?.toISOString(),
@@ -44,8 +46,8 @@ const TestCaseEditorPage: NextPage = () => {
             }
           }
         }
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
+      }).then(nextMRLookupState => {
+        setMeasureReportLookup(nextMRLookupState);
         setIsCalculationLoading(false);
       });
     }

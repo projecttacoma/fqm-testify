@@ -26,6 +26,7 @@ import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
 import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -39,6 +40,7 @@ function PatientCreationPanel() {
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
+  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -62,14 +64,15 @@ function PatientCreationPanel() {
   };
 
   const measureReportCalculation = async (id: string) => {
-    if (!currentPatients[id].measureReport) {
+    setSelectedPatient(id);
+    if (!measureReportLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(currentPatients, async draftState => {
+      produce(measureReportLookup, async draftState => {
         if (measureBundle.content) {
           try {
-            draftState[id].measureReport = await calculateMeasureReport(
-              draftState[id],
+            draftState[id] = await calculateMeasureReport(
+              currentPatients[id],
               measureBundle.content,
               measurementPeriod.start?.toISOString(),
               measurementPeriod.end?.toISOString()
@@ -85,8 +88,8 @@ function PatientCreationPanel() {
             }
           }
         }
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
+      }).then(nextMRLookupState => {
+        setMeasureReportLookup(nextMRLookupState);
         setIsCalculationLoading(false);
       });
     }
@@ -106,36 +109,42 @@ function PatientCreationPanel() {
       } else {
         resources = currentPatients[patientId]?.resources ?? [];
       }
-      setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(currentPatients, async draftState => {
+      const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
           resources: resources
         };
-        if (measureBundle.content) {
-          try {
-            draftState[patientId].measureReport = await calculateMeasureReport(
-              draftState[patientId],
-              measureBundle.content,
-              measurementPeriod.start?.toISOString(),
-              measurementPeriod.end?.toISOString()
-            );
-          } catch (error) {
-            if (error instanceof Error) {
-              showNotification({
-                icon: <IconAlertCircle />,
-                title: 'Calculation Error',
-                message: error.message,
-                color: 'red'
-              });
+      });
+      setCurrentPatients(nextPatientState);
+      setIsCalculationLoading(true);
+
+      setTimeout(() => {
+        produce(measureReportLookup, async draftState => {
+          if (measureBundle.content) {
+            try {
+              draftState[patientId] = await calculateMeasureReport(
+                nextPatientState[patientId],
+                measureBundle.content,
+                measurementPeriod.start?.toISOString(),
+                measurementPeriod.end?.toISOString()
+              );
+            } catch (error) {
+              if (error instanceof Error) {
+                showNotification({
+                  icon: <IconAlertCircle />,
+                  title: 'Calculation Error',
+                  message: error.message,
+                  color: 'red'
+                });
+              }
             }
           }
-        }
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
-        setIsCalculationLoading(false);
-      });
+        }).then(nextMRLookupState => {
+          setMeasureReportLookup(nextMRLookupState);
+          setIsCalculationLoading(false);
+        });
+      }, 400);
     }
 
     closePatientModal();
@@ -154,7 +163,11 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         delete draftState[id];
       });
+      const nextResourceState = produce(measureReportLookup, draftState => {
+        delete draftState[id];
+      });
       setCurrentPatients(nextPatientState);
+      setMeasureReportLookup(nextResourceState);
       // Set the selected patient to null because the selected patient will not longer exist after it is deleted
       setSelectedPatient(null);
       closeConfirmationModal();
