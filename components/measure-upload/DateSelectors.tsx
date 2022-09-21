@@ -14,7 +14,7 @@ export default function DateSelectors() {
           label="Measurement Period Start"
           value={period.start}
           onChange={start => setPeriod({ ...period, start })}
-          icon={<IconCalendar size={16} />}
+          icon={<IconCalendar size={25} />}
         />
       </Grid.Col>
       <Grid.Col span={5}>
@@ -23,7 +23,7 @@ export default function DateSelectors() {
           label="Measurement Period End"
           value={period.end}
           onChange={end => setPeriod({ ...period, end })}
-          icon={<IconCalendar size={16} />}
+          icon={<IconCalendar size={25} />}
         />
       </Grid.Col>
     </Grid>
