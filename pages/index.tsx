@@ -20,14 +20,14 @@ const Home: NextPage = () => {
       </Head>
       <Grid justify="center">
         <Grid.Col span={5}>
-          <Stack justify="space-between" spacing="xl">
+          <Stack justify="space-evenly" spacing="xl">
             <MeasureUploadHeader />
             <MeasureUpload />
             <Space />
             <DateSelectorsHeader />
             <DateSelectors />
-            <Link href={'/generate-test-cases'}>
-              <Group position="right">
+            <Group position="right">
+              <Link href={'/generate-test-cases'}>
                 <Button
                   sx={() => ({
                     marginTop: 10
@@ -36,8 +36,8 @@ const Home: NextPage = () => {
                 >
                   Next
                 </Button>
-              </Group>
-            </Link>
+              </Link>
+            </Group>
           </Stack>
         </Grid.Col>
       </Grid>
