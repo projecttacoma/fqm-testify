@@ -2,7 +2,7 @@ import { Group, MultiSelect, Popover, Text, ActionIcon } from '@mantine/core';
 import { InfoCircle } from 'tabler-icons-react';
 import produce from 'immer';
 import { Enums } from 'fqm-execution';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
@@ -17,8 +17,9 @@ interface MultiSelectData {
 export default function PopulationMultiSelect() {
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')
-    ?.resource as fhir4.Measure;
+  const measure = useMemo(() => {
+    return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
+  }, [measureBundle]);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const [value, setValue] = useState<string[]>(
     selectedPatient ? currentPatients[selectedPatient].desiredPopulations || [] : []
@@ -34,9 +35,13 @@ export default function PopulationMultiSelect() {
    * @param {fhir4.Measure} measure - FHIR measure resource
    * @returns {Array} array of strings representing all unique measure populations
    */
-  const getMeasurePopulations = (measure: fhir4.Measure): Array<MultiSelectData> => {
+  const getMeasurePopulations = (measure: fhir4.Measure): MultiSelectData[] => {
     const measurePopulations: MultiSelectData[] = [];
-    const EXCLUDED_MEASURES = ['measure-population', 'measure-population-exclusion', 'measure-observation'];
+    const EXCLUDED_MEASURE_POPULATIONS = [
+      Enums.PopulationType.MSRPOPL,
+      Enums.PopulationType.MSRPOPLEX,
+      Enums.PopulationType.OBSERV
+    ];
     // Iterate over measure population groups
     measure.group?.forEach(group => {
       group.population?.forEach(population => {
@@ -46,7 +51,7 @@ export default function PopulationMultiSelect() {
         if (
           populationCode &&
           !measurePopulations.map(p => p.value).includes(populationCode) &&
-          !EXCLUDED_MEASURES.includes(populationCode)
+          !EXCLUDED_MEASURE_POPULATIONS.find(p => p === populationCode)
         ) {
           measurePopulations.push({
             value: populationCode,
@@ -67,7 +72,7 @@ export default function PopulationMultiSelect() {
   const updateDesiredPopulations = (value: string[]) => {
     const newDesiredPopulations = value;
     if (selectedPatient) {
-      // add intiial population since it is a superset of all other populations
+      // add initial population since it is a superset of all other populations
       if (value.length > 0 && !value.includes(Enums.PopulationType.IPP)) {
         newDesiredPopulations.push(Enums.PopulationType.IPP);
       }
@@ -82,11 +87,11 @@ export default function PopulationMultiSelect() {
       }
 
       // update the desired populations state
-      produce(currentPatients, async draftState => {
+      const nextPatientState = produce(currentPatients, draftState => {
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
-      }).then(nextPatientState => {
-        setCurrentPatients(nextPatientState);
       });
+      setCurrentPatients(nextPatientState);
+
       // update value that appears in MultiSelect component
       setValue(newDesiredPopulations);
     }
@@ -113,7 +118,9 @@ export default function PopulationMultiSelect() {
 
     // disable all other populations (aside from IPP) if denominator exclusion selected
     if (value.includes(Enums.PopulationType.DENEX)) {
-      const disabledPops = populations.filter(e => e.value !== Enums.PopulationType.IPP);
+      const disabledPops = populations.filter(
+        e => e.value !== Enums.PopulationType.IPP && e.value !== Enums.PopulationType.DENEX
+      );
       disabledPops.forEach(pop => (pop.disabled = true));
     }
 
