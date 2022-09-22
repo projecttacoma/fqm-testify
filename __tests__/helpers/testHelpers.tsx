@@ -73,3 +73,9 @@ export function createMockRouter(router: Partial<NextRouter>): NextRouter {
     ...router
   };
 }
+
+export const mockResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn()
+}));

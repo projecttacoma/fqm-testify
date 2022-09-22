@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import PatientInfoCard, { PatientInfoCardProps } from '../../../components/utils/PatientInfoCard';
-import { mantineRecoilWrap } from '../../helpers/testHelpers';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
+import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 
 const EXAMPLE_PATIENT: fhir4.Patient = {
   resourceType: 'Patient',
@@ -10,11 +11,51 @@ const EXAMPLE_PATIENT: fhir4.Patient = {
   birthDate: '1996-07-19'
 };
 
+const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
+  resourceType: 'Bundle',
+  type: 'transaction',
+  entry: [
+    {
+      resource: {
+        resourceType: 'Measure',
+        status: 'active',
+        group: [
+          {
+            population: [
+              {
+                code: {
+                  coding: [
+                    {
+                      system: 'test-system',
+                      code: 'denominator',
+                      display: 'Denominator'
+                    }
+                  ]
+                },
+                criteria: {
+                  language: 'text/cql.identifier',
+                  expression: 'Denominator'
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+};
+
+const MEASURE_BUNDLE_POPULATED = {
+  name: 'measureBundle',
+  content: TEST_MEASURE_BUNDLE
+};
+
 const MOCK_CALLBACK_PROPS: Omit<PatientInfoCardProps, 'patient'> = {
   onEditClick: jest.fn(),
   onDeleteClick: jest.fn(),
   onExportClick: jest.fn(),
-  onCopyClick: jest.fn()
+  onCopyClick: jest.fn(),
+  selected: true
 };
 
 describe('PatientInfoCard', () => {
@@ -108,5 +149,20 @@ describe('PatientInfoCard', () => {
     expect(MOCK_CALLBACK_PROPS.onExportClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onEditClick).toHaveBeenCalledTimes(0);
     expect(MOCK_CALLBACK_PROPS.onCopyClick).toHaveBeenCalledTimes(0);
+  });
+
+  it('should render populations dropdown if selected', () => {
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
+    render(
+      mantineRecoilWrap(
+        <>
+          <MockMB />
+          <PatientInfoCard patient={EXAMPLE_PATIENT} {...MOCK_CALLBACK_PROPS} />
+        </>
+      )
+    );
+
+    const populationSelector = screen.getByPlaceholderText(/select populations/i) as HTMLInputElement;
+    expect(populationSelector).toBeInTheDocument();
   });
 });
