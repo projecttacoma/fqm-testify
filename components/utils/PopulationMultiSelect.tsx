@@ -72,7 +72,6 @@ export default function PopulationMultiSelect() {
   const updateDesiredPopulations = (value: string[]) => {
     let newDesiredPopulations = [...value];
     if (selectedPatient) {
-
       // add initial population since it is a superset of all other populations
       if (value.length > 0 && !value.includes(Enums.PopulationType.IPP)) {
         newDesiredPopulations.push(Enums.PopulationType.IPP);
