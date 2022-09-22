@@ -1,13 +1,14 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
-import { Button, Grid } from '@mantine/core';
+import { Button, Grid, Group, Space, Stack } from '@mantine/core';
 import MeasureUpload from '../components/measure-upload/MeasureUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
 import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import { useRecoilValue } from 'recoil';
 import MeasureUploadHeader from '../components/utils/MeasureUploadHeader';
+import DateSelectorsHeader from '../components/utils/DateSelectorsHeader';
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);
@@ -17,27 +18,29 @@ const Home: NextPage = () => {
       <Head>
         <title>FQM Testify: an eCQM Analysis Tool</title>
       </Head>
-      <Grid>
-        <Grid.Col span={12}>
-          <MeasureUploadHeader />
-        </Grid.Col>
-        <Grid.Col span={12}>
-          <MeasureUpload />
-        </Grid.Col>
-        <Grid.Col span={12}>
-          <DateSelectors />
+      <Grid justify="center">
+        <Grid.Col span={5}>
+          <Stack justify="space-evenly" spacing="xl">
+            <MeasureUploadHeader />
+            <MeasureUpload />
+            <Space />
+            <DateSelectorsHeader />
+            <DateSelectors />
+            <Group position="right">
+              <Link href={'/generate-test-cases'}>
+                <Button
+                  sx={() => ({
+                    marginTop: 10
+                  })}
+                  disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}
+                >
+                  Next
+                </Button>
+              </Link>
+            </Group>
+          </Stack>
         </Grid.Col>
       </Grid>
-      <Link href={'/generate-test-cases'}>
-        <Button
-          sx={() => ({
-            marginTop: 10
-          })}
-          disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}
-        >
-          Next
-        </Button>
-      </Link>
     </>
   );
 };

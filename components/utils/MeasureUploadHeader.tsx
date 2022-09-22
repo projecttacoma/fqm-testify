@@ -8,7 +8,9 @@ export default function MeasureUploadHeader() {
   return (
     <Group>
       <div style={{ paddingRight: 5 }}>
-        <Text size="xl">Step 1: Upload a Measure Bundle</Text>
+        <Text size="xl" weight={700}>
+          Step 1: Upload a Measure Bundle
+        </Text>
       </div>
       <div>
         <Popover opened={opened} onClose={() => setOpened(false)}>

@@ -1,12 +1,18 @@
 import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
-import { Grid, Center, Text } from '@mantine/core';
+import { Grid, Center, Text, Stack, createStyles } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import MissingValueSetModal from '../modals/MissingValueSetModal';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { DateTime } from 'luxon';
+
+const useStyles = createStyles({
+  text: {
+    wordBreak: 'break-all'
+  }
+});
 
 export const DEFAULT_MEASUREMENT_PERIOD = {
   start: DateTime.fromISO('2022-01-01').toJSDate(),
@@ -72,6 +78,7 @@ export default function MeasureUpload() {
         }
         accept={['application/json']}
         multiple={false}
+        style={{ minHeight: 200 }}
       >
         <DropzoneChildren />
       </Dropzone>
@@ -81,18 +88,18 @@ export default function MeasureUpload() {
 
 function DropzoneChildren() {
   const measureBundle = useRecoilValue(measureBundleState);
+  const { classes } = useStyles();
+
   return (
-    <Grid justify="center">
-      <Grid.Col span={12}>
+    <Grid justify="center" align="center" style={{ minHeight: 200 }}>
+      <Stack>
         <Center>{measureBundle.name ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}</Center>
-      </Grid.Col>
-      <Grid.Col>
         <Center>
-          <Text size="xl" inline>
+          <Text size="xl" inline className={classes.text}>
             {measureBundle.name ? measureBundle.name : 'Drag a Measure Bundle JSON file here or click to select files'}
           </Text>
         </Center>
-      </Grid.Col>
+      </Stack>
     </Grid>
   );
 }
