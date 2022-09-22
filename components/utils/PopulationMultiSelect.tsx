@@ -70,8 +70,9 @@ export default function PopulationMultiSelect() {
    * @param value array of selected options from MultiSelect component
    */
   const updateDesiredPopulations = (value: string[]) => {
-    const newDesiredPopulations = value;
+    let newDesiredPopulations = [...value];
     if (selectedPatient) {
+
       // add initial population since it is a superset of all other populations
       if (value.length > 0 && !value.includes(Enums.PopulationType.IPP)) {
         newDesiredPopulations.push(Enums.PopulationType.IPP);
@@ -84,6 +85,25 @@ export default function PopulationMultiSelect() {
         !value.includes(Enums.PopulationType.DENOM)
       ) {
         newDesiredPopulations.push(Enums.PopulationType.DENOM);
+      }
+
+      // remove all selected populations if initial population is deselected
+      if (
+        currentPatients[selectedPatient].desiredPopulations?.includes(Enums.PopulationType.IPP) &&
+        !value.includes(Enums.PopulationType.IPP)
+      ) {
+        newDesiredPopulations = [];
+      }
+      // remove numerator, numerator exclusion, and/or denominator exception if denominator is deselected
+      if (
+        [Enums.PopulationType.NUMER, Enums.PopulationType.NUMEX, Enums.PopulationType.DENEXCEP].some(p =>
+          currentPatients[selectedPatient].desiredPopulations?.includes(p)
+        ) &&
+        !value.includes(Enums.PopulationType.DENOM)
+      ) {
+        newDesiredPopulations = newDesiredPopulations.filter(
+          p => p === Enums.PopulationType.IPP || p === Enums.PopulationType.DENEX
+        );
       }
 
       // update the desired populations state
