@@ -55,7 +55,8 @@ const MOCK_CALLBACK_PROPS: Omit<PatientInfoCardProps, 'patient'> = {
   onDeleteClick: jest.fn(),
   onExportClick: jest.fn(),
   onCopyClick: jest.fn(),
-  selected: true
+  selected: true,
+  smallScreen: false
 };
 
 describe('PatientInfoCard', () => {
@@ -164,5 +165,22 @@ describe('PatientInfoCard', () => {
 
     const populationSelector = screen.getByPlaceholderText(/select populations/i) as HTMLInputElement;
     expect(populationSelector).toBeInTheDocument();
+  });
+
+  it('should render a patient actions menu when the screen is small', () => {
+    render(
+      mantineRecoilWrap(
+        <PatientInfoCard
+          patient={EXAMPLE_PATIENT}
+          onEditClick={jest.fn()}
+          onDeleteClick={jest.fn()}
+          onExportClick={jest.fn()}
+          onCopyClick={jest.fn()}
+          selected={true}
+          smallScreen={true}
+        />
+      )
+    );
+    expect(screen.getByLabelText(/menu button/i)).toBeInTheDocument();
   });
 });

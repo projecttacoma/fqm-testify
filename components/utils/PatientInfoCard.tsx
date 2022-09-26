@@ -1,5 +1,4 @@
 import { Button, Center, Divider, Grid, Group, Menu, Paper, Sx, Text, Tooltip } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
 import React from 'react';
 import { Copy, Dots, Download, Edit, Trash } from 'tabler-icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
@@ -12,6 +11,7 @@ export interface PatientInfoCardProps {
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
   selected?: boolean;
+  smallScreen?: boolean;
 }
 
 export default function PatientInfoCard({
@@ -20,9 +20,9 @@ export default function PatientInfoCard({
   onExportClick,
   onEditClick,
   onDeleteClick,
-  selected
+  selected,
+  smallScreen
 }: PatientInfoCardProps) {
-  const matches = useMediaQuery('(min-width: 1600px)');
   return (
     <Paper
       shadow="sm"
@@ -56,7 +56,7 @@ export default function PatientInfoCard({
         </Grid.Col>
         <Grid.Col span={6}>
           <Group position="right">
-            {matches ? (
+            {!smallScreen ? (
               <Center>
                 <Tooltip label="Export Patient" openDelay={1000}>
                   <Button
@@ -112,7 +112,7 @@ export default function PatientInfoCard({
             ) : (
               <Menu shadow="md" width={200}>
                 <Menu.Target>
-                  <Button variant="subtle">
+                  <Button variant="subtle" aria-label={'Menu Button'}>
                     <Dots />
                   </Button>
                 </Menu.Target>

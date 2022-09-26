@@ -27,6 +27,7 @@ import PopulationCalculation from '../calculation/PopulationCalculation';
 import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
+import { useMediaQuery } from '@mantine/hooks';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -41,6 +42,7 @@ function PatientCreationPanel() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const isSmallScreen = useMediaQuery('(max-width: 1600px)');
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -411,6 +413,7 @@ function PatientCreationPanel() {
                   onEditClick={() => openPatientModal(id)}
                   onDeleteClick={() => openConfirmationModal()}
                   selected={selectedPatient === id}
+                  smallScreen={isSmallScreen}
                 />
               </div>
             ))}
