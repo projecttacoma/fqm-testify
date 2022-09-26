@@ -56,7 +56,51 @@ export default function PatientInfoCard({
         </Grid.Col>
         <Grid.Col span={6}>
           <Group position="right">
-            {!smallScreen ? (
+            {smallScreen ? (
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <Button variant="subtle" aria-label={'Menu Button'}>
+                    <Dots />
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Patient Actions</Menu.Label>
+                  <Menu.Item
+                    icon={<Download size={20} />}
+                    onClick={() => {
+                      onExportClick();
+                    }}
+                  >
+                    Download Patient
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<Edit size={20} />}
+                    onClick={() => {
+                      onEditClick();
+                    }}
+                  >
+                    Edit Patient
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<Copy size={20} />}
+                    onClick={() => {
+                      onCopyClick();
+                    }}
+                  >
+                    Copy Patient
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<Trash size={20} />}
+                    color="red"
+                    onClick={() => {
+                      onDeleteClick();
+                    }}
+                  >
+                    Delete Patient
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ) : (
               <Center>
                 <Tooltip label="Export Patient" openDelay={1000}>
                   <Button
@@ -109,49 +153,6 @@ export default function PatientInfoCard({
                   </Button>
                 </Tooltip>
               </Center>
-            ) : (
-              <Menu shadow="md" width={200}>
-                <Menu.Target>
-                  <Button variant="subtle" aria-label={'Menu Button'}>
-                    <Dots />
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>Patient Actions</Menu.Label>
-                  <Menu.Item
-                    icon={<Download size={14} />}
-                    onClick={() => {
-                      onExportClick();
-                    }}
-                  >
-                    Download Patient
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<Edit size={14} />}
-                    onClick={() => {
-                      onEditClick();
-                    }}
-                  >
-                    Edit Patient
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<Copy size={14} />}
-                    onClick={() => {
-                      onCopyClick();
-                    }}
-                  >
-                    Copy Patient
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<Trash size={14} />}
-                    onClick={() => {
-                      onDeleteClick();
-                    }}
-                  >
-                    Delete Patient
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
             )}
           </Group>
         </Grid.Col>

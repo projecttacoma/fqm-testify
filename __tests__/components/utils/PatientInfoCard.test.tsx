@@ -169,17 +169,7 @@ describe('PatientInfoCard', () => {
 
   it('should render a patient actions menu when the screen is small', () => {
     render(
-      mantineRecoilWrap(
-        <PatientInfoCard
-          patient={EXAMPLE_PATIENT}
-          onEditClick={jest.fn()}
-          onDeleteClick={jest.fn()}
-          onExportClick={jest.fn()}
-          onCopyClick={jest.fn()}
-          selected={true}
-          smallScreen={true}
-        />
-      )
+      mantineRecoilWrap(<PatientInfoCard patient={EXAMPLE_PATIENT} {...MOCK_CALLBACK_PROPS} smallScreen={true} />)
     );
     expect(screen.getByLabelText(/menu button/i)).toBeInTheDocument();
   });
