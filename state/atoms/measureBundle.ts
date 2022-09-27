@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-interface measureBundleStateType {
+interface MeasureBundleStateType {
   name: string;
   content: fhir4.Bundle | null;
 }
@@ -8,7 +8,7 @@ interface measureBundleStateType {
 /**
  * Atom tracking and controlling the value of uploaded measure bundle
  */
-export const measureBundleState = atom<measureBundleStateType>({
+export const measureBundleState = atom<MeasureBundleStateType>({
   key: 'measureBundleState',
   default: {
     name: '',
