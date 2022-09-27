@@ -1,18 +1,5 @@
 import { dateFieldInfo } from '../../scripts/parsePrimaryDatePath';
 import {
-  createFHIRResourceString,
-  getDataRequirementFiltersString,
-  createPatientBundle,
-  getFhirResourceSummary,
-  getRandomPeriodInPeriod,
-  getRandomDateInPeriod,
-  jsDateToFHIRDate,
-  getDateType,
-  getResourcePrimaryDates,
-  createCopiedResources,
-  createCopiedPatientResource
-} from '../../util/fhir';
-import {
   EXAMPLE_DR_CHOICE_TYPE_PERIOD_TO_PERIOD,
   EXAMPLE_DR_CHOICE_TYPE_DATETIME_TO_PERIOD,
   EXAMPLE_DR_PERIOD_TO_DATETIME,
@@ -22,6 +9,20 @@ import {
   EXAMPLE_DR_MULTIPLE_DATE_FILTERS,
   EXAMPLE_DR_NO_DATEFILTER
 } from '../../fixtures/test/dateFilterFixtures';
+import {
+  getDateType,
+  getRandomDateInPeriod,
+  getRandomPeriodInPeriod,
+  getResourcePrimaryDates,
+  jsDateToFHIRDate
+} from '../../util/fhir/dates';
+import { getDataRequirementFiltersString, getFhirResourceSummary } from '../../util/fhir/codes';
+import {
+  createCopiedPatientResource,
+  createCopiedResources,
+  createFHIRResourceString,
+  createPatientBundle
+} from '../../util/fhir/resourceCreation';
 
 const PERIOD_START = '2020-01-01T00:00:00.000Z';
 const PERIOD_END = '2020-12-31T00:00:00.000Z';

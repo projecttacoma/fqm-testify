@@ -6,7 +6,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Loader } from 'tabler-icons-react';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { getPatientNameString } from '../../util/fhir';
 import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import ResourceDisplay from './ResourceDisplay';
@@ -17,6 +16,7 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
+import { getPatientNameString } from '../../util/fhir/patient';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);

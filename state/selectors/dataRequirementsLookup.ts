@@ -1,5 +1,5 @@
 import { selector } from 'recoil';
-import { getDataRequirementFiltersString } from '../../util/fhir';
+import { getDataRequirementFiltersString } from '../../util/fhir/codes';
 import { dataRequirementsState } from './dataRequirements';
 import { valueSetMapState, ValueSetsMap } from './valueSetsMap';
 

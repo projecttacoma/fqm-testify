@@ -1,7 +1,7 @@
 import { Button, Center, Divider, Grid, Group, Menu, Paper, Sx, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Copy, Dots, Download, Edit, Trash } from 'tabler-icons-react';
-import { getPatientDOBString, getPatientNameString } from '../../util/fhir';
+import { getPatientDOBString, getPatientNameString } from '../../util/fhir/patient';
 import PopulationMultiSelect from './PopulationMultiSelect';
 
 export interface PatientInfoCardProps {

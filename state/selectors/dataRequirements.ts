@@ -1,10 +1,10 @@
 import { selector } from 'recoil';
 import { measureBundleState } from '../atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
-import { getDataRequirementFiltersString } from '../../util/fhir';
 import { valueSetMapState } from './valueSetsMap';
 
 import { measurementPeriodState } from '../atoms/measurementPeriod';
+import { getDataRequirementFiltersString } from '../../util/fhir/codes';
 
 export const dataRequirementsState = selector<fhir4.DataRequirement[] | null>({
   key: 'dataRequirementsState',
