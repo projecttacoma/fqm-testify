@@ -90,7 +90,7 @@ export function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement
  * @param {String} path the attribute name that needs to be populated with date info
  * @returns {Object} an object containing the newPath to enter date info and the ideal date info type
  */
-export function getDateType(fieldTypeInfo: DateFieldInfo, path: string) {
+export function getDateType(fieldTypeInfo: DateFieldInfo, path: string): { validField: string; newPath: string } {
   let validField;
   let newPath = path;
   if (fieldTypeInfo.isChoiceType) {
@@ -117,7 +117,7 @@ export function getDateType(fieldTypeInfo: DateFieldInfo, path: string) {
  * @param {String} end end date string for the period
  * @returns {Date} a js date object within the specified period
  */
-export function getRandomDateInPeriod(start: string, end: string) {
+export function getRandomDateInPeriod(start: string, end: string): Date {
   const startDate = new Date(start);
   const endDate = new Date(end);
   endDate.setDate(endDate.getDate() - 1);
@@ -131,7 +131,7 @@ export function getRandomDateInPeriod(start: string, end: string) {
  * @param {Date} date JS date to be converted
  * @returns {String} a string representing a FHIR date
  */
-export function jsDateToFHIRDate(date: Date) {
+export function jsDateToFHIRDate(date: Date): string {
   const year = date.getFullYear();
   // month is 0 indexed
   const month = date.getMonth() + 1;
