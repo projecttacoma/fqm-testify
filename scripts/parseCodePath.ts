@@ -8,7 +8,7 @@ const modelInfoPath = path.resolve(path.join(__dirname, '../fixtures/model-info/
 const outputPath = path.resolve(path.join(__dirname, '../util/codePaths.ts'));
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 
-interface elementChoice {
+interface ElementChoice {
   $: {
     namespace: string;
     name: string;
@@ -50,7 +50,7 @@ export async function parse(xml: string) {
             // xsi:type is ChoiceTypeSpecifier, so there are multiple possible types
             // save both options to an array
             const choices: string[] = [];
-            elem.elementTypeSpecifier[0].choice.forEach((c: elementChoice) => {
+            elem.elementTypeSpecifier[0].choice.forEach((c: ElementChoice) => {
               const choiceNamespace = c.$.namespace;
               const choiceName = c.$.name;
               choices.push(`${choiceNamespace}.${choiceName}`);
