@@ -1,6 +1,5 @@
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Select } from '@mantine/core';
-import { getDataRequirementFiltersString } from '../../util/fhir';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
@@ -11,6 +10,7 @@ import {
   dataRequirementsLookupState,
   getDataRequirementsLookupKey
 } from '../../state/selectors/dataRequirementsLookup';
+import { getDataRequirementFiltersString } from '../../util/fhir/codes';
 
 interface DataRequirementsItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;

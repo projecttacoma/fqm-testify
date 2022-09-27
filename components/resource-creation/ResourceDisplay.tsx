@@ -6,7 +6,6 @@ import CodeEditorModal from '../modals/CodeEditorModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
-import { createFHIRResourceString, getFhirResourceSummary } from '../../util/fhir';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
@@ -18,6 +17,8 @@ import { IconAlertCircle } from '@tabler/icons';
 import { WritableDraft } from 'immer/dist/internal';
 import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 import { MeasureReport } from 'fhir/r4';
+import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
+import { getFhirResourceSummary } from '../../util/fhir/codes';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);

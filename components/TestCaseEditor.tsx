@@ -5,10 +5,10 @@ import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
 import ResourcePanel from './resource-creation/ResourcePanel';
 import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
-import { getPatientNameString } from '../util/fhir';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { CircleCheck } from 'tabler-icons-react';
+import { getPatientNameString } from '../util/fhir/patient';
 
 const useStyles = createStyles({
   panel: {

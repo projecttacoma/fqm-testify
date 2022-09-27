@@ -8,19 +8,19 @@ const outputPath = path.resolve(path.join(__dirname, '../util/primaryDatePaths.t
 const xmlStr = fs.readFileSync(modelInfoPath, 'utf8');
 const DATE_TYPES = ['dateTime', 'date', 'Period'];
 
-export interface dateFieldInfo {
+export interface DateFieldInfo {
   isChoiceType?: boolean;
   dataTypes: string[];
 }
-export interface dateInfo {
-  [dateField: string]: dateFieldInfo;
+export interface DateInfo {
+  [dateField: string]: DateFieldInfo;
 }
 
-export interface primaryDatePathInfo {
-  [resourceType: string]: dateInfo;
+export interface PrimaryDatePathInfo {
+  [resourceType: string]: DateInfo;
 }
 
-async function parseModelInfo(xml: string): Promise<primaryDatePathInfo> {
+async function parseModelInfo(xml: string): Promise<PrimaryDatePathInfo> {
   const { modelInfo } = await xml2js.parseStringPromise(xml);
   const domainInfo = modelInfo.typeInfo.filter((ti: any) => ti.$.baseType === 'FHIR.DomainResource');
   const dateInfo: any = {};
@@ -33,7 +33,7 @@ async function parseModelInfo(xml: string): Promise<primaryDatePathInfo> {
   return dateInfo;
 }
 
-function getDateTypes(resourceInfo: any): dateInfo {
+function getDateTypes(resourceInfo: any): DateInfo {
   return resourceInfo.reduce((acc: any, e: any) => {
     const propName = e.$.name;
     if (e.$.elementType) {
@@ -63,9 +63,9 @@ parseModelInfo(xmlStr).then(data => {
   fs.writeFileSync(
     outputPath,
     `  
-import {primaryDatePathInfo} from '../scripts/parsePrimaryDatePath'
+import { PrimaryDatePathInfo } from '../scripts/parsePrimaryDatePath'
 
-export const parsedPrimaryDatePaths: primaryDatePathInfo = 
+export const parsedPrimaryDatePaths: PrimaryDatePathInfo =
   ${JSON.stringify(data, null, 2)};
           `,
     'utf8'

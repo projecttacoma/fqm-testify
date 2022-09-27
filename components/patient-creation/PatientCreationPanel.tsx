@@ -5,13 +5,6 @@ import produce from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
-import {
-  createPatientResourceString,
-  getPatientNameString,
-  createPatientBundle,
-  createCopiedPatientResource,
-  createCopiedResources
-} from '../../util/fhir';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import React, { ReactNode, useState } from 'react';
@@ -28,6 +21,13 @@ import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 import { useMediaQuery } from '@mantine/hooks';
+import { getPatientNameString } from '../../util/fhir/patient';
+import {
+  createCopiedPatientResource,
+  createCopiedResources,
+  createPatientBundle,
+  createPatientResourceString
+} from '../../util/fhir/resourceCreation';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);

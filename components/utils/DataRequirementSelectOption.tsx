@@ -2,7 +2,7 @@ import { Text } from '@mantine/core';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
-import { getDataRequirementFiltersString } from '../../util/fhir';
+import { getDataRequirementFiltersString } from '../../util/fhir/codes';
 
 export interface DataRequirementSelectOptionProps {
   dataRequirement: fhir4.DataRequirement;

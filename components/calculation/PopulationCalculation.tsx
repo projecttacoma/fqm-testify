@@ -3,7 +3,6 @@ import { useRecoilValue } from 'recoil';
 import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { createPatientBundle, getPatientInfoString } from '../../util/fhir';
 import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
 import { fhirJson } from '@fhir-typescript/r4-core';
@@ -11,6 +10,8 @@ import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import Link from 'next/link';
+import { getPatientInfoString } from '../../util/fhir/patient';
+import { createPatientBundle } from '../../util/fhir/resourceCreation';
 
 interface PatientLabel {
   [patientId: string]: string;
