@@ -18,7 +18,8 @@ export async function calculateMeasureReport(
     calculateClauseCoverage: false,
     reportType: 'individual',
     measurementPeriodStart: mpStart,
-    measurementPeriodEnd: mpEnd
+    measurementPeriodEnd: mpEnd,
+    useElmJsonsCaching: true
   };
 
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);
