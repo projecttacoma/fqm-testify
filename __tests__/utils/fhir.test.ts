@@ -1,4 +1,4 @@
-import { dateFieldInfo } from '../../scripts/parsePrimaryDatePath';
+import { DateFieldInfo } from '../../scripts/parsePrimaryDatePath';
 import {
   EXAMPLE_DR_CHOICE_TYPE_PERIOD_TO_PERIOD,
   EXAMPLE_DR_CHOICE_TYPE_DATETIME_TO_PERIOD,
@@ -319,20 +319,20 @@ const MEASURE_REPORT_WITH_ID: fhir4.MeasureReport = {
     status: 'additional'
   }
 };
-const EXAMPLE_FIELD_DATE: dateFieldInfo = {
+const EXAMPLE_FIELD_DATE: DateFieldInfo = {
   dataTypes: ['date']
 };
 
-const EXAMPLE_FIELD_CHOICE_TYPE_PERIOD: dateFieldInfo = {
+const EXAMPLE_FIELD_CHOICE_TYPE_PERIOD: DateFieldInfo = {
   isChoiceType: true,
   dataTypes: ['Period', 'dateTime', 'date', 'nonsense']
 };
-const EXAMPLE_FIELD_CHOICE_TYPE_DATETIME: dateFieldInfo = {
+const EXAMPLE_FIELD_CHOICE_TYPE_DATETIME: DateFieldInfo = {
   isChoiceType: true,
   dataTypes: ['dateTime', 'date', 'nonsense']
 };
 
-const EXAMPLE_FIELD_CHOICE_TYPE_DATE: dateFieldInfo = {
+const EXAMPLE_FIELD_CHOICE_TYPE_DATE: DateFieldInfo = {
   isChoiceType: true,
   dataTypes: ['date', 'nonsense']
 };

@@ -1,6 +1,6 @@
-import { primaryDatePathInfo } from '../scripts/parsePrimaryDatePath';
+import { PrimaryDatePathInfo } from '../scripts/parsePrimaryDatePath';
 
-export const parsedPrimaryDatePaths: primaryDatePathInfo = {
+export const parsedPrimaryDatePaths: PrimaryDatePathInfo = {
   Account: {
     servicePeriod: {
       dataTypes: ['Period']
