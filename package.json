@@ -37,7 +37,7 @@
     "ecqm-visualizers": "0.0.1",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
-    "fqm-execution": "^1.0.0-beta.3",
+    "fqm-execution": "github:projecttacoma/fqm-execution",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
     "luxon": "^2.4.0",
