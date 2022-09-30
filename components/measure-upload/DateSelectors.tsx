@@ -1,5 +1,5 @@
 import { Grid } from '@mantine/core';
-import { DatePicker } from '@mantine/dates';
+import { DateRangePicker } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons';
 import { useRecoilState } from 'recoil';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
@@ -8,23 +8,16 @@ export default function DateSelectors() {
   const [period, setPeriod] = useRecoilState(measurementPeriodState);
   return (
     <Grid>
-      <Grid.Col span={5}>
-        <DatePicker
-          placeholder="Select start date"
-          label="Measurement Period Start"
-          value={period.start}
-          onChange={start => setPeriod({ ...period, start })}
+      <Grid.Col span={12}>
+        <DateRangePicker
+          placeholder="Select Measurement Period Range"
+          label="Measurement Period Range"
+          value={[period.start, period.end]}
+          onChange={period => {
+            setPeriod({ start: period[0], end: period[1] });
+          }}
           icon={<IconCalendar size={25} />}
-        />
-      </Grid.Col>
-      <Grid.Col span={5}>
-        <DatePicker
-          placeholder="Select end date"
-          label="Measurement Period End"
-          value={period.end}
-          onChange={end => setPeriod({ ...period, end })}
-          icon={<IconCalendar size={25} />}
-        />
+        ></DateRangePicker>
       </Grid.Col>
     </Grid>
   );
