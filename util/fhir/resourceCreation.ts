@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { getResourcePrimaryDates } from './dates';
 import { getResourcePatientReference } from './patient';
 import { getResourceCode } from './codes';
+import { Enums } from '../../../fqm-execution/build';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
@@ -149,4 +150,55 @@ export function createFHIRResourceString(
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);
   return JSON.stringify(resource, null, 2);
+}
+
+export function createCQFMTestCaseMeasureReport(
+  measureReport: fhir4.MeasureReport,
+  subjectId: string,
+  desiredPopulations: string[]
+): fhir4.MeasureReport {
+  let measureScore = 0;
+  const expectedGroups = measureReport?.group?.[0].population?.map(pop => {
+    const newPop = _.cloneDeep(pop);
+    const popCode = pop.code?.coding?.[0].code;
+    if (popCode && desiredPopulations.includes(popCode)) {
+      newPop.count = 1;
+      if (popCode === Enums.PopulationType.NUMER) {
+        measureScore = 1;
+      }
+    } else {
+      newPop.count = 0;
+    }
+    return pop;
+  });
+  return {
+    resourceType: 'MeasureReport',
+    id: uuidv4(),
+    measure: measureReport.measure,
+    period: measureReport.period,
+    status: measureReport.status,
+    type: measureReport.type,
+    meta: {
+      profile: ['http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm']
+    },
+    modifierExtension: [
+      {
+        url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase',
+        valueBoolean: true
+      }
+    ],
+    contained: [
+      {
+        resourceType: 'Parameters',
+        id: uuidv4(),
+        parameter: [
+          {
+            name: 'subject',
+            valueString: subjectId
+          }
+        ]
+      }
+    ],
+    group: expectedGroups
+  };
 }

@@ -25,6 +25,7 @@ import { getPatientNameString } from '../../util/fhir/patient';
 import {
   createCopiedPatientResource,
   createCopiedResources,
+  createCQFMTestCaseMeasureReport,
   createPatientBundle,
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
@@ -112,7 +113,7 @@ function PatientCreationPanel() {
         resources = currentPatients[patientId]?.resources ?? [];
       }
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      const nextPatientState = produce(currentPatients, draftState => {
+      let nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
           resources: resources
@@ -144,7 +145,12 @@ function PatientCreationPanel() {
           }
         }).then(nextMRLookupState => {
           setMeasureReportLookup(nextMRLookupState);
+          const testMR = createCQFMTestCaseMeasureReport(nextMRLookupState[patientId], patientId, []);
           setIsCalculationLoading(false);
+          nextPatientState = produce(nextPatientState, draftState => {
+            draftState[patientId].resources.push(testMR);
+          });
+          setCurrentPatients(nextPatientState);
         });
       }, 400);
     }
