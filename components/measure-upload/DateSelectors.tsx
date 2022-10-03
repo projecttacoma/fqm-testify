@@ -17,7 +17,8 @@ export default function DateSelectors() {
             setPeriod({ start: period[0], end: period[1] });
           }}
           icon={<IconCalendar size={25} />}
-        ></DateRangePicker>
+          dropdownPosition="bottom-start"
+        />
       </Grid.Col>
     </Grid>
   );
