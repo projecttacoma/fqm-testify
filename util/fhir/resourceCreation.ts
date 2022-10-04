@@ -157,20 +157,7 @@ export function createCQFMTestCaseMeasureReport(
   subjectId: string,
   desiredPopulations: string[]
 ): fhir4.MeasureReport {
-  let measureScore = 0;
-  const expectedGroups = measureReport?.group?.[0].population?.map(pop => {
-    const newPop = _.cloneDeep(pop);
-    const popCode = pop.code?.coding?.[0].code;
-    if (popCode && desiredPopulations.includes(popCode)) {
-      newPop.count = 1;
-      if (popCode === Enums.PopulationType.NUMER) {
-        measureScore = 1;
-      }
-    } else {
-      newPop.count = 0;
-    }
-    return pop;
-  });
+  const testGroup = generateTestCaseMRGroup(measureReport, desiredPopulations);
   return {
     resourceType: 'MeasureReport',
     id: uuidv4(),
@@ -199,6 +186,29 @@ export function createCQFMTestCaseMeasureReport(
         ]
       }
     ],
-    group: expectedGroups
+    group: testGroup
   };
+}
+
+export function generateTestCaseMRGroup(measureReport: fhir4.MeasureReport, desiredPopulations: string[]) {
+  let measureScore = 0;
+  const testPops = measureReport?.group?.[0].population?.map(pop => {
+    const newPop = _.cloneDeep(pop);
+    const popCode = pop.code?.coding?.[0].code;
+    if (popCode && desiredPopulations.includes(popCode)) {
+      newPop.count = 1;
+      if (popCode === Enums.PopulationType.NUMER) {
+        measureScore = 1;
+      }
+    } else {
+      newPop.count = 0;
+    }
+    return pop;
+  });
+  return [
+    {
+      population: testPops,
+      measureScore: { value: measureScore }
+    }
+  ];
 }

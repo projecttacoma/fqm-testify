@@ -29,6 +29,7 @@ import {
   createPatientBundle,
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
+import { cqfmTestMRLookupState } from '../../state/atoms/CQFMTestMRLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -38,6 +39,7 @@ function PatientCreationPanel() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
+  const [currentTestMRLookup, setTestMRLookup] = useRecoilState(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
@@ -147,10 +149,10 @@ function PatientCreationPanel() {
           setMeasureReportLookup(nextMRLookupState);
           const testMR = createCQFMTestCaseMeasureReport(nextMRLookupState[patientId], patientId, []);
           setIsCalculationLoading(false);
-          nextPatientState = produce(nextPatientState, draftState => {
-            draftState[patientId].resources.push(testMR);
+          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
+            draftState[patientId] = testMR;
           });
-          setCurrentPatients(nextPatientState);
+          setTestMRLookup(nextCQFMTestMRState);
         });
       }, 400);
     }
