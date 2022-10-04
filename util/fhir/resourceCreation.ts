@@ -100,7 +100,11 @@ export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.P
  * @param {Array} resources array of FHIR resources associated with the patient
  * @returns {String} representation of a FHIR patient bundle resource
  */
-export function createPatientBundle(patient: fhir4.Patient, resources: fhir4.FhirResource[]): fhir4.Bundle {
+export function createPatientBundle(
+  patient: fhir4.Patient,
+  resources: fhir4.FhirResource[],
+  testMeasureReport?: fhir4.MeasureReport
+): fhir4.Bundle {
   const bundle: fhir4.Bundle = {
     type: 'transaction',
     resourceType: 'Bundle',
@@ -125,6 +129,15 @@ export function createPatientBundle(patient: fhir4.Patient, resources: fhir4.Fhi
     };
     bundle.entry?.push(entry);
   });
+  if (testMeasureReport) {
+    bundle.entry?.push({
+      resource: testMeasureReport,
+      request: {
+        method: 'PUT',
+        url: `MeasureReport/${testMeasureReport.id}`
+      }
+    });
+  }
   return bundle;
 }
 
@@ -203,7 +216,7 @@ export function generateTestCaseMRGroup(measureReport: fhir4.MeasureReport, desi
     } else {
       newPop.count = 0;
     }
-    return pop;
+    return newPop;
   });
   return [
     {

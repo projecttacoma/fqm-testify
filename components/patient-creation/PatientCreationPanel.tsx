@@ -37,7 +37,6 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const [currentTestMRLookup, setTestMRLookup] = useRecoilState(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -186,7 +185,7 @@ function PatientCreationPanel() {
 
   const exportPatientTestCase = (id: string) => {
     const bundleString: string = JSON.stringify(
-      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
       null,
       2
     );
@@ -231,7 +230,7 @@ function PatientCreationPanel() {
     if (measureBundleFolder) {
       Object.keys(currentPatients).forEach(id => {
         const bundleString: string = JSON.stringify(
-          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
           null,
           2
         );
