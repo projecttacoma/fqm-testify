@@ -29,5 +29,4 @@ describe('DateSelectors', () => {
     const dateRangeDisplay = screen.getByDisplayValue('January 1, 2020 – January 1, 2021');
     expect(dateRangeDisplay).toBeInTheDocument();
   });
-  //TODO: Add unit testing for updates on change
 });
