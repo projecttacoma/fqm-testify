@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { getResourcePrimaryDates } from './dates';
 import { getResourcePatientReference } from './patient';
 import { getResourceCode } from './codes';
-import { Enums } from '../../../fqm-execution/build';
+import { Enums } from 'fqm-execution';
 
 export function createPatientResourceString(birthDate: string): string {
   const id = uuidv4();
