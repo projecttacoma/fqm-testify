@@ -113,13 +113,15 @@ export default function PopulationMultiSelect() {
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
       });
       setCurrentPatients(nextPatientState);
-      const nextTestMRState = produce(currentTestMRLookup, draftState => {
-        draftState[selectedPatient].group = generateTestCaseMRGroup(
-          currentTestMRLookup[selectedPatient],
-          newDesiredPopulations
-        );
-      });
-      setTestMRLookup(nextTestMRState);
+      if (measureBundle.content) {
+        const nextTestMRState = produce(currentTestMRLookup, draftState => {
+          draftState[selectedPatient].group = generateTestCaseMRGroup(
+            measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure,
+            newDesiredPopulations
+          );
+        });
+        setTestMRLookup(nextTestMRState);
+      }
       // update value that appears in MultiSelect component
       setValue(newDesiredPopulations);
     }
