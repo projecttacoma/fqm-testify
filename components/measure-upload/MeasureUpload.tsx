@@ -1,12 +1,15 @@
 import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text, Stack, createStyles } from '@mantine/core';
-import { IconFileImport, IconFileCheck, IconAlertCircle } from '@tabler/icons';
+import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { v4 as uuidv4 } from 'uuid';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import MissingValueSetModal from '../modals/MissingValueSetModal';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { DateTime } from 'luxon';
+import { Calculator } from 'fqm-execution';
+
+const VSAC_REGEX = /http:\/\/cts\.nlm\.nih\.gov.*ValueSet/;
 
 const useStyles = createStyles({
   text: {
@@ -21,50 +24,85 @@ export const DEFAULT_MEASUREMENT_PERIOD = {
 
 const DEFAULT_MEASUREMENT_PERIOD_DURATION = 1;
 
-export default function MeasureUpload() {
+export interface MeasureUploadError {
+  id: string;
+  message: string | string[];
+  timestamp: string;
+  attemptedFileName: string;
+  isValueSetMissingError: boolean;
+}
+
+export interface MeasureUploadProps {
+  logError: (error: MeasureUploadError) => void;
+}
+
+export default function MeasureUpload({ logError }: MeasureUploadProps) {
   const setMeasureBundle = useSetRecoilState(measureBundleState);
   const setMeasurementPeriod = useSetRecoilState(measurementPeriodState);
-  // Need to nest this function so it has access to hooks
-  function extractMeasureBundle(file: File): void {
+
+  const extractMeasureBundle = (file: File) => {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
       const measures = bundle?.entry?.filter(r => r?.resource?.resourceType === 'Measure');
       if (bundle.resourceType !== 'Bundle') {
-        rejectFile("Uploaded file must be a JSON FHIR Resource of type 'Bundle'");
-      } else if (measures?.length !== 1) {
-        rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'");
-      } else {
-        setMeasureBundle({
-          name: file.name,
-          content: bundle
-        });
-        const effectivePeriod = (measures[0].resource as fhir4.Measure).effectivePeriod;
-
-        // Set measurement period to default period
-        const measurementPeriod = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
-        setMeasurementPeriod(measurementPeriod);
+        rejectFile("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", file.name);
+        return;
+      } else if (measures && measures.length !== 1) {
+        rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'", file.name);
+        return;
       }
+
+      const missingValueSets = await identifyMissingValueSets(bundle);
+      if (missingValueSets.length > 0) {
+        rejectFile(missingValueSets, file.name, true);
+        return;
+      }
+
+      setMeasureBundle({
+        name: file.name,
+        content: bundle
+      });
+
+      // Safe to cast measures as error will be set if undefined above
+      const effectivePeriod = ((measures as fhir4.BundleEntry[])[0].resource as fhir4.Measure).effectivePeriod;
+
+      // Set measurement period to default period
+      const measurementPeriod = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
+      setMeasurementPeriod(measurementPeriod);
+
+      showNotification({
+        icon: <IconCircleCheck />,
+        title: 'Upload Success',
+        message: `Successfully uploaded ${file.name}`,
+        color: 'green'
+      });
     };
     reader.readAsText(file);
-  }
+  };
 
-  function rejectFile(message: string) {
+  const rejectFile = (message: string | string[], fileName: string, isValueSetMissingError = false) => {
+    logError({
+      id: uuidv4(),
+      message,
+      timestamp: new Date().toISOString(),
+      attemptedFileName: fileName,
+      isValueSetMissingError
+    });
     showNotification({
-      id: 'failed-upload',
       icon: <IconAlertCircle />,
       title: 'File upload failed',
-      message,
+      message: 'There was an issue with your file. Please correct the issues listed below.',
       color: 'red'
     });
     setMeasureBundle({
       name: '',
       content: null
     });
-  }
+  };
+
   return (
     <>
-      <MissingValueSetModal />
       <Dropzone
         onDrop={files => extractMeasureBundle(files[0])}
         onReject={files =>
@@ -139,4 +177,30 @@ export function populateMeasurementPeriod(
     measurementPeriod.start = newStart;
   }
   return measurementPeriod;
+}
+
+/**
+ * Runs data requirements on a FHIR MeasureBundle, then compares the required
+ * valuesets to the valuesets included in the bundle. Returns an array of canonical urls of
+ * missing required valuesets
+ */
+async function identifyMissingValueSets(mb: fhir4.Bundle): Promise<string[]> {
+  const allRequiredValuesets = new Set<string>();
+  const includedValuesets = new Set<string>();
+
+  mb?.entry?.forEach(e => {
+    if (e?.resource?.resourceType === 'ValueSet') {
+      includedValuesets.add(e.resource.url as string);
+    }
+  });
+  const dataRequirements = await Calculator.calculateDataRequirements(mb);
+  dataRequirements?.results?.dataRequirement?.forEach(dr => {
+    dr?.codeFilter?.forEach(filter => {
+      if (filter.valueSet && VSAC_REGEX.test(filter.valueSet)) {
+        allRequiredValuesets.add(filter.valueSet as string);
+      }
+    });
+  });
+  const missingValuesets = Array.from(allRequiredValuesets).filter(vs => !includedValuesets.has(vs));
+  return missingValuesets;
 }
