@@ -165,6 +165,14 @@ export function createFHIRResourceString(
   return JSON.stringify(resource, null, 2);
 }
 
+/**
+ * Creates a FHIR cqfm test MeasureReport from measure and subject data to be exported with associated patient
+ * @param mb FHIR MeasureBundle
+ * @param measurementPeriod FHIR Period representing the measurement period
+ * @param subjectId the patient id the MeasureReport is associated with
+ * @param desiredPopulations a list of desired population codes for the patient to fall into
+ * @returns {fhir4.MeasureReport} a cqfm test measure report associated with the patient and measure
+ */
 export function createCQFMTestCaseMeasureReport(
   mb: fhir4.Bundle,
   measurementPeriod: fhir4.Period,
@@ -206,7 +214,21 @@ export function createCQFMTestCaseMeasureReport(
   };
 }
 
-export function generateTestCaseMRGroup(measure: fhir4.Measure, desiredPopulations: string[]) {
+/**
+ * Takes in a Measure and desired populations array and produces the group property for a cqfm test case MeasureReport
+ * @param measure a FHIR Measure resource
+ * @param desiredPopulations a list of desired population codes for the patient to fall into
+ * @returns an Array containing an object with a measure score and population object to be used as the group property in a cqfm test case MeasureReport
+ */
+export function generateTestCaseMRGroup(
+  measure: fhir4.Measure,
+  desiredPopulations: string[]
+): {
+  population: fhir4.MeasureReportGroupPopulation[] | undefined;
+  measureScore: {
+    value: number;
+  };
+}[] {
   let measureScore = 0;
   const testPops = measure?.group?.[0].population?.map(pop => {
     const newPop: fhir4.MeasureReportGroupPopulation = { code: pop.code };
