@@ -54,7 +54,8 @@ const TestCaseEditorPage: NextPage = () => {
         const newTestMRLookup = produce(currentTestMRLookup, draftState => {
           for (const patientId of Object.keys(currentPatients)) {
             draftState[patientId] = createCQFMTestCaseMeasureReport(
-              nextMRLookupState[patientId],
+              measureBundle.content as fhir4.Bundle,
+              { start: start?.toISOString(), end: end?.toISOString() },
               patientId,
               currentPatients[patientId].desiredPopulations ?? []
             );

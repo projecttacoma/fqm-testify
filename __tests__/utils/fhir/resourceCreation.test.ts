@@ -1,13 +1,18 @@
+import { MOCK_MEASURE_BUNDLE } from '../../../fixtures/test/measureBundle';
 import {
   createCopiedPatientResource,
   createCopiedResources,
+  createCQFMTestCaseMeasureReport,
   createFHIRResourceString,
-  createPatientBundle
+  createPatientBundle,
+  generateTestCaseMRGroup
 } from '../../../util/fhir/resourceCreation';
 
 const PERIOD_START = '2020-01-01T00:00:00.000Z';
 const PERIOD_END = '2020-12-31T00:00:00.000Z';
 
+const MOCK_MEASURE = MOCK_MEASURE_BUNDLE.content.entry?.find(e => e?.resource?.resourceType === 'Measure')
+  ?.resource as fhir4.Measure;
 const OBSERVATION_DATA_REQUIREMENT_WITH_CODE_AND_VALUESET = {
   type: 'Observation',
   status: 'draft',
@@ -219,6 +224,84 @@ const OBSERVATION_RESOURCE: fhir4.Observation = {
   status: 'final'
 };
 
+const EXPECTED_CQFM_NO_POPS_OUTPUT = {
+  resourceType: 'MeasureReport',
+  id: expect.any(String),
+  measure: 'test-measure-id',
+  period: {
+    start: PERIOD_START,
+    end: PERIOD_END
+  },
+  status: 'complete',
+  type: 'individual',
+  meta: {
+    profile: ['http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm']
+  },
+  modifierExtension: [
+    {
+      url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase',
+      valueBoolean: true
+    }
+  ],
+  contained: [
+    {
+      resourceType: 'Parameters',
+      id: expect.any(String),
+      parameter: [
+        {
+          name: 'subject',
+          valueString: 'test-subject-id'
+        }
+      ]
+    }
+  ],
+  group: [
+    {
+      population: [
+        {
+          count: 0,
+          code: {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                code: 'initial-population',
+                display: 'Initial Population'
+              }
+            ]
+          }
+        },
+        {
+          count: 0,
+          code: {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                code: 'denominator',
+                display: 'Denominator'
+              }
+            ]
+          }
+        },
+        {
+          count: 0,
+          code: {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                code: 'numerator',
+                display: 'Numerator'
+              }
+            ]
+          }
+        }
+      ],
+      measureScore: {
+        value: 0
+      }
+    }
+  ]
+};
+
 describe('createFHIRResourceString', () => {
   it('should return populated FHIR resource for primaryCodeType FHIR.CodeableConcept', () => {
     const createdResource = createFHIRResourceString(
@@ -376,7 +459,7 @@ describe('createPatientBundle', () => {
     expect(createPatientBundle(PATIENT_RESOURCE, [])).toEqual(expectedBundle);
   });
 
-  it('shoult create bundle with patient and resources', () => {
+  it('should create bundle with patient and resources', () => {
     const expectedBundle: fhir4.Bundle = {
       resourceType: 'Bundle',
       type: 'transaction',
@@ -436,5 +519,47 @@ describe('createCopiedPatientResource', () => {
   it('should change the id of a patient when cloned', () => {
     const patient = createCopiedPatientResource(PATIENT_RESOURCE);
     expect(patient.id).not.toEqual(PATIENT_RESOURCE.id);
+  });
+});
+
+describe('generateTestCaseMRGroup', () => {
+  test.only('returns a group array with all populations from MeasureReport', () => {
+    const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, []);
+    expect(expectedGroups?.[0]?.population?.length).toEqual(3);
+    const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
+    expect(codes).toEqual(['initial-population', 'denominator', 'numerator']);
+    expectedGroups?.[0]?.population?.forEach(g => expect(g.count).toEqual(0));
+    expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
+  });
+  test('returns a group array with all populations from MeasureReport and counts based on desired populations', () => {
+    const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population']);
+    expect(expectedGroups?.[0]?.population?.length).toEqual(3);
+    const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
+    expect(codes).toEqual(['initial-population', 'denominator', 'numerator']);
+    expect(expectedGroups?.[0]?.population?.[0]?.count).toEqual(1);
+    expect(expectedGroups?.[0]?.population?.[1]?.count).toEqual(1);
+    expect(expectedGroups?.[0]?.population?.[2]?.count).toEqual(0);
+    expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
+  });
+  test('returns a group array with all populations from MeasureReport and 1 for measure score when numerator desired', () => {
+    const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population', 'numerator']);
+    expect(expectedGroups?.[0]?.population?.length).toEqual(3);
+    const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
+    expect(codes).toEqual(['initial-population', 'denominator', 'numerator']);
+    expect(expectedGroups?.[0]?.population?.[0]?.count).toEqual(1);
+    expect(expectedGroups?.[0]?.population?.[1]?.count).toEqual(1);
+    expect(expectedGroups?.[0]?.population?.[2]?.count).toEqual(1);
+    expect(expectedGroups?.[0]?.measureScore.value).toEqual(1);
+  });
+});
+describe('generateTestCaseMRGroup', () => {
+  test('createCQFMTestCaseMeasureReport produces properly formatted test measure report', () => {
+    const cqfmTestMeasureReport = createCQFMTestCaseMeasureReport(
+      MOCK_MEASURE_BUNDLE.content,
+      { start: PERIOD_START, end: PERIOD_END },
+      'test-subject-id',
+      []
+    );
+    expect(cqfmTestMeasureReport).toEqual(EXPECTED_CQFM_NO_POPS_OUTPUT);
   });
 });

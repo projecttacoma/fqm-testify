@@ -114,7 +114,7 @@ function PatientCreationPanel() {
         resources = currentPatients[patientId]?.resources ?? [];
       }
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      let nextPatientState = produce(currentPatients, draftState => {
+      const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
           resources: resources
@@ -124,6 +124,18 @@ function PatientCreationPanel() {
       setIsCalculationLoading(true);
 
       setTimeout(() => {
+        if (measurementPeriod.start && measurementPeriod.end) {
+          const testMR = createCQFMTestCaseMeasureReport(
+            measureBundle.content as fhir4.Bundle,
+            { start: measurementPeriod.start?.toISOString(), end: measurementPeriod.end?.toISOString() },
+            patientId,
+            []
+          );
+          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
+            draftState[patientId] = testMR;
+          });
+          setTestMRLookup(nextCQFMTestMRState);
+        }
         produce(measureReportLookup, async draftState => {
           if (measureBundle.content) {
             try {
@@ -146,12 +158,7 @@ function PatientCreationPanel() {
           }
         }).then(nextMRLookupState => {
           setMeasureReportLookup(nextMRLookupState);
-          const testMR = createCQFMTestCaseMeasureReport(nextMRLookupState[patientId], patientId, []);
           setIsCalculationLoading(false);
-          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
-            draftState[patientId] = testMR;
-          });
-          setTestMRLookup(nextCQFMTestMRState);
         });
       }, 400);
     }
@@ -175,8 +182,12 @@ function PatientCreationPanel() {
       const nextResourceState = produce(measureReportLookup, draftState => {
         delete draftState[id];
       });
+      const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
+        delete draftState[id];
+      });
       setCurrentPatients(nextPatientState);
       setMeasureReportLookup(nextResourceState);
+      setTestMRLookup(nextCQFMTestMRState);
       // Set the selected patient to null because the selected patient will not longer exist after it is deleted
       setSelectedPatient(null);
       closeConfirmationModal();
@@ -252,6 +263,7 @@ function PatientCreationPanel() {
 
     let successCount = 0,
       failureCount = 0;
+    const addedIds: string[] = [];
     Promise.all(filePromises)
       .then(allFileContent => {
         const nextPatientState = produce(currentPatients, draftState => {
@@ -310,6 +322,7 @@ function PatientCreationPanel() {
             }
 
             draftState[testCase.patient.id] = testCase;
+            addedIds.push(testCase.patient.id);
             successCount += 1;
           });
         });
@@ -336,6 +349,20 @@ function PatientCreationPanel() {
           message: `Success: ${successCount}\nFailed: ${failureCount}`,
           color: 'blue'
         });
+        if (measurementPeriod.start && measurementPeriod.end) {
+          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
+            addedIds.forEach(id => {
+              const testMR = createCQFMTestCaseMeasureReport(
+                measureBundle.content as fhir4.Bundle,
+                { start: measurementPeriod.start?.toISOString(), end: measurementPeriod.end?.toISOString() },
+                id,
+                []
+              );
+              draftState[id] = testMR;
+            });
+          });
+          setTestMRLookup(nextCQFMTestMRState);
+        }
       });
   };
 

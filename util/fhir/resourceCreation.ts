@@ -166,18 +166,20 @@ export function createFHIRResourceString(
 }
 
 export function createCQFMTestCaseMeasureReport(
-  measureReport: fhir4.MeasureReport,
+  mb: fhir4.Bundle,
+  measurementPeriod: fhir4.Period,
   subjectId: string,
   desiredPopulations: string[]
 ): fhir4.MeasureReport {
-  const testGroup = generateTestCaseMRGroup(measureReport, desiredPopulations);
+  const measure = mb?.entry?.find(e => e?.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
+  const testGroup = generateTestCaseMRGroup(measure, desiredPopulations);
   return {
     resourceType: 'MeasureReport',
     id: uuidv4(),
-    measure: measureReport.measure,
-    period: measureReport.period,
-    status: measureReport.status,
-    type: measureReport.type,
+    measure: measure.id as string,
+    period: measurementPeriod,
+    status: 'complete',
+    type: 'individual',
     meta: {
       profile: ['http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm']
     },
@@ -194,6 +196,7 @@ export function createCQFMTestCaseMeasureReport(
         parameter: [
           {
             name: 'subject',
+            // For now this is just the Patient id. May evolve as we learn more about cqfm-testCases
             valueString: subjectId
           }
         ]
@@ -203,10 +206,10 @@ export function createCQFMTestCaseMeasureReport(
   };
 }
 
-export function generateTestCaseMRGroup(measureReport: fhir4.MeasureReport, desiredPopulations: string[]) {
+export function generateTestCaseMRGroup(measure: fhir4.Measure, desiredPopulations: string[]) {
   let measureScore = 0;
-  const testPops = measureReport?.group?.[0].population?.map(pop => {
-    const newPop = _.cloneDeep(pop);
+  const testPops = measure?.group?.[0].population?.map(pop => {
+    const newPop: fhir4.MeasureReportGroupPopulation = { code: pop.code };
     const popCode = pop.code?.coding?.[0].code;
     if (popCode && desiredPopulations.includes(popCode)) {
       newPop.count = 1;
