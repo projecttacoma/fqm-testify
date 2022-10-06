@@ -246,7 +246,6 @@ function PatientCreationPanel() {
 
     let successCount = 0,
       failureCount = 0;
-    const addedIds: string[] = [];
     Promise.all(filePromises)
       .then(allFileContent => {
         const nextPatientState = produce(currentPatients, draftState => {
@@ -305,7 +304,6 @@ function PatientCreationPanel() {
             }
 
             draftState[testCase.patient.id] = testCase;
-            addedIds.push(testCase.patient.id);
             successCount += 1;
           });
         });

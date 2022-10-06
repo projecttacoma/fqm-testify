@@ -200,7 +200,6 @@ export function createCQFMTestCaseMeasureReport(
         }
       }
     ],
-
     modifierExtension: [
       {
         url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase',

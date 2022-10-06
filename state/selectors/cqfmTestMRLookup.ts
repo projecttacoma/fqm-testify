@@ -4,24 +4,21 @@ import { measureBundleState } from '../atoms/measureBundle';
 import { measurementPeriodState } from '../atoms/measurementPeriod';
 import { patientTestCaseState } from '../atoms/patientTestCase';
 
-interface CqfmTestMRLookupType {
-  [id: string]: fhir4.MeasureReport;
-}
-export const cqfmTestMRLookupState = selector<CqfmTestMRLookupType>({
+export const cqfmTestMRLookupState = selector<Record<string, fhir4.MeasureReport>>({
   key: 'cqfmTestMRLookupState',
   get: ({ get }) => {
     const measureBundle = get(measureBundleState);
     const { start, end } = get(measurementPeriodState);
     const currentPatients = get(patientTestCaseState);
     if (measureBundle.content && start && end) {
-      return Object.keys(currentPatients).reduce((acc: CqfmTestMRLookupType, e) => {
-        acc[e] = createCQFMTestCaseMeasureReport(
+      return Object.keys(currentPatients).reduce((lookupResult: Record<string, fhir4.MeasureReport>, patientId) => {
+        lookupResult[patientId] = createCQFMTestCaseMeasureReport(
           measureBundle.content as fhir4.Bundle,
           { start: start.toISOString(), end: end.toISOString() },
-          e,
-          currentPatients[e].desiredPopulations
+          patientId,
+          currentPatients[patientId].desiredPopulations
         );
-        return acc;
+        return lookupResult;
       }, {});
     }
     return {};
