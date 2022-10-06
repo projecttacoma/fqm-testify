@@ -20,19 +20,15 @@ describe('UploadErrorLog', () => {
   it('should render no errors for empty error log', () => {
     render(mantineRecoilWrap(<UploadErrorLog uploadSuccess={false} errorLog={[]} />));
 
-    expect(screen.getByText(/no errors/i)).toBeInTheDocument();
+    expect(screen.getByText(/no errors!/i)).toBeInTheDocument();
   });
 
-  it('should render current error heading on unsuccessful upload with non-empty log', () => {
+  it('should render red error heading on unsuccessful upload with non-empty log', () => {
     render(mantineRecoilWrap(<UploadErrorLog uploadSuccess={false} errorLog={[MOCK_SIMPLE_ERROR]} />));
 
-    expect(screen.getByText(/current errors/i)).toBeInTheDocument();
-  });
-
-  it('should render previous error heading on successful upload with non-empty log', () => {
-    render(mantineRecoilWrap(<UploadErrorLog uploadSuccess={true} errorLog={[MOCK_SIMPLE_ERROR]} />));
-
-    expect(screen.getByText(/previous errors/i)).toBeInTheDocument();
+    const errorHeading = screen.getByText(/errors/i);
+    expect(errorHeading).toBeInTheDocument();
+    expect(errorHeading).not.toHaveStyle('color: #000'); // Color of text should change
   });
 
   afterEach(() => {

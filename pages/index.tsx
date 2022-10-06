@@ -29,6 +29,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (measureBundle.content != null) {
       setUploadSuccess(true);
+      setErrorLog([]);
     } else {
       setUploadSuccess(false);
     }
