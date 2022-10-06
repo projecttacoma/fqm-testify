@@ -28,7 +28,7 @@ import {
   createPatientBundle,
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
-import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMrLookup';
+import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
