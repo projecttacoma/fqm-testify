@@ -25,11 +25,10 @@ import { getPatientNameString } from '../../util/fhir/patient';
 import {
   createCopiedPatientResource,
   createCopiedResources,
-  createCQFMTestCaseMeasureReport,
   createPatientBundle,
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
-import { cqfmTestMRLookupState } from '../../state/atoms/cqfmTestMRLookup';
+import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMrLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -38,7 +37,7 @@ function PatientCreationPanel() {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
-  const [currentTestMRLookup, setTestMRLookup] = useRecoilState(cqfmTestMRLookupState);
+  const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
@@ -124,18 +123,6 @@ function PatientCreationPanel() {
       setIsCalculationLoading(true);
 
       setTimeout(() => {
-        if (measurementPeriod.start && measurementPeriod.end) {
-          const testMR = createCQFMTestCaseMeasureReport(
-            measureBundle.content as fhir4.Bundle,
-            { start: measurementPeriod.start?.toISOString(), end: measurementPeriod.end?.toISOString() },
-            patientId,
-            []
-          );
-          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
-            draftState[patientId] = testMR;
-          });
-          setTestMRLookup(nextCQFMTestMRState);
-        }
         produce(measureReportLookup, async draftState => {
           if (measureBundle.content) {
             try {
@@ -182,12 +169,8 @@ function PatientCreationPanel() {
       const nextResourceState = produce(measureReportLookup, draftState => {
         delete draftState[id];
       });
-      const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
-        delete draftState[id];
-      });
       setCurrentPatients(nextPatientState);
       setMeasureReportLookup(nextResourceState);
-      setTestMRLookup(nextCQFMTestMRState);
       // Set the selected patient to null because the selected patient will not longer exist after it is deleted
       setSelectedPatient(null);
       closeConfirmationModal();
@@ -349,20 +332,6 @@ function PatientCreationPanel() {
           message: `Success: ${successCount}\nFailed: ${failureCount}`,
           color: 'blue'
         });
-        if (measurementPeriod.start && measurementPeriod.end) {
-          const nextCQFMTestMRState = produce(currentTestMRLookup, draftState => {
-            addedIds.forEach(id => {
-              const testMR = createCQFMTestCaseMeasureReport(
-                measureBundle.content as fhir4.Bundle,
-                { start: measurementPeriod.start?.toISOString(), end: measurementPeriod.end?.toISOString() },
-                id,
-                []
-              );
-              draftState[id] = testMR;
-            });
-          });
-          setTestMRLookup(nextCQFMTestMRState);
-        }
       });
   };
 

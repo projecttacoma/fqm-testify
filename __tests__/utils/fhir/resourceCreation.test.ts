@@ -243,6 +243,14 @@ const EXPECTED_CQFM_NO_POPS_OUTPUT = {
       valueBoolean: true
     }
   ],
+  extension: [
+    {
+      url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters',
+      valueReference: {
+        reference: expect.any(String)
+      }
+    }
+  ],
   contained: [
     {
       resourceType: 'Parameters',
@@ -529,7 +537,7 @@ describe('generateTestCaseMRGroup', () => {
     const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
     expect(codes).toEqual(['initial-population', 'denominator', 'numerator']);
     expectedGroups?.[0]?.population?.forEach(g => expect(g.count).toEqual(0));
-    expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
+    expect(expectedGroups?.[0]?.measureScore?.value).toEqual(0);
   });
   it('returns a group array with all populations from MeasureReport and counts based on desired populations', () => {
     const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population']);
@@ -539,7 +547,7 @@ describe('generateTestCaseMRGroup', () => {
     expect(expectedGroups?.[0]?.population?.[0]?.count).toEqual(1);
     expect(expectedGroups?.[0]?.population?.[1]?.count).toEqual(1);
     expect(expectedGroups?.[0]?.population?.[2]?.count).toEqual(0);
-    expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
+    expect(expectedGroups?.[0]?.measureScore?.value).toEqual(0);
   });
   it('returns a group array with all populations from MeasureReport and 1 for measure score when numerator desired', () => {
     const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population', 'numerator']);
@@ -549,7 +557,7 @@ describe('generateTestCaseMRGroup', () => {
     expect(expectedGroups?.[0]?.population?.[0]?.count).toEqual(1);
     expect(expectedGroups?.[0]?.population?.[1]?.count).toEqual(1);
     expect(expectedGroups?.[0]?.population?.[2]?.count).toEqual(1);
-    expect(expectedGroups?.[0]?.measureScore.value).toEqual(1);
+    expect(expectedGroups?.[0]?.measureScore?.value).toEqual(1);
   });
 });
 describe('generateTestCaseMRGroup', () => {

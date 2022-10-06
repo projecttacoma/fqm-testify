@@ -7,8 +7,6 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { cqfmTestMRLookupState } from '../../state/atoms/cqfmTestMRLookup';
-import { generateTestCaseMRGroup } from '../../util/fhir/resourceCreation';
 
 interface MultiSelectData {
   value: string;
@@ -23,7 +21,6 @@ export default function PopulationMultiSelect() {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
   }, [measureBundle]);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
-  const [currentTestMRLookup, setTestMRLookup] = useRecoilState(cqfmTestMRLookupState);
   const [value, setValue] = useState<string[]>(
     selectedPatient ? currentPatients[selectedPatient].desiredPopulations || [] : []
   );
@@ -113,15 +110,6 @@ export default function PopulationMultiSelect() {
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
       });
       setCurrentPatients(nextPatientState);
-      if (measureBundle.content) {
-        const nextTestMRState = produce(currentTestMRLookup, draftState => {
-          draftState[selectedPatient].group = generateTestCaseMRGroup(
-            measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure,
-            newDesiredPopulations
-          );
-        });
-        setTestMRLookup(nextTestMRState);
-      }
       // update value that appears in MultiSelect component
       setValue(newDesiredPopulations);
     }

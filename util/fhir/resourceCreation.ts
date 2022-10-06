@@ -177,20 +177,30 @@ export function createCQFMTestCaseMeasureReport(
   mb: fhir4.Bundle,
   measurementPeriod: fhir4.Period,
   subjectId: string,
-  desiredPopulations: string[]
+  desiredPopulations?: string[]
 ): fhir4.MeasureReport {
   const measure = mb?.entry?.find(e => e?.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
   const testGroup = generateTestCaseMRGroup(measure, desiredPopulations);
+  const parametersId = uuidv4();
   return {
     resourceType: 'MeasureReport',
     id: uuidv4(),
-    measure: measure.id as string,
+    measure: measure.url as string,
     period: measurementPeriod,
     status: 'complete',
     type: 'individual',
     meta: {
       profile: ['http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm']
     },
+    extension: [
+      {
+        url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters',
+        valueReference: {
+          reference: `#${parametersId}`
+        }
+      }
+    ],
+
     modifierExtension: [
       {
         url: 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase',
@@ -200,7 +210,7 @@ export function createCQFMTestCaseMeasureReport(
     contained: [
       {
         resourceType: 'Parameters',
-        id: uuidv4(),
+        id: parametersId,
         parameter: [
           {
             name: 'subject',
@@ -222,18 +232,13 @@ export function createCQFMTestCaseMeasureReport(
  */
 export function generateTestCaseMRGroup(
   measure: fhir4.Measure,
-  desiredPopulations: string[]
-): {
-  population: fhir4.MeasureReportGroupPopulation[] | undefined;
-  measureScore: {
-    value: number;
-  };
-}[] {
+  desiredPopulations?: string[]
+): fhir4.MeasureReportGroup[] {
   let measureScore = 0;
   const testPops = measure?.group?.[0].population?.map(pop => {
     const newPop: fhir4.MeasureReportGroupPopulation = { code: pop.code };
     const popCode = pop.code?.coding?.[0].code;
-    if (popCode && desiredPopulations.includes(popCode)) {
+    if (popCode && desiredPopulations && desiredPopulations.includes(popCode)) {
       newPop.count = 1;
       if (popCode === Enums.PopulationType.NUMER) {
         measureScore = 1;

@@ -13,8 +13,6 @@ import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { measureReportLookupState } from '../state/atoms/measureReportLookup';
-import { cqfmTestMRLookupState } from '../state/atoms/cqfmTestMRLookup';
-import { createCQFMTestCaseMeasureReport } from '../util/fhir/resourceCreation';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
@@ -22,7 +20,6 @@ const TestCaseEditorPage: NextPage = () => {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
-  const [currentTestMRLookup, setTestMRLookup] = useRecoilState(cqfmTestMRLookupState);
 
   // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
@@ -51,17 +48,6 @@ const TestCaseEditorPage: NextPage = () => {
         }
       }).then(nextMRLookupState => {
         setMeasureReportLookup(nextMRLookupState);
-        const newTestMRLookup = produce(currentTestMRLookup, draftState => {
-          for (const patientId of Object.keys(currentPatients)) {
-            draftState[patientId] = createCQFMTestCaseMeasureReport(
-              measureBundle.content as fhir4.Bundle,
-              { start: start?.toISOString(), end: end?.toISOString() },
-              patientId,
-              currentPatients[patientId].desiredPopulations ?? []
-            );
-          }
-        });
-        setTestMRLookup(newTestMRLookup);
         setIsCalculationLoading(false);
       });
     }

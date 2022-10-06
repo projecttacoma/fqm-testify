@@ -23,7 +23,7 @@ export const MOCK_MEASURE_BUNDLE = {
       {
         resource: {
           resourceType: 'Measure',
-          id: 'test-measure-id',
+          url: 'test-measure-id',
           group: [
             {
               population: [
