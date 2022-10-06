@@ -13,7 +13,7 @@ const MOCK_SIMPLE_ERROR: MeasureUploadError = {
 };
 
 describe('UploadErrorLog', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     window.ResizeObserver = mockResizeObserver;
   });
 
@@ -31,7 +31,7 @@ describe('UploadErrorLog', () => {
     expect(errorHeading).not.toHaveStyle('color: #000'); // Color of text should change
   });
 
-  afterEach(() => {
+  afterAll(() => {
     jest.clearAllMocks();
   });
 });

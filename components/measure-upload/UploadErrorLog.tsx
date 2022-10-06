@@ -31,7 +31,10 @@ export default function UploadErrorLog({ uploadSuccess, errorLog }: UploadErrorL
         Errors
       </Text>
 
-      <ScrollArea sx={theme => ({ border: `1px solid ${theme.colors.gray[5]}`, padding: '12px 8px 8px 12px' })}>
+      <ScrollArea
+        type="scroll"
+        sx={theme => ({ border: `1px solid ${theme.colors.gray[5]}`, padding: '12px 8px 8px 12px' })}
+      >
         <div style={{ height: '400px' }}>{renderErrorLog()}</div>
       </ScrollArea>
     </>
