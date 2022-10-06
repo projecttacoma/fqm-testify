@@ -7,7 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { cqfmTestMRLookupState } from '../../state/atoms/CQFMTestMRLookup';
+import { cqfmTestMRLookupState } from '../../state/atoms/cqfmTestMRLookup';
 import { generateTestCaseMRGroup } from '../../util/fhir/resourceCreation';
 
 interface MultiSelectData {

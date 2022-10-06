@@ -523,7 +523,7 @@ describe('createCopiedPatientResource', () => {
 });
 
 describe('generateTestCaseMRGroup', () => {
-  test.only('returns a group array with all populations from MeasureReport', () => {
+  it('returns a group array with all populations from MeasureReport', () => {
     const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, []);
     expect(expectedGroups?.[0]?.population?.length).toEqual(3);
     const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
@@ -531,7 +531,7 @@ describe('generateTestCaseMRGroup', () => {
     expectedGroups?.[0]?.population?.forEach(g => expect(g.count).toEqual(0));
     expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
   });
-  test('returns a group array with all populations from MeasureReport and counts based on desired populations', () => {
+  it('returns a group array with all populations from MeasureReport and counts based on desired populations', () => {
     const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population']);
     expect(expectedGroups?.[0]?.population?.length).toEqual(3);
     const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
@@ -541,7 +541,7 @@ describe('generateTestCaseMRGroup', () => {
     expect(expectedGroups?.[0]?.population?.[2]?.count).toEqual(0);
     expect(expectedGroups?.[0]?.measureScore.value).toEqual(0);
   });
-  test('returns a group array with all populations from MeasureReport and 1 for measure score when numerator desired', () => {
+  it('returns a group array with all populations from MeasureReport and 1 for measure score when numerator desired', () => {
     const expectedGroups = generateTestCaseMRGroup(MOCK_MEASURE, ['denominator', 'initial-population', 'numerator']);
     expect(expectedGroups?.[0]?.population?.length).toEqual(3);
     const codes = expectedGroups?.[0]?.population?.map(g => g?.code?.coding?.[0]?.code);
@@ -553,7 +553,7 @@ describe('generateTestCaseMRGroup', () => {
   });
 });
 describe('generateTestCaseMRGroup', () => {
-  test('createCQFMTestCaseMeasureReport produces properly formatted test measure report', () => {
+  it('createCQFMTestCaseMeasureReport produces properly formatted test measure report', () => {
     const cqfmTestMeasureReport = createCQFMTestCaseMeasureReport(
       MOCK_MEASURE_BUNDLE.content,
       { start: PERIOD_START, end: PERIOD_END },

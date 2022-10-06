@@ -166,12 +166,12 @@ export function createFHIRResourceString(
 }
 
 /**
- * Creates a FHIR cqfm test MeasureReport from measure and subject data to be exported with associated patient
+ * Creates a FHIR cqfm test case MeasureReport from measure and subject data to be exported with associated patient
  * @param mb FHIR MeasureBundle
  * @param measurementPeriod FHIR Period representing the measurement period
  * @param subjectId the patient id the MeasureReport is associated with
  * @param desiredPopulations a list of desired population codes for the patient to fall into
- * @returns {fhir4.MeasureReport} a cqfm test measure report associated with the patient and measure
+ * @returns {fhir4.MeasureReport} a cqfm test case measure report associated with the patient and measure
  */
 export function createCQFMTestCaseMeasureReport(
   mb: fhir4.Bundle,

@@ -13,7 +13,7 @@ import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { measureReportLookupState } from '../state/atoms/measureReportLookup';
-import { cqfmTestMRLookupState } from '../state/atoms/CQFMTestMRLookup';
+import { cqfmTestMRLookupState } from '../state/atoms/cqfmTestMRLookup';
 import { createCQFMTestCaseMeasureReport } from '../util/fhir/resourceCreation';
 
 const TestCaseEditorPage: NextPage = () => {
