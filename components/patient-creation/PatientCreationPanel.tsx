@@ -28,6 +28,7 @@ import {
   createPatientBundle,
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
+import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -35,8 +36,8 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
+  const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
@@ -178,7 +179,7 @@ function PatientCreationPanel() {
 
   const exportPatientTestCase = (id: string) => {
     const bundleString: string = JSON.stringify(
-      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
       null,
       2
     );
@@ -223,7 +224,7 @@ function PatientCreationPanel() {
     if (measureBundleFolder) {
       Object.keys(currentPatients).forEach(id => {
         const bundleString: string = JSON.stringify(
-          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources),
+          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
           null,
           2
         );

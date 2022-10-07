@@ -110,7 +110,6 @@ export default function PopulationMultiSelect() {
         draftState[selectedPatient].desiredPopulations = newDesiredPopulations;
       });
       setCurrentPatients(nextPatientState);
-
       // update value that appears in MultiSelect component
       setValue(newDesiredPopulations);
     }
