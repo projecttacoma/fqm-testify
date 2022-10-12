@@ -116,7 +116,8 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
-          resources: resources
+          resources: resources,
+          desiredPopulations: currentPatients[patientId]?.desiredPopulations
         };
       });
       setCurrentPatients(nextPatientState);

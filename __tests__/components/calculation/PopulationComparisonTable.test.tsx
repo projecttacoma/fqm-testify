@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import { MeasureReport } from 'fhir/r4';
 import { Suspense } from 'react';
-import MeasureHighlightingPanel from '../../../components/calculation/MeasureHighlightingPanel';
+import PopulationComparisonTable from '../../../components/calculation/PopulationComparisonTable';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { measureReportLookupState } from '../../../state/atoms/measureReportLookup';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
@@ -178,7 +178,7 @@ const MOCK_TEST_CASE: TestCase = {
   }
 };
 
-describe('MeasureHighlightingPanel', () => {
+describe('PopulationComparisonTable', () => {
   it('should render population comparison table', async () => {
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
@@ -194,7 +194,7 @@ describe('MeasureHighlightingPanel', () => {
             <MockSelectedPatient />
             <MockMeasureReportLookup />
             <Suspense>
-              <MeasureHighlightingPanel patientId={'example-pt'} />
+              <PopulationComparisonTable patientId={'example-pt'} />
             </Suspense>
           </>
         )
