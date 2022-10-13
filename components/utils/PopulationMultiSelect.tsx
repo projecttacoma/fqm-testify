@@ -7,7 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { getMeasurePopulations } from '../calculation/MeasurePopulations';
+import { getMeasurePopulations } from './MeasurePopulations';
 interface MultiSelectData {
   value: string;
   label: string;

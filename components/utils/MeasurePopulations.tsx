@@ -13,7 +13,7 @@ export interface MultiSelectData {
  * Excludes measure-population, measure-population-exclusion, and measure-observation
  * (used for CV measures).
  * @param {fhir4.Measure} measure - FHIR measure resource
- * @returns {Array} array of strings representing all unique measure populations
+ * @returns {Array} array of objects representing all unique measure populations
  */
 export function getMeasurePopulations(measure: fhir4.Measure): MultiSelectData[] {
   const measurePopulations: MultiSelectData[] = [];
@@ -41,5 +41,6 @@ export function getMeasurePopulations(measure: fhir4.Measure): MultiSelectData[]
       }
     });
   });
+  console.log(typeof measurePopulations);
   return measurePopulations;
 }
