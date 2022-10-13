@@ -41,6 +41,5 @@ export function getMeasurePopulations(measure: fhir4.Measure): MultiSelectData[]
       }
     });
   });
-  console.log(typeof measurePopulations);
   return measurePopulations;
 }
