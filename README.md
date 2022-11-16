@@ -1,6 +1,6 @@
 # FQM Testify
 
-Tooling for analysis of Electronic Clinical Quality Measures (eCQMS).
+Tooling for analysis of FHIR-based Electronic Clinical Quality Measures (eCQMs).
 
 - [Installation](#installation)
 
