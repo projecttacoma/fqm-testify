@@ -15,7 +15,7 @@ export default function App(props: AppProps) {
   return (
     <RecoilRoot>
       <Head>
-        <title>FQM Testify: an eCQM Analysis Tool</title>
+        <title>FQM Testify: a FHIR-based eCQM Analysis Tool</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
