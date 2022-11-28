@@ -58,7 +58,7 @@ const TestCaseEditorPage: NextPage = () => {
 
   return (
     <>
-      <div style={{ paddingTop: '24px' }}>
+      <div>
         {start && end && measureBundle.content ? (
           <TestCaseEditor />
         ) : (

@@ -1,6 +1,5 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import Head from 'next/head';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Grid, Group, Space, Stack } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
@@ -37,9 +36,6 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <Head>
-        <title>FQM Testify: an eCQM Analysis Tool</title>
-      </Head>
       <Grid justify="center">
         <Grid.Col span={5}>
           <Stack justify="space-evenly" spacing="xl">

@@ -15,14 +15,17 @@ export default function App(props: AppProps) {
   return (
     <RecoilRoot>
       <Head>
-        <title>FQM Testify: an ECQM Analysis Tool</title>
+        <title>FQM Testify: a FHIR-based eCQM Analysis Tool</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
         <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme }}>
           <NotificationsProvider position="top-center">
-            <AppShell padding="md" header={<Header height={120}>{<AppHeader></AppHeader>}</Header>}>
+            <AppShell
+              style={{ marginTop: '-8px', marginBottom: '-8px', marginLeft: '-8px', marginRight: '-8px' }}
+              header={<Header height={120}>{<AppHeader></AppHeader>}</Header>}
+            >
               <Component {...pageProps} />
             </AppShell>
           </NotificationsProvider>
