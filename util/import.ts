@@ -39,7 +39,7 @@ export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: str
         // TODO: Once we have import errors persist on page, replace this!!!
         throw new Error(
           `Found invalid population codes: ${invalidPops.join(
-            ','
+            ', '
           )}. Ensure all imported desired populations are valid with uploaded measure populations`
         );
       }
