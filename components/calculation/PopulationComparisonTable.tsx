@@ -4,7 +4,7 @@ import { measureReportLookupState } from '../../state/atoms/measureReportLookup'
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
-import { getMeasurePopulationsForSelection, MultiSelectData } from '../utils/MeasurePopulations';
+import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
 import { MeasureReportGroup } from 'fhir/r4';
 import { InfoCircle } from 'tabler-icons-react';
 

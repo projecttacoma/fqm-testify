@@ -29,7 +29,7 @@ import {
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
 import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
-import { getMeasurePopulations } from '../utils/MeasurePopulations';
+import { getMeasurePopulations } from '../../util/MeasurePopulations';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
