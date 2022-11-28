@@ -7,7 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { getMeasurePopulations } from './MeasurePopulations';
+import { getMeasurePopulationsForSelection } from './MeasurePopulations';
 interface MultiSelectData {
   value: string;
   label: string;
@@ -135,7 +135,7 @@ export default function PopulationMultiSelect() {
   };
 
   if (measure) {
-    const populations = updateMeasurePopulations(getMeasurePopulations(measure));
+    const populations = updateMeasurePopulations(getMeasurePopulationsForSelection(measure));
     return (
       <MultiSelect
         data={populations}
