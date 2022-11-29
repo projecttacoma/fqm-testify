@@ -22,24 +22,22 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
     Enums.PopulationType.MSRPOPLEX,
     Enums.PopulationType.OBSERV
   ];
-  // Iterate over measure population groups
-  measure.group?.forEach(group => {
-    group.population?.forEach(population => {
-      const populationCode = population.code?.coding?.[0].code;
-      const populationDisplay = population.code?.coding?.[0].display;
-      // TODO: determine handling of populations that are not permitted for proportion measures
-      if (
-        populationCode &&
-        !measurePopulations.map(p => p.value).includes(populationCode) &&
-        !EXCLUDED_MEASURE_POPULATIONS.find(p => p === populationCode)
-      ) {
-        measurePopulations.push({
-          value: populationCode,
-          label: populationDisplay || populationCode,
-          disabled: false
-        });
-      }
-    });
+  // TODO: This will need to change if we want to support multiple groups
+  measure.group?.[0]?.population?.forEach(population => {
+    const populationCode = population.code?.coding?.[0].code;
+    const populationDisplay = population.code?.coding?.[0].display;
+    // TODO: determine handling of populations that are not permitted for proportion measures
+    if (
+      populationCode &&
+      !measurePopulations.map(p => p.value).includes(populationCode) &&
+      !EXCLUDED_MEASURE_POPULATIONS.find(p => p === populationCode)
+    ) {
+      measurePopulations.push({
+        value: populationCode,
+        label: populationDisplay || populationCode,
+        disabled: false
+      });
+    }
   });
   return measurePopulations;
 }
@@ -49,14 +47,13 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
  */
 export function getMeasurePopulations(measure: fhir4.Measure): string[] {
   const measurePopulations: string[] = [];
-
-  measure.group?.forEach(group => {
-    group.population?.forEach(population => {
-      const populationCode = population.code?.coding?.[0].code;
-      if (populationCode) {
-        measurePopulations.push(populationCode);
-      }
-    });
+  // TODO: This will need to change if we want to support multiple groups
+  measure.group?.[0]?.population?.forEach(population => {
+    const populationCode = population.code?.coding?.[0].code;
+    if (populationCode) {
+      measurePopulations.push(populationCode);
+    }
   });
+
   return measurePopulations;
 }
