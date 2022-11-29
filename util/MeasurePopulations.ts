@@ -46,8 +46,6 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
 
 /**
  * Extracts all population codes included in measure groups
- * @param {fhir4.Measure} measure a FHIR Measure from which to extract measure populations
- * @returns {Array} an array of all measure population codes included in measure
  */
 export function getMeasurePopulations(measure: fhir4.Measure): string[] {
   const measurePopulations: string[] = [];
