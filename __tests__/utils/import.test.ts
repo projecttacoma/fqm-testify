@@ -225,7 +225,7 @@ describe('bundleToTestCase', () => {
     };
     expect(() =>
       bundleToTestCase(bundle, ['initial-population, numerator, denominator, denominator-exclusion'])
-    ).toThrowError(`Expected 1 or 0 test case measure reports in bundle, but found 2`);
+    ).toThrowError(`Expected 0 or 1 test case measure reports in bundle, but found 2`);
   });
 });
 
