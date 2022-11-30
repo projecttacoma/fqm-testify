@@ -4,7 +4,7 @@ import { measureReportLookupState } from '../../state/atoms/measureReportLookup'
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
-import { getMeasurePopulations, MultiSelectData } from '../utils/MeasurePopulations';
+import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
 import { MeasureReportGroup } from 'fhir/r4';
 import { InfoCircle } from 'tabler-icons-react';
 
@@ -70,7 +70,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * that population is desired (or actual).
    */
   function constructBothPopulationsValuesArray(group: MeasureReportGroup | undefined) {
-    const desiredPopulations = constructDesiredPopulationsValuesArray(getMeasurePopulations(measure));
+    const desiredPopulations = constructDesiredPopulationsValuesArray(getMeasurePopulationsForSelection(measure));
     const bothPopulations: BothPopulations = {};
     group?.population?.forEach(population => {
       const key = population?.code?.coding?.[0]?.display || population?.code?.coding?.[0]?.code;

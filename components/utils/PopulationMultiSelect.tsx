@@ -7,7 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { getMeasurePopulations } from './MeasurePopulations';
+import { getMeasurePopulationsForSelection } from '../../util/MeasurePopulations';
 interface MultiSelectData {
   value: string;
   label: string;
@@ -135,7 +135,7 @@ export default function PopulationMultiSelect() {
   };
 
   if (measure) {
-    const populations = updateMeasurePopulations(getMeasurePopulations(measure));
+    const populations = updateMeasurePopulations(getMeasurePopulationsForSelection(measure));
     return (
       <MultiSelect
         data={populations}
@@ -150,8 +150,12 @@ export default function PopulationMultiSelect() {
                   </ActionIcon>
                 </Popover.Target>
                 <Popover.Dropdown>
-                  A measure population is disabled if a patient cannot belong to both the disabled population and the
-                  selected population(s).
+                  <div style={{ maxWidth: '500px' }}>
+                    Test cases created by Patient Bundle import will have desired populations auto-populated according
+                    to the CQFM test case MeasureReport when one is present in the Patient Bundle. A measure population
+                    is disabled if a patient cannot belong to both the disabled population and the selected
+                    population(s).
+                  </div>
                 </Popover.Dropdown>
               </Popover>
             </div>

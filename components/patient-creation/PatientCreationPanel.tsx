@@ -7,7 +7,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { download } from '../../util/downloadUtil';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -29,6 +29,7 @@ import {
   createPatientResourceString
 } from '../../util/fhir/resourceCreation';
 import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
+import { getMeasurePopulations } from '../../util/MeasurePopulations';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -44,6 +45,9 @@ function PatientCreationPanel() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
   const isSmallScreen = useMediaQuery('(max-width: 1600px)');
+  const measure = useMemo(() => {
+    return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
+  }, [measureBundle]);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -281,7 +285,9 @@ function PatientCreationPanel() {
             let testCase = {} as TestCaseInfo;
 
             try {
-              testCase = bundleToTestCase(bundle);
+              if (measure) {
+                testCase = bundleToTestCase(bundle, getMeasurePopulations(measure));
+              }
             } catch (e) {
               if (e instanceof Error) {
                 failureCount += 1;
