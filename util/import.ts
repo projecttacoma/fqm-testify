@@ -5,6 +5,10 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
  * from a passed in Patient bundle. Uses the population codes on the Measure Bundle imported to testify
  * to determine the desired populations the patient can fall into. Uses the CQFM test case
  * MeasureReport (if present in the Patient Bundle) to determine which desired populations are selected.
+ * @param bundle FHIR Patient Bundle containing Patient and all test case resources
+ * @param populationGroupCodes An array of population codes pulled from uploaded FHIR Measure to determine
+ * valid desired populations
+ * @returns An fqm-testify test case
  */
 export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: string[]): TestCaseInfo {
   if (!bundle.entry || bundle.entry.length === 0) {
