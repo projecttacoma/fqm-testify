@@ -64,7 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
     "eslint": "8.15.0",
-    "eslint-config-next": "12.1.6",
+    "eslint-config-next": "13.1.1",
     "eslint-config-prettier": "^8.5.0",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
