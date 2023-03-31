@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import MeasureUploadHeader from '../../../components/utils/MeasureUploadHeader';
+import MeasureUploadHeader from '../../../components/utils/MeasureFileUploadHeader';
 import { createMockRouter, mantineRecoilWrap } from '../../helpers/testHelpers';
 
 describe('MeasureUploadHeader', () => {

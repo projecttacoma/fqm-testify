@@ -5,7 +5,7 @@ import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Calculator, MeasureReportBuilder } from 'fqm-execution';
-import MeasureUpload from '../../../components/measure-upload/MeasureUpload';
+import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 
 const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
   resourceType: 'MeasureReport',
