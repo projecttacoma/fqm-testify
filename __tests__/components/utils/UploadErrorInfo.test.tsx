@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MeasureUploadError } from '../../../components/measure-upload/MeasureFileUpload';
+import { MeasureUploadError } from '../../../util/MeasureUploadUtils';
 import UploadErrorInfo from '../../../components/utils/UploadErrorInfo';
 import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
@@ -8,7 +8,7 @@ const MOCK_SIMPLE_ERROR: MeasureUploadError = {
   id: 'simple-error',
   message: 'this is a simple error',
   timestamp: '1996-07-19T20:12:00.0Z',
-  attemptedFileName: 'fake-bundle.json',
+  attemptedBundleDisplay: 'fake-bundle.json',
   isValueSetMissingError: false
 };
 
@@ -16,7 +16,7 @@ const MOCK_VALUESET_ERROR: MeasureUploadError = {
   id: 'valueset-error',
   message: ['http://example.com/ValueSet/1', 'http://example.com/ValueSet/2'],
   timestamp: '1996-07-19T20:12:00.0Z',
-  attemptedFileName: 'fake-bundle.json',
+  attemptedBundleDisplay: 'fake-bundle.json',
   isValueSetMissingError: true
 };
 
@@ -24,7 +24,7 @@ describe('UploadErrorInfo', () => {
   it('should render file name and timestamp of error', () => {
     render(mantineRecoilWrap(<UploadErrorInfo error={MOCK_SIMPLE_ERROR} />));
 
-    expect(screen.getByText(MOCK_SIMPLE_ERROR.attemptedFileName)).toBeInTheDocument();
+    expect(screen.getByText(MOCK_SIMPLE_ERROR.attemptedBundleDisplay as string)).toBeInTheDocument();
     expect(screen.getByText(MOCK_SIMPLE_ERROR.timestamp)).toBeInTheDocument();
   });
 

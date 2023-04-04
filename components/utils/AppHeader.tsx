@@ -29,7 +29,9 @@ export default function AppHeader() {
             <div style={{ display: 'flex', justifyContent: 'space-around', gap: 10, alignItems: 'center' }}>
               <div>
                 <Text size="md" color="dimmed">
-                  {measureBundle.name}
+                  {measureBundle.isFile
+                    ? measureBundle.fileName
+                    : measureBundle.displayMap[measureBundle.selectedMeasureId as string]}
                 </Text>
                 <Text size="sm" color="dimmed">
                   {retrieveMeasurementPeriodString(start, end)}

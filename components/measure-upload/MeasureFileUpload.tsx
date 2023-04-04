@@ -22,11 +22,11 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
     const reader = new FileReader();
     reader.onload = async () => {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
-      const measures = bundle?.entry?.filter(r => r?.resource?.resourceType === 'Measure');
+      const measures = bundle.entry?.filter(r => r?.resource?.resourceType === 'Measure');
       if (bundle.resourceType !== 'Bundle') {
         rejectFile("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", file.name);
         return;
-      } else if (measures && measures.length !== 1) {
+      } else if (!measures || measures.length !== 1) {
         rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'", file.name);
         return;
       }
@@ -37,10 +37,14 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
         return;
       }
 
-      setMeasureBundle({
-        name: file.name,
-        content: bundle
-      });
+      setMeasureBundle(mb => ({
+        ...mb,
+        fileName: file.name,
+        content: bundle,
+        isFile: true,
+        selectedMeasureId: null,
+        displayMap: {}
+      }));
 
       // Safe to cast measures as error will be set if undefined above
       const effectivePeriod = ((measures as fhir4.BundleEntry[])[0].resource as fhir4.Measure).effectivePeriod;
@@ -72,10 +76,6 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
       title: 'File upload failed',
       message: 'There was an issue with your file. Please correct the issues listed below.',
       color: 'red'
-    });
-    setMeasureBundle({
-      name: '',
-      content: null
     });
   };
 
@@ -109,10 +109,14 @@ function DropzoneChildren() {
   return (
     <Grid justify="center" align="center" style={{ minHeight: 200 }}>
       <Stack>
-        <Center>{measureBundle.name ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}</Center>
+        <Center>
+          {measureBundle.fileName && measureBundle.isFile ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}
+        </Center>
         <Center>
           <Text size="xl" inline className={classes.text}>
-            {measureBundle.name ? measureBundle.name : 'Drag a Measure Bundle JSON file here or click to select files'}
+            {measureBundle.fileName && measureBundle.isFile
+              ? measureBundle.fileName
+              : 'Drag a Measure Bundle JSON file here or click to select files'}
           </Text>
         </Center>
       </Stack>

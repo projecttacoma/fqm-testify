@@ -13,7 +13,7 @@ export interface MeasureUploadProps {
   logError: (error: MeasureUploadError) => void;
 }
 
-const DEFAULT_MEASUREMENT_PERIOD = {
+export const DEFAULT_MEASUREMENT_PERIOD = {
   start: DateTime.fromISO('2022-01-01').toJSDate(),
   end: DateTime.fromISO('2022-12-31').toJSDate()
 };

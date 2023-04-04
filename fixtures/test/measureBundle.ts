@@ -1,5 +1,9 @@
 export const MOCK_MEASURE_BUNDLE = {
-  name: 'measureBundle',
+  fileName: 'measureBundle',
+  isFile: true,
+  displayMap: {},
+  selectedMeasureId: null,
+  measureRepositoryUrl: '',
   content: {
     resourceType: 'Bundle',
     type: 'collection',

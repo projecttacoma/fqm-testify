@@ -56,7 +56,7 @@ const Home: NextPage = () => {
                   sx={() => ({
                     marginTop: 10
                   })}
-                  disabled={!(measureBundle.name && measurementPeriod.start && measurementPeriod.end)}
+                  disabled={!(measureBundle.content && measurementPeriod.start && measurementPeriod.end)}
                 >
                   Next
                 </Button>

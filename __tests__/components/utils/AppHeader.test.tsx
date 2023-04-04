@@ -40,7 +40,7 @@ describe('AppHeader', () => {
 
     const heading = screen.getByText(/FQM Testify: an ECQM Analysis Tool/i);
     expect(heading).toBeInTheDocument();
-    const mbName = screen.getByText(MOCK_MEASURE_BUNDLE.name);
+    const mbName = screen.getByText(MOCK_MEASURE_BUNDLE.fileName);
     expect(mbName).toBeInTheDocument();
     const dateString = screen.getByText(/January 1, 2020 - January 1, 2021/i);
     expect(dateString).toBeInTheDocument();

@@ -14,7 +14,9 @@ describe('MeasureUploadHeader', () => {
       )
     );
 
-    const measureUploadHeader = screen.getByText(/Step 1: Upload a Measure Bundle/i);
+    const stepHeader = screen.getByText(/Step 1:/i);
+    const measureUploadHeader = screen.getByText(/Upload a Measure Bundle/i);
+    expect(stepHeader).toBeInTheDocument();
     expect(measureUploadHeader).toBeInTheDocument();
   });
 
