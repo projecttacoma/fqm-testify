@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MeasureUploadError } from '../../../util/MeasureUploadUtils';
+import { MeasureUploadError } from '../../../util/measureUploadUtils';
 import UploadErrorInfo from '../../../components/utils/UploadErrorInfo';
 import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
