@@ -12,7 +12,7 @@ import MeasureRepositoryUploadHeader from '../components/utils/MeasureRespositor
 import DateSelectorsHeader from '../components/utils/DateSelectorsHeader';
 import UploadErrorLog from '../components/measure-upload/UploadErrorLog';
 import MeasureRepositoryUpload from '../components/measure-upload/MeasureRepositoryUpload';
-import { MeasureUploadError } from '../util/MeasureUploadUtils';
+import { MeasureUploadError } from '../util/measureUploadUtils';
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);

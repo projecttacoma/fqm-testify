@@ -6,7 +6,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { MeasureUploadProps, identifyMissingValueSets, populateMeasurementPeriod } from '../../util/MeasureUploadUtils';
+import { MeasureUploadProps, identifyMissingValueSets, populateMeasurementPeriod } from '../../util/measureUploadUtils';
 
 const useStyles = createStyles({
   text: {

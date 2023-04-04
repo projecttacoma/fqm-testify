@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Collapse, Group, Paper, Text } from '@mantine/core';
 import Link from 'next/link';
-import { MeasureUploadError } from '../../util/MeasureUploadUtils';
+import { MeasureUploadError } from '../../util/measureUploadUtils';
 
 export interface UploadErrorInfoProps {
   error: MeasureUploadError;

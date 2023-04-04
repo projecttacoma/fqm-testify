@@ -1,6 +1,6 @@
 import { Center, ScrollArea, Stack, Text } from '@mantine/core';
 import React from 'react';
-import { MeasureUploadError } from '../../util/MeasureUploadUtils';
+import { MeasureUploadError } from '../../util/measureUploadUtils';
 import UploadErrorInfo from '../utils/UploadErrorInfo';
 
 export interface UploadErrorLogProps {
