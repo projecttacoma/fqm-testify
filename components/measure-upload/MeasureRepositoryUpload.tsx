@@ -58,7 +58,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
 
   /**
    * Handles updating of the Measure Repository Service url field and associated state variables
-  */
+   */
   function handleMrsUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (measureSelectIsOpen) {
       setMeasureSelectIsOpen(false);
@@ -76,7 +76,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
   /**
    * Takes the entries from a Measure retrieval response and creates a map from Measure id
    * to Measure display label for Measure select component
-  */
+   */
   function createMeasureDisplayMap(
     displayMap: Record<string, string>,
     { resource: measure }: { resource: fhir4.Measure }
@@ -100,7 +100,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
   /**
    * Sends a `GET` request to the `/Measure` endpoint of the specified Measure Repository Service.
    * Parses and stores the measureIds if successful
-  */
+   */
   async function retrieveMeasures() {
     setIsLoadingIds(true);
     let parsedMeasureRepositoryUrl = measureRepositoryUrl;
@@ -150,7 +150,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
   /**
    * Sends a `POST` request to the `Measure/:id/$package` endpoint of the specified Measure
    * Repository Service. Checks the resulting bundle is valid and saves it if so.
-  */
+   */
   async function retrieveMeasurePackage(id: string) {
     setMeasureBundle(mb => ({ ...mb, selectedMeasureId: id }));
     if (id) {
