@@ -98,10 +98,19 @@ function DropzoneChildren() {
     <Grid justify="center" align="center" style={{ minHeight: 200 }}>
       <Stack>
         <Center>
-          {measureBundle.fileName && measureBundle.isFile ? <IconFileCheck size={80} /> : <IconFileImport size={80} />}
+          {measureBundle.fileName && measureBundle.isFile ? (
+            <IconFileCheck size={80} color="green" />
+          ) : (
+            <IconFileImport size={80} />
+          )}
         </Center>
         <Center>
-          <Text size="xl" inline className={classes.text}>
+          <Text
+            size="xl"
+            inline
+            className={classes.text}
+            style={{ color: measureBundle.fileName && measureBundle.isFile ? 'green' : 'black' }}
+          >
             {measureBundle.fileName && measureBundle.isFile
               ? measureBundle.fileName
               : 'Drag a Measure Bundle JSON file here or click to select files'}
