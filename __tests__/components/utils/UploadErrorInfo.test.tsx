@@ -9,7 +9,8 @@ const MOCK_SIMPLE_ERROR: MeasureUploadError = {
   message: 'this is a simple error',
   timestamp: '1996-07-19T20:12:00.0Z',
   attemptedBundleDisplay: 'fake-bundle.json',
-  isValueSetMissingError: false
+  isValueSetMissingError: false,
+  isThrownFromMrs: false
 };
 
 const MOCK_VALUESET_ERROR: MeasureUploadError = {
@@ -17,7 +18,8 @@ const MOCK_VALUESET_ERROR: MeasureUploadError = {
   message: ['http://example.com/ValueSet/1', 'http://example.com/ValueSet/2'],
   timestamp: '1996-07-19T20:12:00.0Z',
   attemptedBundleDisplay: 'fake-bundle.json',
-  isValueSetMissingError: true
+  isValueSetMissingError: true,
+  isThrownFromMrs: false
 };
 
 describe('UploadErrorInfo', () => {

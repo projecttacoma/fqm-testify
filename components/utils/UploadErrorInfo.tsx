@@ -24,8 +24,16 @@ export default function UploadErrorInfo({ error }: UploadErrorInfoProps) {
               justifyContent: 'space-between'
             }}
           >
-            <Text>Bundle is missing required ValueSets</Text>
-            <Button variant="subtle" color="gray" onClick={() => setIsDetailOpen(!isDetailOpen)} style={{}}>
+            <div>
+              <Text>Bundle is missing required ValueSets.</Text>
+              {error.isThrownFromMrs && (
+                <Text>
+                  A VS API Key must be specified by the Measure Repository Service server to retrieve the missing
+                  ValueSets.
+                </Text>
+              )}
+            </div>
+            <Button variant="subtle" color="gray" onClick={() => setIsDetailOpen(!isDetailOpen)}>
               {isDetailOpen ? 'Hide ' : 'Show '}Missing ValueSet URLs
             </Button>
           </div>

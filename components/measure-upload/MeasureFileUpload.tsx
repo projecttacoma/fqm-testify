@@ -3,10 +3,14 @@ import { showNotification } from '@mantine/notifications';
 import { Grid, Center, Text, Stack, createStyles } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { v4 as uuidv4 } from 'uuid';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { MeasureUploadProps, identifyMissingValueSets, populateMeasurementPeriod } from '../../util/measureUploadUtils';
+import {
+  MeasureUploadProps,
+  identifyMissingValueSets,
+  populateMeasurementPeriod,
+  rejectUpload
+} from '../../util/measureUploadUtils';
 
 const useStyles = createStyles({
   text: {
@@ -24,16 +28,16 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
       const bundle = JSON.parse(reader.result as string) as fhir4.Bundle;
       const measures = bundle.entry?.filter(r => r?.resource?.resourceType === 'Measure');
       if (bundle.resourceType !== 'Bundle') {
-        rejectFile("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", file.name);
+        rejectUpload("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", file.name, logError);
         return;
       } else if (!measures || measures.length !== 1) {
-        rejectFile("Uploaded bundle must contain exactly one resource of type 'Measure'", file.name);
+        rejectUpload("Uploaded bundle must contain exactly one resource of type 'Measure'", file.name, logError);
         return;
       }
 
       const missingValueSets = await identifyMissingValueSets(bundle);
       if (missingValueSets.length > 0) {
-        rejectFile(missingValueSets, file.name, true);
+        rejectUpload(missingValueSets, file.name, logError, false, true);
         return;
       }
 
@@ -61,22 +65,6 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
       });
     };
     reader.readAsText(file);
-  };
-
-  const rejectFile = (message: string | string[], fileName: string, isValueSetMissingError = false) => {
-    logError({
-      id: uuidv4(),
-      message,
-      timestamp: new Date().toISOString(),
-      attemptedBundleDisplay: fileName,
-      isValueSetMissingError
-    });
-    showNotification({
-      icon: <IconAlertCircle />,
-      title: 'File upload failed',
-      message: 'There was an issue with your file. Please correct the issues listed below.',
-      color: 'red'
-    });
   };
 
   return (

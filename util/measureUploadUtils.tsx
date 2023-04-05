@@ -1,5 +1,8 @@
+import { showNotification } from '@mantine/notifications';
 import { Calculator } from 'fqm-execution';
 import { DateTime } from 'luxon';
+import { v4 as uuidv4 } from 'uuid';
+import { IconAlertCircle } from '@tabler/icons';
 
 export interface MeasureUploadError {
   id: string;
@@ -7,11 +10,14 @@ export interface MeasureUploadError {
   timestamp: string;
   attemptedBundleDisplay: string | null;
   isValueSetMissingError: boolean;
+  isThrownFromMrs: boolean;
 }
 
 export interface MeasureUploadProps {
-  logError: (error: MeasureUploadError) => void;
+  logError: LogErrorType;
 }
+
+type LogErrorType = (error: MeasureUploadError) => void;
 
 export const DEFAULT_MEASUREMENT_PERIOD = {
   start: DateTime.fromISO('2022-01-01').toJSDate(),
@@ -21,6 +27,29 @@ export const DEFAULT_MEASUREMENT_PERIOD = {
 const DEFAULT_MEASUREMENT_PERIOD_DURATION = 1;
 
 const VSAC_REGEX = /http:\/\/cts\.nlm\.nih\.gov.*ValueSet/;
+
+export const rejectUpload = (
+  message: string | string[],
+  attemptedBundleDisplay: string | null,
+  logError: LogErrorType,
+  isThrownFromMrs = false,
+  isValueSetMissingError = false
+) => {
+  logError({
+    id: uuidv4(),
+    message,
+    timestamp: new Date().toISOString(),
+    attemptedBundleDisplay,
+    isValueSetMissingError,
+    isThrownFromMrs
+  });
+  showNotification({
+    icon: <IconAlertCircle />,
+    title: 'Bundle upload failed',
+    message: 'There was an issue uploading your bundle. Please correct the issues listed below.',
+    color: 'red'
+  });
+};
 
 /**
  * Takes in two date strings and populates a valid measurement period with JS Dates

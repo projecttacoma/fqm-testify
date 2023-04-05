@@ -4,10 +4,14 @@ import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { identifyMissingValueSets, MeasureUploadProps, populateMeasurementPeriod } from '../../util/measureUploadUtils';
-import { showNotification } from '@mantine/notifications';
-import { v4 as uuidv4 } from 'uuid';
-import { IconAlertCircle } from '@tabler/icons';
+import {
+  identifyMissingValueSets,
+  MeasureUploadProps,
+  populateMeasurementPeriod,
+  rejectUpload
+} from '../../util/measureUploadUtils';
+import { showNotification, cleanNotifications } from '@mantine/notifications';
+import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
 import { CircleCheck } from 'tabler-icons-react';
 import { displayMapToSelectDataState } from '../../state/selectors/displayMapToSelectData';
 
@@ -51,27 +55,6 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
       setIsLoadingPackage(PACKAGE_STATES.NONE);
     }
   }, [isFile]);
-
-  const rejectUpload = (
-    message: string | string[],
-    attemptedBundleDisplay: string | null,
-    isValueSetMissingError = false
-  ) => {
-    logError({
-      id: uuidv4(),
-      message,
-      timestamp: new Date().toISOString(),
-      attemptedBundleDisplay,
-      isValueSetMissingError
-    });
-    showNotification({
-      icon: <IconAlertCircle />,
-      title: 'Bundle upload failed',
-      message: 'There was an issue uploading your bundle. Please correct the issues listed below.',
-      color: 'red'
-    });
-    setIsLoadingPackage(PACKAGE_STATES.FAIL);
-  };
 
   /*
     Handles updating of the Measure Repository Service url field and associated state variables
@@ -120,10 +103,26 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
   */
   async function retrieveMeasures() {
     setIsLoadingIds(true);
+    let parsedMeasureRepositoryUrl = measureRepositoryUrl;
+    if (measureRepositoryUrl.slice(-1) === '/') {
+      parsedMeasureRepositoryUrl = measureRepositoryUrl.slice(0, -1);
+      setMeasureBundle(mb => ({ ...mb, measureRepositoryUrl: parsedMeasureRepositoryUrl }));
+    }
     try {
-      const response = await fetch(`${measureRepositoryUrl}/Measure`);
+      const response = await fetch(`${parsedMeasureRepositoryUrl}/Measure`);
       const responseBody = await response.json();
       if (response.status === 200) {
+        if (responseBody.entry.length === 0) {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'No measures found',
+            message: `Measure repository service hosted at ${parsedMeasureRepositoryUrl} returned an empty 
+            FHIR Bundle when queried for Measures. Ensure Measures are present on server.`,
+            color: 'red'
+          });
+          setIsLoadingIds(false);
+          return;
+        }
         const displayMap = responseBody.entry.reduce(createMeasureDisplayMap, {});
         setMeasureBundle(mb => ({ ...mb, displayMap }));
         if (!measureSelectIsOpen) {
@@ -141,7 +140,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
       showNotification({
         icon: <IconAlertCircle />,
         title: 'Failed reaching out to server',
-        message: `Could not connect to server with url: ${measureRepositoryUrl}`,
+        message: `Could not connect to server with url: ${parsedMeasureRepositoryUrl}`,
         color: 'red'
       });
     }
@@ -156,39 +155,62 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
     setMeasureBundle(mb => ({ ...mb, selectedMeasureId: id }));
     if (id) {
       const display = displayMap[id];
+      showNotification({
+        loading: true,
+        title: `Packaging ${display}...`,
+        message: `Waiting for measure repository service to finish packaging Measure: ${display}`,
+        color: 'blue'
+      });
       setIsLoadingPackage(PACKAGE_STATES.LOADING);
       const response = await fetch(`${measureRepositoryUrl}/Measure/${id}/$package`, MEASURE_RETRIEVAL_OPTIONS);
-      const responseBody = await response.json();
+      const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
       if (responseBody.resourceType !== 'Bundle') {
         if (responseBody.resourceType === 'OperationOutcome') {
           rejectUpload(
-            `Packaging of Measure: ${display} failed with message: "${responseBody.issue[0].details.text}"`,
-            display
+            `Packaging of Measure: ${display} failed with message: "${responseBody.issue[0].details?.text}"`,
+            display,
+            logError,
+            true
           );
         } else {
-          rejectUpload("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", display);
+          rejectUpload("Uploaded file must be a JSON FHIR Resource of type 'Bundle'", display, logError, true);
         }
+        setIsLoadingPackage(PACKAGE_STATES.FAIL);
         return;
       }
 
-      const measures = responseBody.entry.filter((e: fhir4.BundleEntry) => e.resource?.resourceType === 'Measure');
-      if (measures.length !== 1) {
-        rejectUpload(`Expected exactly 1 Measure in uploaded Bundle, received: ${measures.length}`, display);
+      const measures = responseBody.entry?.filter(e => e.resource?.resourceType === 'Measure');
+      if (measures?.length !== 1) {
+        rejectUpload(
+          `Expected exactly 1 Measure in uploaded Bundle, received: ${measures?.length}`,
+          display,
+          logError,
+          true
+        );
+        setIsLoadingPackage(PACKAGE_STATES.FAIL);
         return;
       }
 
       const missingValueSets = await identifyMissingValueSets(responseBody);
       if (missingValueSets.length > 0) {
-        rejectUpload(missingValueSets, display, true);
+        rejectUpload(missingValueSets, display, logError, true, true);
+        setIsLoadingPackage(PACKAGE_STATES.FAIL);
         return;
       }
-      const effectivePeriod = ((measures as fhir4.BundleEntry[])[0].resource as fhir4.Measure).effectivePeriod;
+      const effectivePeriod = (measures[0].resource as fhir4.Measure).effectivePeriod;
 
       // Set measurement period to default period
       const measurementPeriod = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
       setMeasureBundle(mb => ({ ...mb, content: responseBody, isFile: false }));
       setMeasurementPeriod(measurementPeriod);
       setIsLoadingPackage(PACKAGE_STATES.SUCCESS);
+      cleanNotifications();
+      showNotification({
+        icon: <IconCircleCheck />,
+        title: 'Upload Success',
+        message: `Successfully uploaded ${display}`,
+        color: 'green'
+      });
     } else {
       setIsLoadingPackage(PACKAGE_STATES.NONE);
     }
@@ -204,7 +226,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
           onChange={handleMrsUrlChange}
           style={{ flex: 1 }}
         />
-        <Button onClick={retrieveMeasures} loading={isLoadingIds}>
+        <Button onClick={retrieveMeasures} loading={isLoadingIds} disabled={measureRepositoryUrl === ''}>
           Get Measures
         </Button>
       </Group>

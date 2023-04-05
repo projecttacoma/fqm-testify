@@ -23,7 +23,13 @@ export default function MeasureRepositoryUploadHeader() {
             </ActionIcon>
           </Popover.Target>
           <Popover.Dropdown style={{ width: '300px' }}>
-            <Text>Enter the base URL for a Measure Repository Service server.</Text>
+            <Text>
+              Enter the base URL for a{' '}
+              <Anchor href="https://build.fhir.org/ig/HL7/cqf-measures/measure-repository-service.html">
+                Measure Repository Service
+              </Anchor>{' '}
+              server.
+            </Text>
             <Text>
               The server must support the{' '}
               <Anchor href="https://build.fhir.org/ig/HL7/cqf-measures/measure-repository-service.html#package">
