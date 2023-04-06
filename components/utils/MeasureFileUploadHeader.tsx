@@ -2,17 +2,20 @@ import { Text, Popover, List, Anchor, ActionIcon, Group } from '@mantine/core';
 import React, { useState } from 'react';
 import { InfoCircle } from 'tabler-icons-react';
 
-export default function MeasureUploadHeader() {
+export default function MeasureFileUploadHeader() {
   const [opened, setOpened] = useState(false);
 
   return (
-    <Group>
-      <div style={{ paddingRight: 5 }}>
+    <div>
+      <div style={{ paddingRight: 4 }}>
         <Text size="xl" weight={700}>
-          Step 1: Upload a Measure Bundle
+          Step 1:
         </Text>
       </div>
-      <div>
+      <Group>
+        <Text size="lg" weight={400}>
+          Upload a Measure Bundle
+        </Text>
         <Popover opened={opened} onClose={() => setOpened(false)}>
           <Popover.Target>
             <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
@@ -34,7 +37,7 @@ export default function MeasureUploadHeader() {
             </List>
           </Popover.Dropdown>
         </Popover>
-      </div>
-    </Group>
+      </Group>
+    </div>
   );
 }

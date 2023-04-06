@@ -6,7 +6,10 @@ export default function DateSelectorsHeader() {
     <Group>
       <div style={{ paddingRight: 5 }}>
         <Text size="xl" weight={700}>
-          Step 2: Set your Measurement Period Date Range
+          Step 2:
+        </Text>
+        <Text size="lg" weight={400}>
+          Set your Measurement Period Date Range
         </Text>
       </div>
     </Group>

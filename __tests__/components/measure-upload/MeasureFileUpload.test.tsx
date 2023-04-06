@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { Calculator } from 'fqm-execution';
 import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
-import MeasureUpload from '../../../components/measure-upload/MeasureUpload';
+import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 
 const MOCK_BUNDLE: fhir4.Bundle = {
   resourceType: 'Bundle',
@@ -12,7 +12,7 @@ const MOCK_BUNDLE: fhir4.Bundle = {
 
 describe('MeasureUpload', () => {
   it('renders a dropzone with generic label when no measure uploaded', () => {
-    render(mantineRecoilWrap(<MeasureUpload />));
+    render(mantineRecoilWrap(<MeasureUpload logError={jest.fn()} />));
 
     const title = screen.getByText('Drag a Measure Bundle JSON file here or click to select files');
     expect(title).toBeInTheDocument();
@@ -28,8 +28,12 @@ describe('MeasureUpload', () => {
     });
 
     const MockMB = getMockRecoilState(measureBundleState, {
-      name: 'testName',
-      content: MOCK_BUNDLE
+      fileName: 'testName',
+      content: MOCK_BUNDLE,
+      isFile: true,
+      measureRepositoryUrl: '',
+      selectedMeasureId: null,
+      displayMap: {}
     });
 
     await act(async () => {
@@ -37,7 +41,7 @@ describe('MeasureUpload', () => {
         mantineRecoilWrap(
           <>
             <MockMB />
-            <MeasureUpload />
+            <MeasureUpload logError={jest.fn()} />
           </>
         )
       );

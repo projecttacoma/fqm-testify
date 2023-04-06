@@ -1,4 +1,4 @@
-import { populateMeasurementPeriod, DEFAULT_MEASUREMENT_PERIOD } from '../../components/measure-upload/MeasureUpload';
+import { populateMeasurementPeriod, DEFAULT_MEASUREMENT_PERIOD } from '../../util/measureUploadUtils';
 import { DateTime } from 'luxon';
 
 const EXAMPLE_START_DATE = '2020-01-01';

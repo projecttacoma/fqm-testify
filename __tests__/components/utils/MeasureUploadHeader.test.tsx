@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import MeasureUploadHeader from '../../../components/utils/MeasureUploadHeader';
+import MeasureUploadHeader from '../../../components/utils/MeasureFileUploadHeader';
 import { createMockRouter, mantineRecoilWrap } from '../../helpers/testHelpers';
 
 describe('MeasureUploadHeader', () => {
@@ -14,7 +14,9 @@ describe('MeasureUploadHeader', () => {
       )
     );
 
-    const measureUploadHeader = screen.getByText(/Step 1: Upload a Measure Bundle/i);
+    const stepHeader = screen.getByText(/Step 1:/i);
+    const measureUploadHeader = screen.getByText(/Upload a Measure Bundle/i);
+    expect(stepHeader).toBeInTheDocument();
     expect(measureUploadHeader).toBeInTheDocument();
   });
 

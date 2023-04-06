@@ -1,8 +1,12 @@
 import { atom } from 'recoil';
 
 interface MeasureBundleStateType {
-  name: string;
   content: fhir4.Bundle | null;
+  displayMap: Record<string, string>;
+  fileName: string;
+  isFile: boolean;
+  measureRepositoryUrl: string;
+  selectedMeasureId: string | null;
 }
 
 /**
@@ -11,7 +15,11 @@ interface MeasureBundleStateType {
 export const measureBundleState = atom<MeasureBundleStateType>({
   key: 'measureBundleState',
   default: {
-    name: '',
-    content: null
+    content: null,
+    displayMap: {},
+    fileName: '',
+    isFile: false,
+    measureRepositoryUrl: '',
+    selectedMeasureId: null
   }
 });

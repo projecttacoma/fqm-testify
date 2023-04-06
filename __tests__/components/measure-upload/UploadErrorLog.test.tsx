@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import { MeasureUploadError } from '../../../components/measure-upload/MeasureUpload';
+import { MeasureUploadError } from '../../../components/measure-upload/MeasureFileUpload';
 import UploadErrorLog from '../../../components/measure-upload/UploadErrorLog';
 import { mantineRecoilWrap, mockResizeObserver } from '../../helpers/testHelpers';
 

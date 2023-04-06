@@ -224,7 +224,11 @@ function PatientCreationPanel() {
     // Build zip file
     const zip = new JSZip();
     const dateCreated = new Date();
-    const fileNameString = `${measureBundle.name.replace('.json', '')}-test-cases`;
+    const fileNameString = `${
+      measureBundle.isFile
+        ? measureBundle.fileName.replace('.json', '')
+        : measureBundle.displayMap[measureBundle.selectedMeasureId as string]
+    }-test-cases`;
     const measureBundleFolder = zip.folder(fileNameString);
     if (measureBundleFolder) {
       Object.keys(currentPatients).forEach(id => {
