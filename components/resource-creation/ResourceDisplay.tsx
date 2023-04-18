@@ -10,15 +10,14 @@ import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
-import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { WritableDraft } from 'immer/dist/internal';
-import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
-import { MeasureReport } from 'fhir/r4';
-import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
+import { createFHIRResourceString, createPatientBundle } from '../../util/fhir/resourceCreation';
 import { getFhirResourceSummary } from '../../util/fhir/codes';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -30,7 +29,7 @@ function ResourceDisplay() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
-  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -82,19 +81,25 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const measureReportCalculation = async (
-    draftState: WritableDraft<Record<string, MeasureReport>>,
+  const detailedResultCalculation = async (
+    draftState: WritableDraft<
+      Record<string, CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>>
+    >,
     selectedPatient: string,
     nextResourceState: TestCase
   ) => {
     if (measureBundle.content) {
+      const options: CalculatorTypes.CalculationOptions = {
+        measurementPeriodStart: measurementPeriod.start?.toISOString(),
+        measurementPeriodEnd: measurementPeriod.end?.toISOString()
+      };
       try {
-        draftState[selectedPatient] = await calculateMeasureReport(
-          nextResourceState[selectedPatient],
-          measureBundle.content,
-          measurementPeriod.start?.toISOString(),
-          measurementPeriod.end?.toISOString()
+        const patientBundle = createPatientBundle(
+          nextResourceState[selectedPatient].patient,
+          nextResourceState[selectedPatient].resources
         );
+        const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
+        draftState[selectedPatient] = results[0];
       } catch (error) {
         if (error instanceof Error) {
           showNotification({
@@ -129,10 +134,10 @@ function ResourceDisplay() {
         setIsCalculationLoading(true);
 
         setTimeout(() => {
-          produce(measureReportLookup, async draftState => {
-            await measureReportCalculation(draftState, selectedPatient, nextResourceState);
-          }).then(nextMRLookupState => {
-            setMeasureReportLookup(nextMRLookupState);
+          produce(detailedResultLookup, async draftState => {
+            await detailedResultCalculation(draftState, selectedPatient, nextResourceState);
+          }).then(nextDRLookupState => {
+            setDetailedResultLookup(nextDRLookupState);
             setIsCalculationLoading(false);
           });
         }, 400);
@@ -153,10 +158,10 @@ function ResourceDisplay() {
       setIsCalculationLoading(true);
 
       setTimeout(() => {
-        produce(measureReportLookup, async draftState => {
-          await measureReportCalculation(draftState, selectedPatient, nextResourceState);
-        }).then(nextMRLookupState => {
-          setMeasureReportLookup(nextMRLookupState);
+        produce(detailedResultLookup, async draftState => {
+          await detailedResultCalculation(draftState, selectedPatient, nextResourceState);
+        }).then(nextDRLookupState => {
+          setDetailedResultLookup(nextDRLookupState);
           setIsCalculationLoading(false);
         });
       }, 400);

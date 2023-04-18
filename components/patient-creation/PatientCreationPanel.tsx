@@ -17,9 +17,7 @@ import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
 import PopulationCalculation from '../calculation/PopulationCalculation';
-import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
-import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 import { useMediaQuery } from '@mantine/hooks';
 import { getPatientNameString } from '../../util/fhir/patient';
 import {
@@ -30,6 +28,8 @@ import {
 } from '../../util/fhir/resourceCreation';
 import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
 import { getMeasurePopulations } from '../../util/MeasurePopulations';
+import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -43,7 +43,7 @@ function PatientCreationPanel() {
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
-  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const isSmallScreen = useMediaQuery('(max-width: 1600px)');
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
@@ -72,18 +72,19 @@ function PatientCreationPanel() {
 
   const measureReportCalculation = async (id: string) => {
     setSelectedPatient(id);
-    if (!measureReportLookup[id]) {
+    if (!detailedResultLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(measureReportLookup, async draftState => {
+      produce(detailedResultLookup, async draftState => {
+        const options: CalculatorTypes.CalculationOptions = {
+          measurementPeriodStart: measurementPeriod.start?.toISOString(),
+          measurementPeriodEnd: measurementPeriod.end?.toISOString()
+        };
         if (measureBundle.content) {
           try {
-            draftState[id] = await calculateMeasureReport(
-              currentPatients[id],
-              measureBundle.content,
-              measurementPeriod.start?.toISOString(),
-              measurementPeriod.end?.toISOString()
-            );
+            const patientBundle = createPatientBundle(currentPatients[id].patient, currentPatients[id].resources);
+            const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
+            draftState[id] = results[0];
           } catch (error) {
             if (error instanceof Error) {
               showNotification({
@@ -95,8 +96,8 @@ function PatientCreationPanel() {
             }
           }
         }
-      }).then(nextMRLookupState => {
-        setMeasureReportLookup(nextMRLookupState);
+      }).then(nextDRLookupState => {
+        setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
       });
     }
@@ -128,15 +129,19 @@ function PatientCreationPanel() {
       setIsCalculationLoading(true);
 
       setTimeout(() => {
-        produce(measureReportLookup, async draftState => {
+        produce(detailedResultLookup, async draftState => {
+          const options: CalculatorTypes.CalculationOptions = {
+            measurementPeriodStart: measurementPeriod.start?.toISOString(),
+            measurementPeriodEnd: measurementPeriod.end?.toISOString()
+          };
           if (measureBundle.content) {
             try {
-              draftState[patientId] = await calculateMeasureReport(
-                nextPatientState[patientId],
-                measureBundle.content,
-                measurementPeriod.start?.toISOString(),
-                measurementPeriod.end?.toISOString()
+              const patientBundle = createPatientBundle(
+                nextPatientState[patientId].patient,
+                nextPatientState[patientId].resources
               );
+              const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
+              draftState[patientId] = results[0];
             } catch (error) {
               if (error instanceof Error) {
                 showNotification({
@@ -148,8 +153,8 @@ function PatientCreationPanel() {
               }
             }
           }
-        }).then(nextMRLookupState => {
-          setMeasureReportLookup(nextMRLookupState);
+        }).then(nextDRLookupState => {
+          setDetailedResultLookup(nextDRLookupState);
           setIsCalculationLoading(false);
         });
       }, 400);
@@ -171,11 +176,11 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         delete draftState[id];
       });
-      const nextResourceState = produce(measureReportLookup, draftState => {
+      const nextResourceState = produce(detailedResultLookup, draftState => {
         delete draftState[id];
       });
       setCurrentPatients(nextPatientState);
-      setMeasureReportLookup(nextResourceState);
+      setDetailedResultLookup(nextResourceState);
       // Set the selected patient to null because the selected patient will not longer exist after it is deleted
       setSelectedPatient(null);
       closeConfirmationModal();

@@ -11,12 +11,13 @@ import CodeEditorModal from '../modals/CodeEditorModal';
 import ResourceDisplay from './ResourceDisplay';
 import ResourceSelection from './ResourceSelection';
 import { showNotification } from '@mantine/notifications';
-import { calculateMeasureReport } from '../../util/MeasureCalculation';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 import { getPatientNameString } from '../../util/fhir/patient';
+import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { createPatientBundle } from '../../util/fhir/resourceCreation';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
@@ -25,7 +26,7 @@ export default function ResourcePanel() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
-  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
 
   const createNewResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -52,15 +53,19 @@ export default function ResourcePanel() {
         setIsCalculationLoading(true);
 
         setTimeout(() => {
-          produce(measureReportLookup, async draftState => {
+          produce(detailedResultLookup, async draftState => {
             if (measureBundle.content) {
+              const options: CalculatorTypes.CalculationOptions = {
+                measurementPeriodStart: measurementPeriod.start?.toISOString(),
+                measurementPeriodEnd: measurementPeriod.end?.toISOString()
+              };
               try {
-                draftState[selectedPatient] = await calculateMeasureReport(
-                  nextResourceState[selectedPatient],
-                  measureBundle.content,
-                  measurementPeriod.start?.toISOString(),
-                  measurementPeriod.end?.toISOString()
+                const patientBundle = createPatientBundle(
+                  nextResourceState[selectedPatient].patient,
+                  nextResourceState[selectedPatient].resources
                 );
+                const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
+                draftState[selectedPatient] = results[0];
               } catch (error) {
                 if (error instanceof Error) {
                   showNotification({
@@ -72,8 +77,8 @@ export default function ResourcePanel() {
                 }
               }
             }
-          }).then(nextMRLookupState => {
-            setMeasureReportLookup(nextMRLookupState);
+          }).then(nextDRLookupState => {
+            setDetailedResultLookup(nextDRLookupState);
             setIsCalculationLoading(false);
           });
         }, 400);

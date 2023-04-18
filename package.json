@@ -34,7 +34,6 @@
     "@tabler/icons": "^1.105.0",
     "@uiw/react-codemirror": "^4.7.0",
     "dayjs": "^1.11.2",
-    "ecqm-visualizers": "0.0.1",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
     "fqm-execution": "git+https://git@github.com/projecttacoma/fqm-execution",

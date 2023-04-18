@@ -1,12 +1,12 @@
 import { ActionIcon, createStyles, Group, Popover, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
-import { measureReportLookupState } from '../../state/atoms/measureReportLookup';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
-import { MeasureReportGroup } from 'fhir/r4';
 import { InfoCircle } from 'tabler-icons-react';
+import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
+import { DetailedPopulationGroupResult } from 'fqm-execution/build/types/Calculator';
 
 const useStyles = createStyles({
   highlightRed: {
@@ -40,7 +40,7 @@ export interface BothPopulations {
 export default function PopulationComparisonTable({ patientId }: PopulationComparisonTableProps) {
   const { classes } = useStyles();
   const measureBundle = useRecoilValue(measureBundleState);
-  const measureReportLookup = useRecoilValue(measureReportLookupState);
+  const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const [opened, setOpened] = useState(false);
   const measure = useMemo(() => {
@@ -69,19 +69,22 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * Both properties can either be 0 or 1: 0 if that population is not desired (or actual) and 1 if
    * that population is desired (or actual).
    */
-  function constructBothPopulationsValuesArray(group: MeasureReportGroup | undefined) {
+  function constructBothPopulationsValuesArray(group: DetailedPopulationGroupResult | undefined) {
     const desiredPopulations = constructDesiredPopulationsValuesArray(getMeasurePopulationsForSelection(measure));
     const bothPopulations: BothPopulations = {};
-    group?.population?.forEach(population => {
-      const key = population?.code?.coding?.[0]?.display || population?.code?.coding?.[0]?.code;
+    group?.populationResults?.forEach(result => {
+      const key = result?.criteriaExpression;
       if (key) {
-        bothPopulations[key as string] = { desired: desiredPopulations[key as string], actual: population?.count };
+        bothPopulations[key as string] = {
+          desired: desiredPopulations[key as string],
+          actual: result?.result === true ? 1 : 0
+        };
       }
     });
     return bothPopulations;
   }
   if (measure) {
-    const group = measureReportLookup[patientId]?.group?.[0];
+    const group = detailedResultLookup[patientId]?.detailedResults?.[0];
     const bothPopulations = constructBothPopulationsValuesArray(group);
 
     return (

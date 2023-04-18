@@ -32,12 +32,12 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
   }
   function extractPopulationResultRow(
     dr: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>,
-    label: string = 'Unlabeled Patient'
+    label = 'Unlabeled Patient'
   ) {
     const group = dr.detailedResults?.[0];
     const populationResults = { label };
     group?.populationResults?.reduce((acc: any, e) => {
-      const key = e.criteriaExpression;
+      const key = e.criteriaExpression || e.populationType;
       if (key) {
         acc[key as string] = e.result === true ? 1 : 0;
       }

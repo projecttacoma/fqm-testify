@@ -4,22 +4,19 @@ import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Calculator, MeasureReportBuilder } from 'fqm-execution';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 
-const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
-  resourceType: 'MeasureReport',
-  type: 'individual',
-  status: 'complete',
-  measure: '',
-  period: {
-    start: '',
-    end: ''
-  },
-  text: {
-    div: 'test123',
-    status: 'additional'
-  }
+const MOCK_DETAILED_RESULT: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult> = {
+  patientId: '',
+  detailedResults: [
+    {
+      groupId: '',
+      statementResults: [],
+      populationResults: [],
+      html: 'test123'
+    }
+  ]
 };
 
 const MOCK_BUNDLE: fhir4.Bundle = {
@@ -136,12 +133,8 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
-      return [MOCK_MEASURE_REPORT];
-    });
-
     jest.spyOn(Calculator, 'calculate').mockResolvedValue({
-      results: []
+      results: [MOCK_DETAILED_RESULT]
     });
 
     await act(async () => {
@@ -206,12 +199,8 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
-      return [MOCK_MEASURE_REPORT];
-    });
-
     jest.spyOn(Calculator, 'calculate').mockResolvedValue({
-      results: []
+      results: [MOCK_DETAILED_RESULT]
     });
 
     await act(async () => {
@@ -276,12 +265,8 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    jest.spyOn(MeasureReportBuilder, 'buildMeasureReports').mockImplementation(() => {
-      return [MOCK_MEASURE_REPORT];
-    });
-
     jest.spyOn(Calculator, 'calculate').mockResolvedValue({
-      results: []
+      results: [MOCK_DETAILED_RESULT]
     });
 
     await act(async () => {

@@ -1,17 +1,17 @@
 import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
-import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
-import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import Link from 'next/link';
 import { getPatientInfoString } from '../../util/fhir/patient';
 import { createPatientBundle } from '../../util/fhir/resourceCreation';
+import { DetailedDetailedResult } from './PopulationResultsTable';
+import PopulationResultTable from './PopulationResultsTable';
 
 interface PatientLabel {
   [patientId: string]: string;
@@ -21,7 +21,7 @@ export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
-  const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
+  const [detailedResults, setDetailedResults] = useState<DetailedDetailedResult[]>([]);
   const [opened, setOpened] = useState(false);
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
@@ -44,7 +44,9 @@ export default function PopulationCalculation() {
    * measure reports.
    * @returns { Array | void } array of measure reports (if measure bundle is provided)
    */
-  const calculateMeasureReports = async (): Promise<fhir4.MeasureReport[] | void> => {
+  const calculateDetailedResults = async (): Promise<
+    CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>[] | void
+  > => {
     // specify options for calculation
     // TODO: revisit options after new fqm-execution release (calculateSDEs set to true throws error)
     const options: CalculatorTypes.CalculationOptions = {
@@ -68,8 +70,9 @@ export default function PopulationCalculation() {
       if (coverageHTML) {
         setClauseCoverageHTML(coverageHTML);
       }
-      const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
-      return measureReports as fhir4.MeasureReport[];
+      return results;
+      // const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
+      // return measureReports as fhir4.MeasureReport[];
     } else return;
   };
 
@@ -78,19 +81,19 @@ export default function PopulationCalculation() {
    * the population results. Catches errors in fqm-execution that result from calculateMeasureReports().
    */
   const runCalculation = () => {
-    calculateMeasureReports()
-      .then(measureReports => {
-        if (measureReports) {
+    calculateDetailedResults()
+      .then(detailedResults => {
+        if (detailedResults) {
           const patientLabels = createPatientLabels();
-          const labeledMeasureReports: DetailedMeasureReport[] = [];
-          measureReports.forEach(mr => {
-            const patientId = mr.subject?.reference?.split('/')[1];
-            labeledMeasureReports.push({
+          const labeledDetailedResults: DetailedDetailedResult[] = [];
+          detailedResults.forEach(dr => {
+            const patientId = dr.patientId;
+            labeledDetailedResults.push({
               label: patientId ? patientLabels[patientId] : '',
-              report: mr as fhirJson.MeasureReport
+              detailedResult: dr as CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>
             });
           });
-          setMeasureReports(labeledMeasureReports);
+          setDetailedResults(labeledDetailedResults);
           setOpened(true);
           setEnableTableButton(true);
           setEnableClauseCoverageButton(true);
@@ -163,7 +166,7 @@ export default function PopulationCalculation() {
                   </Tooltip>
                 </Link>
               </Group>
-              {measureReports.length > 0 && (
+              {detailedResults.length > 0 && (
                 <>
                   <Drawer
                     opened={opened}
@@ -182,7 +185,7 @@ export default function PopulationCalculation() {
                         overflow: 'scroll'
                       }}
                     >
-                      <PopulationResultsViewer reports={measureReports} />
+                      <PopulationResultTable results={detailedResults} />
                     </div>
                   </Drawer>
                 </>

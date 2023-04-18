@@ -7,34 +7,37 @@ import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import type { NextPage } from 'next';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
-import { calculateMeasureReport } from '../util/MeasureCalculation';
 import produce from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
-import { measureReportLookupState } from '../state/atoms/measureReportLookup';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { createPatientBundle } from '../util/fhir/resourceCreation';
+import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
   const measureBundle = useRecoilValue(measureBundleState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
-  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
 
   // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
       setIsCalculationLoading(true);
-      produce(measureReportLookup, async draftState => {
+      produce(detailedResultLookup, async draftState => {
+        const options: CalculatorTypes.CalculationOptions = {
+          measurementPeriodStart: start?.toISOString(),
+          measurementPeriodEnd: end?.toISOString()
+        };
+
         for (const [patientId, testCaseInfo] of Object.entries(currentPatients)) {
           try {
-            draftState[patientId] = await calculateMeasureReport(
-              testCaseInfo,
-              mb,
-              start?.toISOString(),
-              end?.toISOString()
-            );
+            const patientBundle = createPatientBundle(testCaseInfo.patient, testCaseInfo.resources);
+            const { results } = await Calculator.calculate(mb, [patientBundle], options);
+            draftState[patientId] = results[0];
           } catch (error) {
             if (error instanceof Error) {
               showNotification({
@@ -47,7 +50,7 @@ const TestCaseEditorPage: NextPage = () => {
           }
         }
       }).then(nextMRLookupState => {
-        setMeasureReportLookup(nextMRLookupState);
+        setDetailedResultLookup(nextMRLookupState);
         setIsCalculationLoading(false);
       });
     }
