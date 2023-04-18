@@ -21,7 +21,7 @@ export type PopulationResult = {
 export default function PopulationResultTable({ results }: PopulationResultViewerProps) {
   const tableHeaders = useMemo(() => {
     return extractTableHeaders(results?.[0].detailedResult);
-  }, [results?.[0].detailedResult]);
+  }, [results]);
 
   function constructPopulationResultsArray(results: DetailedResultInfoArray) {
     return results
@@ -36,7 +36,7 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
   ) {
     const group = dr.detailedResults?.[0];
     const populationResults = { label };
-    group?.populationResults?.reduce((acc: any, e) => {
+    group?.populationResults?.reduce((acc: PopulationResult, e) => {
       const key = e.criteriaExpression || e.populationType;
       if (key) {
         acc[key as string] = e.result === true ? 1 : 0;
