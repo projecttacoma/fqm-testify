@@ -58,8 +58,12 @@ const MOCK_DATA_REQUIREMENTS: fhir4.Library = {
 };
 
 const MEASURE_BUNDLE_POPULATED = {
-  name: 'measureBundle',
-  content: MOCK_BUNDLE
+  fileName: 'measureBundle',
+  content: MOCK_BUNDLE,
+  isFile: true,
+  displayMap: {},
+  measureRepositoryUrl: '',
+  selectedMeasureId: null
 };
 
 const MOCK_TEST_CASE_POPULATED: TestCase = {

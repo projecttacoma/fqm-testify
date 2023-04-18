@@ -46,8 +46,12 @@ const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
 };
 
 const MEASURE_BUNDLE_POPULATED = {
-  name: 'measureBundle',
-  content: TEST_MEASURE_BUNDLE
+  fileName: 'measureBundle',
+  content: TEST_MEASURE_BUNDLE,
+  isFile: true,
+  displayMap: {},
+  measureRepositoryUrl: '',
+  selectedMeasureId: null
 };
 
 const MOCK_CALLBACK_PROPS: Omit<PatientInfoCardProps, 'patient'> = {

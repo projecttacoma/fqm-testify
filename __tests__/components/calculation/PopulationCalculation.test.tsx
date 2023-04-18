@@ -69,8 +69,12 @@ describe('PopulationCalculation', () => {
 
   it('should render Calculate Population Results button when measure bundle is present and at least one patient created', () => {
     const MockMB = getMockRecoilState(measureBundleState, {
-      name: 'testName',
-      content: MOCK_BUNDLE
+      fileName: 'testName',
+      content: MOCK_BUNDLE,
+      isFile: true,
+      displayMap: {},
+      measureRepositoryUrl: '',
+      selectedMeasureId: null
     });
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
@@ -115,8 +119,12 @@ describe('PopulationCalculation', () => {
     });
 
     const MockMB = getMockRecoilState(measureBundleState, {
-      name: 'testName',
-      content: MOCK_BUNDLE
+      fileName: 'testName',
+      content: MOCK_BUNDLE,
+      isFile: true,
+      displayMap: {},
+      measureRepositoryUrl: '',
+      selectedMeasureId: null
     });
 
     // Mock calculate data requirements because of the changing state
@@ -142,7 +150,7 @@ describe('PopulationCalculation', () => {
           <>
             <MockPatients />
             <MockMB />
-            <MeasureUpload />
+            <MeasureUpload logError={jest.fn()} />
             <PopulationCalculation />
           </>
         )
@@ -181,8 +189,12 @@ describe('PopulationCalculation', () => {
     });
 
     const MockMB = getMockRecoilState(measureBundleState, {
-      name: 'testName',
-      content: MOCK_BUNDLE
+      fileName: 'testName',
+      content: MOCK_BUNDLE,
+      isFile: true,
+      displayMap: {},
+      measureRepositoryUrl: '',
+      selectedMeasureId: null
     });
 
     // Mock calculate data requirements because of the changing state
@@ -208,7 +220,7 @@ describe('PopulationCalculation', () => {
           <>
             <MockPatients />
             <MockMB />
-            <MeasureUpload />
+            <MeasureUpload logError={jest.fn()} />
             <PopulationCalculation />
           </>
         )
@@ -247,8 +259,12 @@ describe('PopulationCalculation', () => {
     });
 
     const MockMB = getMockRecoilState(measureBundleState, {
-      name: 'testName',
-      content: MOCK_BUNDLE
+      fileName: 'testName',
+      content: MOCK_BUNDLE,
+      isFile: true,
+      displayMap: {},
+      measureRepositoryUrl: '',
+      selectedMeasureId: null
     });
 
     // Mock calculate data requirements because of the changing state
@@ -274,7 +290,7 @@ describe('PopulationCalculation', () => {
           <>
             <MockPatients />
             <MockMB />
-            <MeasureUpload />
+            <MeasureUpload logError={jest.fn()} />
             <PopulationCalculation />
           </>
         )
