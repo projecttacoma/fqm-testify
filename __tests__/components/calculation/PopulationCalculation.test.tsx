@@ -4,10 +4,11 @@ import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
+import { DetailedResult } from '../../../util/types';
 
-const MOCK_DETAILED_RESULT: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult> = {
+const MOCK_DETAILED_RESULT: DetailedResult = {
   patientId: '',
   detailedResults: [
     {

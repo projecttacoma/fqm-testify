@@ -12,6 +12,7 @@ import { getPatientInfoString } from '../../util/fhir/patient';
 import { createPatientBundle } from '../../util/fhir/resourceCreation';
 import { DetailedDetailedResult } from './PopulationResultsTable';
 import PopulationResultTable from './PopulationResultsTable';
+import { DetailedResult } from '../../util/types';
 
 interface PatientLabel {
   [patientId: string]: string;
@@ -41,12 +42,10 @@ export default function PopulationCalculation() {
 
   /**
    * Uses fqm-execution library to perform calculation on all patients and return their
-   * measure reports.
-   * @returns { Array | void } array of measure reports (if measure bundle is provided)
+   * detailed results.
+   * @returns { Array | void } array of detailed results (if measure bundle is provided)
    */
-  const calculateDetailedResults = async (): Promise<
-    CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>[] | void
-  > => {
+  const calculateDetailedResults = async (): Promise<DetailedResult[] | void> => {
     // specify options for calculation
     // TODO: revisit options after new fqm-execution release (calculateSDEs set to true throws error)
     const options: CalculatorTypes.CalculationOptions = {
@@ -71,14 +70,12 @@ export default function PopulationCalculation() {
         setClauseCoverageHTML(coverageHTML);
       }
       return results;
-      // const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
-      // return measureReports as fhir4.MeasureReport[];
     } else return;
   };
 
   /**
-   * Wrapper function that calls calculateMeasureReports() and creates the DetailedMeasureReport that will be used to render
-   * the population results. Catches errors in fqm-execution that result from calculateMeasureReports().
+   * Wrapper function that calls calculateDetailedResults() and creates the DetailedDetailedResult that will be used to render
+   * the population results. Catches errors in fqm-execution that result from calculateDetailedResults().
    */
   const runCalculation = () => {
     calculateDetailedResults()
@@ -90,7 +87,7 @@ export default function PopulationCalculation() {
             const patientId = dr.patientId;
             labeledDetailedResults.push({
               label: patientId ? patientLabels[patientId] : '',
-              detailedResult: dr as CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>
+              detailedResult: dr as DetailedResult
             });
           });
           setDetailedResults(labeledDetailedResults);

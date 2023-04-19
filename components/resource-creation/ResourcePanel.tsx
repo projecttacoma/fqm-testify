@@ -16,8 +16,7 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { getPatientNameString } from '../../util/fhir/patient';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
-import { createPatientBundle } from '../../util/fhir/resourceCreation';
+import { calculateDetailedResult } from '../../util/MeasureCalculation';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
@@ -55,17 +54,13 @@ export default function ResourcePanel() {
         setTimeout(() => {
           produce(detailedResultLookup, async draftState => {
             if (measureBundle.content) {
-              const options: CalculatorTypes.CalculationOptions = {
-                measurementPeriodStart: measurementPeriod.start?.toISOString(),
-                measurementPeriodEnd: measurementPeriod.end?.toISOString()
-              };
               try {
-                const patientBundle = createPatientBundle(
-                  nextResourceState[selectedPatient].patient,
-                  nextResourceState[selectedPatient].resources
+                draftState[selectedPatient] = await calculateDetailedResult(
+                  nextResourceState[selectedPatient],
+                  measureBundle.content,
+                  measurementPeriod.start?.toISOString(),
+                  measurementPeriod.end?.toISOString()
                 );
-                const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
-                draftState[selectedPatient] = results[0];
               } catch (error) {
                 if (error instanceof Error) {
                   showNotification({

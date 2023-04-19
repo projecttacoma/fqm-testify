@@ -11,9 +11,8 @@ import produce from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
-import { createPatientBundle } from '../util/fhir/resourceCreation';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
+import { calculateDetailedResult } from '../util/MeasureCalculation';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
@@ -22,22 +21,20 @@ const TestCaseEditorPage: NextPage = () => {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
 
-  // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
+  // re-runs the detailedResults calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
       setIsCalculationLoading(true);
       produce(detailedResultLookup, async draftState => {
-        const options: CalculatorTypes.CalculationOptions = {
-          measurementPeriodStart: start?.toISOString(),
-          measurementPeriodEnd: end?.toISOString()
-        };
-
         for (const [patientId, testCaseInfo] of Object.entries(currentPatients)) {
           try {
-            const patientBundle = createPatientBundle(testCaseInfo.patient, testCaseInfo.resources);
-            const { results } = await Calculator.calculate(mb, [patientBundle], options);
-            draftState[patientId] = results[0];
+            draftState[patientId] = await calculateDetailedResult(
+              testCaseInfo,
+              mb,
+              start?.toISOString(),
+              end?.toISOString()
+            );
           } catch (error) {
             if (error instanceof Error) {
               showNotification({
@@ -49,8 +46,8 @@ const TestCaseEditorPage: NextPage = () => {
             }
           }
         }
-      }).then(nextMRLookupState => {
-        setDetailedResultLookup(nextMRLookupState);
+      }).then(nextDRLookupState => {
+        setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
       });
     }

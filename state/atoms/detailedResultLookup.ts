@@ -1,9 +1,7 @@
-import { CalculatorTypes } from 'fqm-execution';
 import { atom } from 'recoil';
+import { DetailedResult } from '../../util/types';
 
-export const detailedResultLookupState = atom<
-  Record<string, CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>>
->({
+export const detailedResultLookupState = atom<Record<string, DetailedResult>>({
   key: 'detailedResultLookupState',
   default: {}
 });

@@ -14,10 +14,11 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { WritableDraft } from 'immer/dist/internal';
-import { createFHIRResourceString, createPatientBundle } from '../../util/fhir/resourceCreation';
+import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
 import { getFhirResourceSummary } from '../../util/fhir/codes';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
+import { DetailedResult } from '../../util/types';
+import { calculateDetailedResult } from '../../util/MeasureCalculation';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -82,24 +83,18 @@ function ResourceDisplay() {
   };
 
   const detailedResultCalculation = async (
-    draftState: WritableDraft<
-      Record<string, CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>>
-    >,
+    draftState: WritableDraft<Record<string, DetailedResult>>,
     selectedPatient: string,
     nextResourceState: TestCase
   ) => {
     if (measureBundle.content) {
-      const options: CalculatorTypes.CalculationOptions = {
-        measurementPeriodStart: measurementPeriod.start?.toISOString(),
-        measurementPeriodEnd: measurementPeriod.end?.toISOString()
-      };
       try {
-        const patientBundle = createPatientBundle(
-          nextResourceState[selectedPatient].patient,
-          nextResourceState[selectedPatient].resources
+        draftState[selectedPatient] = await calculateDetailedResult(
+          nextResourceState[selectedPatient],
+          measureBundle.content,
+          measurementPeriod.start?.toISOString(),
+          measurementPeriod.end?.toISOString()
         );
-        const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
-        draftState[selectedPatient] = results[0];
       } catch (error) {
         if (error instanceof Error) {
           showNotification({

@@ -1,6 +1,6 @@
 import { Table } from '@mantine/core';
-import { CalculatorTypes } from 'fqm-execution';
 import { useMemo } from 'react';
+import { DetailedResult } from '../../util/types';
 
 export type PopulationResultViewerProps = {
   results: DetailedResultInfoArray;
@@ -10,12 +10,12 @@ export type DetailedResultInfoArray = Array<DetailedDetailedResult>;
 
 export declare type DetailedDetailedResult = {
   label: string;
-  detailedResult: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>;
+  detailedResult: DetailedResult;
 };
 
 export type PopulationResult = {
   label: string;
-  [key: string]: number | string | boolean;
+  [key: string]: number | string;
 };
 
 export default function PopulationResultTable({ results }: PopulationResultViewerProps) {
@@ -23,6 +23,9 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
     return extractTableHeaders(results?.[0].detailedResult);
   }, [results]);
 
+  /**
+   * Converts an array of DetailedResults with labels and formats it into JSX table rows for display
+   */
   function constructPopulationResultsArray(results: DetailedResultInfoArray) {
     return results
       .filter(drInfo => drInfo.detailedResult)
@@ -30,10 +33,11 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
         return extractPopulationResultRow(drInfo.detailedResult, drInfo.label);
       });
   }
-  function extractPopulationResultRow(
-    dr: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>,
-    label = 'Unlabeled Patient'
-  ) {
+
+  /**
+   * Strips population results off of a DetailedResult and calls PopulationResultsRow to format them into a TSX component
+   */
+  function extractPopulationResultRow(dr: DetailedResult, label = 'Unlabeled Patient') {
     const group = dr.detailedResults?.[0];
     const populationResults = { label };
     group?.populationResults?.reduce((acc: PopulationResult, e) => {
@@ -46,6 +50,9 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
     return PopulationResultsRow(populationResults);
   }
 
+  /**
+   * Formats population results for a FHIR Patient into a TSX component for display as a table row
+   */
   function PopulationResultsRow(populationResult: PopulationResult) {
     return (
       <tr key={populationResult.label}>
@@ -57,9 +64,10 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
     );
   }
 
-  function extractTableHeaders(
-    dr: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>
-  ): string[] {
+  /**
+   * Pulls off the population group criteria expression for use as table headers
+   */
+  function extractTableHeaders(dr: DetailedResult): string[] {
     const group = dr.detailedResults?.[0];
     if (group?.populationResults?.length) {
       return group?.populationResults.map(e => {

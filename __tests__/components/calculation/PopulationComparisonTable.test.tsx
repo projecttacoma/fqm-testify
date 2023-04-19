@@ -6,10 +6,11 @@ import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
-import { CalculatorTypes, Enums } from 'fqm-execution';
+import { Enums } from 'fqm-execution';
 import { detailedResultLookupState } from '../../../state/atoms/detailedResultLookup';
+import { DetailedResult } from '../../../util/types';
 
-const MOCK_DETAILED_RESULT: CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult> = {
+const MOCK_DETAILED_RESULT: DetailedResult = {
   patientId: 'example-pt',
   detailedResults: [
     {
@@ -113,10 +114,7 @@ const MEASURE_BUNDLE_POPULATED = {
   selectedMeasureId: null
 };
 
-const MOCK_DETAILED_RESULT_LOOKUP: Record<
-  string,
-  CalculatorTypes.ExecutionResult<CalculatorTypes.DetailedPopulationGroupResult>
-> = {
+const MOCK_DETAILED_RESULT_LOOKUP: Record<string, DetailedResult> = {
   'example-pt': MOCK_DETAILED_RESULT
 };
 

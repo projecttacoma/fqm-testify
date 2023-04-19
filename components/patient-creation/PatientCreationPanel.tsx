@@ -29,7 +29,7 @@ import {
 import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
 import { getMeasurePopulations } from '../../util/MeasurePopulations';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { Calculator, CalculatorTypes } from 'fqm-execution';
+import { calculateDetailedResult } from '../../util/MeasureCalculation';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -70,21 +70,20 @@ function PatientCreationPanel() {
     setCopiedPatient(null);
   };
 
-  const measureReportCalculation = async (id: string) => {
+  const detailedResultCalculation = async (id: string) => {
     setSelectedPatient(id);
     if (!detailedResultLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
       produce(detailedResultLookup, async draftState => {
-        const options: CalculatorTypes.CalculationOptions = {
-          measurementPeriodStart: measurementPeriod.start?.toISOString(),
-          measurementPeriodEnd: measurementPeriod.end?.toISOString()
-        };
         if (measureBundle.content) {
           try {
-            const patientBundle = createPatientBundle(currentPatients[id].patient, currentPatients[id].resources);
-            const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
-            draftState[id] = results[0];
+            draftState[id] = await calculateDetailedResult(
+              currentPatients[id],
+              measureBundle.content,
+              measurementPeriod.start?.toISOString(),
+              measurementPeriod.end?.toISOString()
+            );
           } catch (error) {
             if (error instanceof Error) {
               showNotification({
@@ -130,18 +129,14 @@ function PatientCreationPanel() {
 
       setTimeout(() => {
         produce(detailedResultLookup, async draftState => {
-          const options: CalculatorTypes.CalculationOptions = {
-            measurementPeriodStart: measurementPeriod.start?.toISOString(),
-            measurementPeriodEnd: measurementPeriod.end?.toISOString()
-          };
           if (measureBundle.content) {
             try {
-              const patientBundle = createPatientBundle(
-                nextPatientState[patientId].patient,
-                nextPatientState[patientId].resources
+              draftState[patientId] = await calculateDetailedResult(
+                nextPatientState[patientId],
+                measureBundle.content,
+                measurementPeriod.start?.toISOString(),
+                measurementPeriod.end?.toISOString()
               );
-              const { results } = await Calculator.calculate(measureBundle.content, [patientBundle], options);
-              draftState[patientId] = results[0];
             } catch (error) {
               if (error instanceof Error) {
                 showNotification({
@@ -420,7 +415,7 @@ function PatientCreationPanel() {
                 key={id}
                 onClick={() => {
                   setSelectedPatient(id);
-                  measureReportCalculation(id);
+                  detailedResultCalculation(id);
                 }}
               >
                 <PatientInfoCard
