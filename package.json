@@ -11,7 +11,7 @@
     "build:names": "ts-node scripts/generatePatientNames.ts && prettier --write data/names.ts --loglevel silent",
     "build:lookups": "npm run build:codes && npm run build:names && npm run build:dates",
     "start": "next start -p 3000",
-    "lint": "next lint",
+    "lint": "next lint && tsc --noEmit",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check \"**/*.{js,ts,jsx,tsx,css}\"",
     "prettier:fix": "prettier --write \"**/*.{js,ts,jsx,tsx,css}\"",
