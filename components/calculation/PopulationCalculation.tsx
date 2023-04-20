@@ -10,8 +10,7 @@ import { IconAlertCircle } from '@tabler/icons';
 import Link from 'next/link';
 import { getPatientInfoString } from '../../util/fhir/patient';
 import { createPatientBundle } from '../../util/fhir/resourceCreation';
-import { DetailedDetailedResult } from './PopulationResultsTable';
-import PopulationResultTable from './PopulationResultsTable';
+import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
 
 interface PatientLabel {
@@ -22,7 +21,7 @@ export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
-  const [detailedResults, setDetailedResults] = useState<DetailedDetailedResult[]>([]);
+  const [detailedResults, setDetailedResults] = useState<LabeledDetailedResult[]>([]);
   const [opened, setOpened] = useState(false);
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
@@ -74,7 +73,7 @@ export default function PopulationCalculation() {
   };
 
   /**
-   * Wrapper function that calls calculateDetailedResults() and creates the DetailedDetailedResult that will be used to render
+   * Wrapper function that calls calculateDetailedResults() and creates the LabeledDetailedResult that will be used to render
    * the population results. Catches errors in fqm-execution that result from calculateDetailedResults().
    */
   const runCalculation = () => {
@@ -82,7 +81,7 @@ export default function PopulationCalculation() {
       .then(detailedResults => {
         if (detailedResults) {
           const patientLabels = createPatientLabels();
-          const labeledDetailedResults: DetailedDetailedResult[] = [];
+          const labeledDetailedResults: LabeledDetailedResult[] = [];
           detailedResults.forEach(dr => {
             const patientId = dr.patientId;
             labeledDetailedResults.push({

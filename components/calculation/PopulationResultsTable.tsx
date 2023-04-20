@@ -6,9 +6,9 @@ export type PopulationResultViewerProps = {
   results: DetailedResultInfoArray;
 };
 
-export type DetailedResultInfoArray = Array<DetailedDetailedResult>;
+export type DetailedResultInfoArray = Array<LabeledDetailedResult>;
 
-export declare type DetailedDetailedResult = {
+export type LabeledDetailedResult = {
   label: string;
   detailedResult: DetailedResult;
 };
