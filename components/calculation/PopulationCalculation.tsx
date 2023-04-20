@@ -13,10 +13,6 @@ import { createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
 
-interface PatientLabel {
-  [patientId: string]: string;
-}
-
 export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
@@ -32,7 +28,7 @@ export default function PopulationCalculation() {
    * @returns { Object } mapping of patient ids to patient info labels
    */
   const createPatientLabels = () => {
-    const patientLabels: PatientLabel = {};
+    const patientLabels: Record<string, string> = {};
     Object.keys(currentPatients).forEach(id => {
       patientLabels[id] = getPatientInfoString(currentPatients[id].patient);
     });

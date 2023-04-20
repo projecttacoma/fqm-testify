@@ -3,20 +3,15 @@ import { useMemo } from 'react';
 import { DetailedResult } from '../../util/types';
 
 export type PopulationResultViewerProps = {
-  results: DetailedResultInfoArray;
+  results: LabeledDetailedResult[];
 };
-
-export type DetailedResultInfoArray = Array<LabeledDetailedResult>;
 
 export type LabeledDetailedResult = {
   label: string;
   detailedResult: DetailedResult;
 };
 
-export type PopulationResult = {
-  label: string;
-  [key: string]: number | string;
-};
+export type PopulationResult = Record<string, string | number> & { label: string };
 
 export default function PopulationResultTable({ results }: PopulationResultViewerProps) {
   const tableHeaders = useMemo(() => {
@@ -24,9 +19,9 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
   }, [results]);
 
   /**
-   * Converts an array of DetailedResults with labels and formats it into JSX table rows for display
+   * Converts an array of DetailedResults with labels into JSX table rows for display
    */
-  function constructPopulationResultsArray(results: DetailedResultInfoArray) {
+  function constructPopulationResultsArray(results: LabeledDetailedResult[]) {
     return results
       .filter(drInfo => drInfo.detailedResult)
       .map(drInfo => {
@@ -39,15 +34,15 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
    */
   function extractPopulationResultRow(dr: DetailedResult, label = 'Unlabeled Patient') {
     const group = dr.detailedResults?.[0];
-    const populationResults = { label };
+    const labeledPopulationResults = { label };
     group?.populationResults?.reduce((acc: PopulationResult, e) => {
       const key = e.criteriaExpression || e.populationType;
       if (key) {
         acc[key as string] = e.result === true ? 1 : 0;
       }
       return acc;
-    }, populationResults);
-    return PopulationResultsRow(populationResults);
+    }, labeledPopulationResults);
+    return PopulationResultsRow(labeledPopulationResults);
   }
 
   /**
