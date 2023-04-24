@@ -7,29 +7,29 @@ import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import type { NextPage } from 'next';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
-import { calculateMeasureReport } from '../util/MeasureCalculation';
 import produce from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
-import { measureReportLookupState } from '../state/atoms/measureReportLookup';
+import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
+import { calculateDetailedResult } from '../util/MeasureCalculation';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
   const measureBundle = useRecoilValue(measureBundleState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
-  const [measureReportLookup, setMeasureReportLookup] = useRecoilState(measureReportLookupState);
+  const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
 
-  // re-runs the measureReport calculation whenever the user navigates to the generate-test-cases page
+  // re-runs the detailedResults calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
       setIsCalculationLoading(true);
-      produce(measureReportLookup, async draftState => {
+      produce(detailedResultLookup, async draftState => {
         for (const [patientId, testCaseInfo] of Object.entries(currentPatients)) {
           try {
-            draftState[patientId] = await calculateMeasureReport(
+            draftState[patientId] = await calculateDetailedResult(
               testCaseInfo,
               mb,
               start?.toISOString(),
@@ -46,8 +46,8 @@ const TestCaseEditorPage: NextPage = () => {
             }
           }
         }
-      }).then(nextMRLookupState => {
-        setMeasureReportLookup(nextMRLookupState);
+      }).then(nextDRLookupState => {
+        setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
       });
     }

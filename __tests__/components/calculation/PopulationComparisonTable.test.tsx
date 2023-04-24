@@ -1,75 +1,26 @@
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
-import { MeasureReport } from 'fhir/r4';
 import { Suspense } from 'react';
 import PopulationComparisonTable from '../../../components/calculation/PopulationComparisonTable';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
-import { measureReportLookupState } from '../../../state/atoms/measureReportLookup';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
+import { Enums } from 'fqm-execution';
+import { detailedResultLookupState } from '../../../state/atoms/detailedResultLookup';
+import { DetailedResult } from '../../../util/types';
 
-const MOCK_MEASURE_REPORT: fhir4.MeasureReport = {
-  resourceType: 'MeasureReport',
-  type: 'individual',
-  status: 'complete',
-  measure: '',
-  period: {
-    start: '',
-    end: ''
-  },
-  group: [
+const MOCK_DETAILED_RESULT: DetailedResult = {
+  patientId: 'example-pt',
+  detailedResults: [
     {
-      id: '',
-      population: [
-        {
-          count: 1,
-          code: {
-            coding: [
-              {
-                system: '',
-                code: 'initial-population',
-                display: 'Initial Population'
-              }
-            ]
-          }
-        },
-        {
-          count: 1,
-          code: {
-            coding: [
-              {
-                system: '',
-                code: 'numerator',
-                display: 'Numerator'
-              }
-            ]
-          }
-        },
-        {
-          count: 1,
-          code: {
-            coding: [
-              {
-                system: '',
-                code: 'denominator-exclusion',
-                display: 'Denominator Exclusion'
-              }
-            ]
-          }
-        },
-        {
-          count: 0,
-          code: {
-            coding: [
-              {
-                system: '',
-                code: 'denominator',
-                display: 'Denominator'
-              }
-            ]
-          }
-        }
+      groupId: '',
+      statementResults: [],
+      populationResults: [
+        { populationType: Enums.PopulationType.IPP, criteriaExpression: 'Initial Population', result: true },
+        { populationType: Enums.PopulationType.DENOM, criteriaExpression: 'Denominator', result: false },
+        { populationType: Enums.PopulationType.DENEX, criteriaExpression: 'Denominator Exclusion', result: true },
+        { populationType: Enums.PopulationType.NUMER, criteriaExpression: 'Numerator', result: true }
       ]
     }
   ]
@@ -163,8 +114,8 @@ const MEASURE_BUNDLE_POPULATED = {
   selectedMeasureId: null
 };
 
-const MOCK_MEASURE_REPORT_LOOKUP: Record<string, MeasureReport> = {
-  'example-pt': MOCK_MEASURE_REPORT
+const MOCK_DETAILED_RESULT_LOOKUP: Record<string, DetailedResult> = {
+  'example-pt': MOCK_DETAILED_RESULT
 };
 
 const EXAMPLE_PATIENT: fhir4.Patient = {
@@ -187,7 +138,7 @@ describe('PopulationComparisonTable', () => {
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
-    const MockMeasureReportLookup = getMockRecoilState(measureReportLookupState, MOCK_MEASURE_REPORT_LOOKUP);
+    const MockDetailedResultLookup = getMockRecoilState(detailedResultLookupState, MOCK_DETAILED_RESULT_LOOKUP);
 
     await act(async () => {
       render(
@@ -196,7 +147,7 @@ describe('PopulationComparisonTable', () => {
             <MockMB />
             <MockPatients />
             <MockSelectedPatient />
-            <MockMeasureReportLookup />
+            <MockDetailedResultLookup />
             <Suspense>
               <PopulationComparisonTable patientId={'example-pt'} />
             </Suspense>

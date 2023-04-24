@@ -1,27 +1,23 @@
 import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
-import { Calculator, CalculatorTypes, MeasureReportBuilder } from 'fqm-execution';
+import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { DetailedMeasureReport, PopulationResultsViewer } from 'ecqm-visualizers';
 import { useState } from 'react';
-import { fhirJson } from '@fhir-typescript/r4-core';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import Link from 'next/link';
 import { getPatientInfoString } from '../../util/fhir/patient';
 import { createPatientBundle } from '../../util/fhir/resourceCreation';
-
-interface PatientLabel {
-  [patientId: string]: string;
-}
+import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
+import { DetailedResult } from '../../util/types';
 
 export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
-  const [measureReports, setMeasureReports] = useState<DetailedMeasureReport[]>([]);
+  const [detailedResults, setDetailedResults] = useState<LabeledDetailedResult[]>([]);
   const [opened, setOpened] = useState(false);
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
@@ -32,7 +28,7 @@ export default function PopulationCalculation() {
    * @returns { Object } mapping of patient ids to patient info labels
    */
   const createPatientLabels = () => {
-    const patientLabels: PatientLabel = {};
+    const patientLabels: Record<string, string> = {};
     Object.keys(currentPatients).forEach(id => {
       patientLabels[id] = getPatientInfoString(currentPatients[id].patient);
     });
@@ -41,10 +37,10 @@ export default function PopulationCalculation() {
 
   /**
    * Uses fqm-execution library to perform calculation on all patients and return their
-   * measure reports.
-   * @returns { Array | void } array of measure reports (if measure bundle is provided)
+   * detailed results.
+   * @returns { Array | void } array of detailed results (if measure bundle is provided)
    */
-  const calculateMeasureReports = async (): Promise<fhir4.MeasureReport[] | void> => {
+  const calculateDetailedResults = async (): Promise<DetailedResult[] | void> => {
     // specify options for calculation
     // TODO: revisit options after new fqm-execution release (calculateSDEs set to true throws error)
     const options: CalculatorTypes.CalculationOptions = {
@@ -68,29 +64,28 @@ export default function PopulationCalculation() {
       if (coverageHTML) {
         setClauseCoverageHTML(coverageHTML);
       }
-      const measureReports = MeasureReportBuilder.buildMeasureReports(measureBundle.content, results, options);
-      return measureReports as fhir4.MeasureReport[];
+      return results;
     } else return;
   };
 
   /**
-   * Wrapper function that calls calculateMeasureReports() and creates the DetailedMeasureReport that will be used to render
-   * the population results. Catches errors in fqm-execution that result from calculateMeasureReports().
+   * Wrapper function that calls calculateDetailedResults() and creates the LabeledDetailedResult that will be used to render
+   * the population results. Catches errors in fqm-execution that result from calculateDetailedResults().
    */
   const runCalculation = () => {
-    calculateMeasureReports()
-      .then(measureReports => {
-        if (measureReports) {
+    calculateDetailedResults()
+      .then(detailedResults => {
+        if (detailedResults) {
           const patientLabels = createPatientLabels();
-          const labeledMeasureReports: DetailedMeasureReport[] = [];
-          measureReports.forEach(mr => {
-            const patientId = mr.subject?.reference?.split('/')[1];
-            labeledMeasureReports.push({
+          const labeledDetailedResults: LabeledDetailedResult[] = [];
+          detailedResults.forEach(dr => {
+            const patientId = dr.patientId;
+            labeledDetailedResults.push({
               label: patientId ? patientLabels[patientId] : '',
-              report: mr as fhirJson.MeasureReport
+              detailedResult: dr as DetailedResult
             });
           });
-          setMeasureReports(labeledMeasureReports);
+          setDetailedResults(labeledDetailedResults);
           setOpened(true);
           setEnableTableButton(true);
           setEnableClauseCoverageButton(true);
@@ -163,7 +158,7 @@ export default function PopulationCalculation() {
                   </Tooltip>
                 </Link>
               </Group>
-              {measureReports.length > 0 && (
+              {detailedResults.length > 0 && (
                 <>
                   <Drawer
                     opened={opened}
@@ -182,7 +177,7 @@ export default function PopulationCalculation() {
                         overflow: 'scroll'
                       }}
                     >
-                      <PopulationResultsViewer reports={measureReports} />
+                      <PopulationResultTable results={detailedResults} />
                     </div>
                   </Drawer>
                 </>

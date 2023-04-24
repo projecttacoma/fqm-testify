@@ -26,6 +26,7 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
   measure.group?.[0]?.population?.forEach(population => {
     const populationCode = population.code?.coding?.[0].code;
     const populationDisplay = population.code?.coding?.[0].display;
+    const populationCriteriaExpression = population.criteria.expression;
     // TODO: determine handling of populations that are not permitted for proportion measures
     if (
       populationCode &&
@@ -34,7 +35,7 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
     ) {
       measurePopulations.push({
         value: populationCode,
-        label: populationDisplay || populationCode,
+        label: populationCriteriaExpression || populationDisplay || populationCode,
         disabled: false
       });
     }
