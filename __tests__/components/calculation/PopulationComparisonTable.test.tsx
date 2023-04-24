@@ -155,8 +155,12 @@ const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
 };
 
 const MEASURE_BUNDLE_POPULATED = {
-  name: 'measureBundle',
-  content: TEST_MEASURE_BUNDLE
+  fileName: 'measureBundle',
+  content: TEST_MEASURE_BUNDLE,
+  isFile: true,
+  displayMap: {},
+  measureRepositoryUrl: '',
+  selectedMeasureId: null
 };
 
 const MOCK_MEASURE_REPORT_LOOKUP: Record<string, MeasureReport> = {

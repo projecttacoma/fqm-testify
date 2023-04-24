@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import { MeasureUploadError } from '../../../components/measure-upload/MeasureFileUpload';
+import { MeasureUploadError } from '../../../util/measureUploadUtils';
 import UploadErrorLog from '../../../components/measure-upload/UploadErrorLog';
 import { mantineRecoilWrap, mockResizeObserver } from '../../helpers/testHelpers';
 
@@ -8,8 +8,9 @@ const MOCK_SIMPLE_ERROR: MeasureUploadError = {
   id: 'simple-error',
   message: 'this is a simple error',
   timestamp: '1996-07-19T20:12:00.0Z',
-  attemptedFileName: 'fake-bundle.json',
-  isValueSetMissingError: false
+  attemptedBundleDisplay: 'fake-bundle.json',
+  isValueSetMissingError: false,
+  isThrownFromMrs: false
 };
 
 describe('UploadErrorLog', () => {
