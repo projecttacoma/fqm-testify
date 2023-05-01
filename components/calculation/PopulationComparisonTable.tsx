@@ -75,9 +75,15 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
     group?.populationResults?.forEach(result => {
       const key = result?.criteriaExpression;
       if (key) {
+        console.log('Result: ', result);
+        // TODO: use criteriaReferenceId to lookup the population the measure observation is associated with
+        // Instead of criteriaExpression, use population type as name (observation key should be adjusted to compensate
+        // for ratio measures observations to also include the population that it's pointing to) *measure type is an atom that can be brought in
         bothPopulations[key as string] = {
           desired: desiredPopulations[key as string],
-          actual: result?.result === true ? 1 : 0
+          actual: (result?.populationType === 'measure-observation') ? 
+            result.observations.reduce((a: number,b: number)=>a+b) : // total sum of all observations (TODO: is sum always appropriate accummulator?)
+            result?.result === true ? 1 : 0 // normal population result
         };
       }
     });

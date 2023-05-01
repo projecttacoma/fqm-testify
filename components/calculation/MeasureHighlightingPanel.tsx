@@ -2,6 +2,7 @@ import { createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
 import PopulationComparisonTable from './PopulationComparisonTable';
+import ObservationLists from './ObservationLists';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 
 const useStyles = createStyles({
@@ -27,6 +28,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
   return (
     <>
       <PopulationComparisonTable patientId={patientId} />
+      <ObservationLists patientId={patientId} />
       <div className={classes.highlightedMarkup}>
         {parse(detailedResultLookup[patientId]?.detailedResults?.[0].html || '')}
       </div>
