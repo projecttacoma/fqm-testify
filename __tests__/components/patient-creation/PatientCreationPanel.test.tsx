@@ -10,6 +10,7 @@ jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
 }));
 
+// Mock out the getClientRects function to avoid warnings
 document.createRange = () => {
   const range = new Range();
 
