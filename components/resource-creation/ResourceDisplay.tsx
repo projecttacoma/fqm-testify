@@ -37,7 +37,7 @@ function ResourceDisplay() {
       if (
         resourceId &&
         selectedPatient &&
-        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+        currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId) >= 0
       ) {
         setCurrentResource(resourceId);
       } else {
@@ -59,7 +59,7 @@ function ResourceDisplay() {
       if (
         resourceId &&
         selectedPatient &&
-        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+        currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId) >= 0
       ) {
         setCurrentResource(resourceId);
       } else {
@@ -115,14 +115,17 @@ function ResourceDisplay() {
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       if (selectedPatient) {
-        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(
+          r => r.resource?.id === resourceId
+        );
         const nextResourceState = produce(currentTestCases, draftState => {
           if (resourceIndexToUpdate < 0) {
             // add new resource
-            draftState[selectedPatient].resources.push(updatedResource);
+            const entry: fhir4.BundleEntry = { resource: updatedResource, fullUrl: `urn:uuid:${resourceId}` };
+            draftState[selectedPatient].resources.push(entry);
           } else {
             // update existing resource
-            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+            draftState[selectedPatient].resources[resourceIndexToUpdate].resource = updatedResource;
           }
         });
         setCurrentTestCases(nextResourceState);
@@ -143,7 +146,7 @@ function ResourceDisplay() {
 
   const deleteResource = (id: string | null) => {
     if (id && selectedPatient) {
-      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === id);
       const nextResourceState = produce(currentTestCases, draftState => {
         if (resourceIndexToDelete >= 0) {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
@@ -167,8 +170,9 @@ function ResourceDisplay() {
   const getInitialResource = () => {
     if (isResourceModalOpen) {
       if (currentResource && selectedPatient) {
+        console.log(currentResource);
         return JSON.stringify(
-          currentTestCases[selectedPatient].resources.filter(r => r.id === currentResource)[0],
+          currentTestCases[selectedPatient].resources.filter(r => r.resource?.id === currentResource)[0].resource,
           null,
           2
         );
@@ -193,10 +197,13 @@ function ResourceDisplay() {
   };
 
   const getConfirmationModalText = (resourceId: string | null) => {
+    console.log();
     if (selectedPatient && resourceId) {
-      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-      const resource = currentTestCases[selectedPatient].resources[resourceIndex];
-      return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
+      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId);
+      const resource = currentTestCases[selectedPatient].resources[resourceIndex].resource;
+      return `Are you sure you want to delete ${resource?.resourceType} ${getFhirResourceSummary(
+        resource as fhir4.FhirResource
+      )}?`;
     }
   };
 
@@ -217,15 +224,19 @@ function ResourceDisplay() {
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <Stack data-testid="resource-display-stack">
-          {currentTestCases[selectedPatient].resources.map(resource => (
-            <ResourceInfoCard
-              key={resource.id}
-              resourceType={resource.resourceType}
-              label={getFhirResourceSummary(resource)}
-              onEditClick={() => openResourceModal(resource.id)}
-              onDeleteClick={() => openConfirmationModal(resource.id)}
-            />
-          ))}
+          {currentTestCases[selectedPatient].resources.map(resource => {
+            if (resource.resource) {
+              return (
+                <ResourceInfoCard
+                  key={resource.resource.id}
+                  resourceType={resource.resource.resourceType}
+                  label={getFhirResourceSummary(resource.resource)}
+                  onEditClick={() => openResourceModal(resource.resource?.id)}
+                  onDeleteClick={() => openConfirmationModal(resource.resource?.id)}
+                />
+              );
+            }
+          })}
         </Stack>
       )}
     </>

@@ -25,20 +25,23 @@ const MOCK_TEST_CASE_POPULATED: TestCase = {
     },
     resources: [
       {
-        resourceType: 'Procedure',
-        id: 'example-procedure',
-        status: 'completed',
-        subject: {
-          reference: 'Patient/example-pt'
+        resource: {
+          resourceType: 'Procedure',
+          id: 'example-procedure',
+          status: 'completed',
+          subject: {
+            reference: 'Patient/example-pt'
+          },
+          code: {
+            coding: [
+              {
+                code: 'example-code',
+                display: 'Example Code Display'
+              }
+            ]
+          }
         },
-        code: {
-          coding: [
-            {
-              code: 'example-code',
-              display: 'Example Code Display'
-            }
-          ]
-        }
+        fullUrl: 'urn:uuid:example-procedure'
       }
     ]
   }

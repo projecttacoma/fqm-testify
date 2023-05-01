@@ -192,36 +192,42 @@ const PATIENT_RESOURCE_W_DETAILS: fhir4.Patient = {
   ]
 };
 
-const ENCOUNTER_RESOURCE: fhir4.Encounter = {
-  resourceType: 'Encounter',
-  id: 'Encounter1',
-  status: 'finished',
-  class: { code: 'AMB' },
-  type: [
-    {
-      coding: [
-        {
-          system: 'https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html',
-          version: '2018',
-          code: 'G0438',
-          display: 'Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit'
-        }
-      ]
-    }
-  ]
-};
-
-const OBSERVATION_RESOURCE: fhir4.Observation = {
-  resourceType: 'Observation',
-  id: 'Observation1',
-  code: {
-    coding: [
+const ENCOUNTER_RESOURCE: fhir4.BundleEntry = {
+  resource: {
+    resourceType: 'Encounter',
+    id: 'Encounter1',
+    status: 'finished',
+    class: { code: 'AMB' },
+    type: [
       {
-        code: 'Test Obs'
+        coding: [
+          {
+            system: 'https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html',
+            version: '2018',
+            code: 'G0438',
+            display: 'Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit'
+          }
+        ]
       }
     ]
   },
-  status: 'final'
+  fullUrl: 'urn:uuid:Encounter1'
+};
+
+const OBSERVATION_RESOURCE: fhir4.BundleEntry = {
+  resource: {
+    resourceType: 'Observation',
+    id: 'Observation1',
+    code: {
+      coding: [
+        {
+          code: 'Test Obs'
+        }
+      ]
+    },
+    status: 'final'
+  },
+  fullUrl: 'urn:uuid:Observation1'
 };
 
 const EXPECTED_CQFM_NO_POPS_OUTPUT = {
@@ -459,7 +465,8 @@ describe('createPatientBundle', () => {
           request: {
             method: 'PUT',
             url: 'Patient/Patient1'
-          }
+          },
+          fullUrl: 'urn:uuid:Patient1'
         }
       ]
     };
@@ -478,21 +485,24 @@ describe('createPatientBundle', () => {
           request: {
             method: 'PUT',
             url: 'Patient/Patient1'
-          }
+          },
+          fullUrl: 'urn:uuid:Patient1'
         },
         {
-          resource: ENCOUNTER_RESOURCE,
+          resource: ENCOUNTER_RESOURCE.resource,
           request: {
             method: 'PUT',
             url: 'Encounter/Encounter1'
-          }
+          },
+          fullUrl: 'urn:uuid:Encounter1'
         },
         {
-          resource: OBSERVATION_RESOURCE,
+          resource: OBSERVATION_RESOURCE.resource,
           request: {
             method: 'PUT',
             url: 'Observation/Observation1'
-          }
+          },
+          fullUrl: 'urn:uuid:Observation1'
         }
       ]
     };
@@ -504,14 +514,14 @@ describe('createPatientBundle', () => {
 describe('createCopiedResources', () => {
   it('should update references to a patient when cloned', () => {
     const resources = createCopiedResources(
-      [PROCEDURE_RESOURCE_WITH_FULL_SUMMARY],
+      [{ resource: PROCEDURE_RESOURCE_WITH_FULL_SUMMARY }],
       'procedure-reference',
       'new-reference'
     );
-    const procedure: fhir4.Procedure = resources[0] as fhir4.Procedure;
+    const procedure = resources[0].resource as fhir4.Procedure;
     expect(procedure.id).not.toEqual(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY.id);
     expect(procedure.subject.reference).toEqual('Patient/new-reference');
-    expect(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY.subject.reference).toEqual('Patient/procedure-reference');
+    expect(PROCEDURE_RESOURCE_WITH_FULL_SUMMARY.subject?.reference).toEqual('Patient/procedure-reference');
   });
 });
 

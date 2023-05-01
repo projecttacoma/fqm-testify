@@ -7,7 +7,7 @@ const TEST_PATIENT: fhir4.Patient = {
 
 const TEST_CONDITION: fhir4.Condition = {
   resourceType: 'Condition',
-  id: 'test-patient',
+  id: 'test-condition',
   subject: {
     reference: 'Patient/test-patient'
   }
@@ -116,7 +116,8 @@ describe('bundleToTestCase', () => {
 
     expect(result).toEqual({
       patient: TEST_PATIENT,
-      resources: [TEST_CONDITION],
+      fullUrl: 'urn:uuid:test-patient',
+      resources: [{ resource: TEST_CONDITION, fullUrl: 'urn:uuid:test-condition' }],
       desiredPopulations: []
     });
   });
@@ -180,7 +181,8 @@ describe('bundleToTestCase', () => {
 
     expect(result).toEqual({
       patient: TEST_PATIENT,
-      resources: [TEST_CONDITION],
+      fullUrl: 'urn:uuid:test-patient',
+      resources: [{ resource: TEST_CONDITION, fullUrl: 'urn:uuid:test-condition' }],
       desiredPopulations: ['initial-population', 'numerator', 'denominator']
     });
   });

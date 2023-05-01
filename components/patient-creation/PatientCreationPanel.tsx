@@ -108,7 +108,7 @@ function PatientCreationPanel() {
     if (pt.id) {
       const patientId = pt.id;
 
-      let resources: fhir4.FhirResource[];
+      let resources: fhir4.BundleEntry[];
       // save new resources for a copied patient
       if (copiedPatient) {
         const pat = currentPatients[copiedPatient];
@@ -120,8 +120,11 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
+          fullUrl: draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
           resources: resources,
-          desiredPopulations: currentPatients[patientId]?.desiredPopulations
+          desiredPopulations: copiedPatient
+            ? currentPatients[copiedPatient].desiredPopulations
+            : currentPatients[patientId]?.desiredPopulations
         };
       });
       setCurrentPatients(nextPatientState);
@@ -184,7 +187,12 @@ function PatientCreationPanel() {
 
   const exportPatientTestCase = (id: string) => {
     const bundleString: string = JSON.stringify(
-      createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
+      createPatientBundle(
+        currentPatients[id].patient,
+        currentPatients[id].resources,
+        currentPatients[id].fullUrl,
+        currentTestMRLookup[id]
+      ),
       null,
       2
     );
@@ -233,7 +241,12 @@ function PatientCreationPanel() {
     if (measureBundleFolder) {
       Object.keys(currentPatients).forEach(id => {
         const bundleString: string = JSON.stringify(
-          createPatientBundle(currentPatients[id].patient, currentPatients[id].resources, currentTestMRLookup[id]),
+          createPatientBundle(
+            currentPatients[id].patient,
+            currentPatients[id].resources,
+            currentPatients[id].fullUrl,
+            currentTestMRLookup[id]
+          ),
           null,
           2
         );

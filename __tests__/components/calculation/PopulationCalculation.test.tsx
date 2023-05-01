@@ -107,10 +107,13 @@ describe('PopulationCalculation', () => {
         },
         resources: [
           {
-            resourceType: 'Procedure',
-            id: 'test-id',
-            status: 'completed',
-            subject: {}
+            resource: {
+              resourceType: 'Procedure',
+              id: 'test-id',
+              status: 'completed',
+              subject: {}
+            },
+            fullUrl: 'urn:uuid:test-id'
           }
         ]
       }
@@ -173,10 +176,13 @@ describe('PopulationCalculation', () => {
         },
         resources: [
           {
-            resourceType: 'Procedure',
-            id: 'test-id',
-            status: 'completed',
-            subject: {}
+            resource: {
+              resourceType: 'Procedure',
+              id: 'test-id',
+              status: 'completed',
+              subject: {}
+            },
+            fullUrl: 'urn:uuid:test-id'
           }
         ]
       }
@@ -239,10 +245,13 @@ describe('PopulationCalculation', () => {
         },
         resources: [
           {
-            resourceType: 'Procedure',
-            id: 'test-id',
-            status: 'completed',
-            subject: {}
+            resource: {
+              resourceType: 'Procedure',
+              id: 'test-id',
+              status: 'completed',
+              subject: {}
+            },
+            fullUrl: 'urn:uuid:test-id'
           }
         ]
       }
