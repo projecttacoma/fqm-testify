@@ -122,9 +122,7 @@ function PatientCreationPanel() {
           patient: pt,
           fullUrl: draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
           resources: resources,
-          desiredPopulations: copiedPatient
-            ? currentPatients[copiedPatient].desiredPopulations
-            : currentPatients[patientId]?.desiredPopulations
+          desiredPopulations: currentPatients[patientId]?.desiredPopulations
         };
       });
       setCurrentPatients(nextPatientState);
