@@ -170,7 +170,6 @@ function ResourceDisplay() {
   const getInitialResource = () => {
     if (isResourceModalOpen) {
       if (currentResource && selectedPatient) {
-        console.log(currentResource);
         return JSON.stringify(
           currentTestCases[selectedPatient].resources.filter(r => r.resource?.id === currentResource)[0].resource,
           null,
@@ -197,7 +196,6 @@ function ResourceDisplay() {
   };
 
   const getConfirmationModalText = (resourceId: string | null) => {
-    console.log();
     if (selectedPatient && resourceId) {
       const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId);
       const resource = currentTestCases[selectedPatient].resources[resourceIndex].resource;
