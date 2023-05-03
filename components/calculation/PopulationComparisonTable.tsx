@@ -72,20 +72,25 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
   function constructBothPopulationsValuesArray(group: DetailedPopulationGroupResult | undefined) {
     const desiredPopulations = constructDesiredPopulationsValuesArray(getMeasurePopulationsForSelection(measure));
     const bothPopulations: BothPopulations = {};
+    console.log('episode results: ', group?.episodeResults);
+    console.log('population results: ', group?.populationResults);
     group?.populationResults?.forEach(result => {
-      const key = result?.criteriaExpression;
-      if (key) {
-        console.log('Result: ', result);
-        // TODO: use criteriaReferenceId to lookup the population the measure observation is associated with
-        // Instead of criteriaExpression, use population type as name (observation key should be adjusted to compensate
-        // for ratio measures observations to also include the population that it's pointing to) *measure type is an atom that can be brought in
-        bothPopulations[key as string] = {
-          desired: desiredPopulations[key as string],
-          actual: (result?.populationType === 'measure-observation') ? 
-            result.observations.reduce((a: number,b: number)=>a+b) : // total sum of all observations (TODO: is sum always appropriate accummulator?)
-            result?.result === true ? 1 : 0 // normal population result
-        };
+      // TODO: keys should probably use population codes (getMeasurePopulationsForSelection values as opposed to labels)
+      let key = result.criteriaExpression as string;
+      
+      if(result.populationType === 'measure-observation' && result.criteriaReferenceId){
+        // TODO: Also check if ratio measure before adjusting? The current check might be sufficient
+        const obsPop = group?.populationResults?.find(pr => pr.populationId === result.criteriaReferenceId)?.populationType;
+        if (obsPop){
+          key = `${key}-${obsPop}`;
+        }else{
+          throw new Error('Observation result criteriaReferenceId has no corresponding population');
+        }
       }
+      bothPopulations[key] = {
+        desired: desiredPopulations[key],
+        actual: result?.result === true ? 1 : 0
+      };
     });
     return bothPopulations;
   }
@@ -110,13 +115,15 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
                 </ActionIcon>
               </Popover.Target>
               <Popover.Dropdown>
-                The rows in this table represent the possible populations as specified on the uploaded Measure and the
-                two columns represent the desired and actual populations as stored/calculated by FQM-Testify. For the
-                &apos;Actual&apos; column, the value will be 1 if the patient calculates into the respective population,
-                and 0 if it does not. For the &apos;Desired&apos; column, the value will be 1 if the respective
-                population was selected as a desired population for the patient, and 0 if not. If any of the rows are
-                highlighted red, that means the desired population does not match the actual population. If they are
-                highlighted green, then they match.
+                The columns in this table represent the possible populations as specified on the uploaded Measure and the
+                rows represent the desired and actual populations as stored/calculated by FQM-Testify. The first rows are
+                for the patient, and any subsequent rows show episode results For the &apos;Actual&apos; rows, the value 
+                will be 1 if the patient calculates into the respective population, and 0 if it does not. The same is true
+                for episode population data, but observation data will show actual observation values. For the &apos;Desired&apos; 
+                rows, the value will be 1 if the respective population was selected as a desired population for the patient, 
+                and 0 if not. The episode observation &apos;Actual&apos; rows will show desired observation values for that 
+                episode. If any of the cells are highlighted red, that means the desired population/observation does not match 
+                the actual population/observation. If they are highlighted green, then they match.
               </Popover.Dropdown>
             </Popover>
           </div>
