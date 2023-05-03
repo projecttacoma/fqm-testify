@@ -2,7 +2,7 @@ import { atom } from 'recoil';
 
 export interface TestCaseInfo {
   patient: fhir4.Patient;
-  fullUrl?: string;
+  fullUrl: string;
   resources: fhir4.BundleEntry[];
   desiredPopulations?: string[];
 }

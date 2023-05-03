@@ -36,12 +36,12 @@ export function createPatientResourceString(birthDate: string): string {
 }
 
 /**
- * Creates copies of all passed in resources (without references maintained) and gives them
- * new resource ids. Replaces all patient references to the patient oldId with newId
- * @param copyResources {fhir4.FhirResource[]} array of fhir resources to be copied
- * @param oldId {String} a patient id that the copyResources may reference
- * @param newId {String} a patient id that should replace oldId in references
- * @returns {fhir4.FhirResource[]} array of new resource copies
+ * Creates copies of all passed in Bundle entries (without references maintained) and gives them
+ * new resource ids. Replaces all patient references to the patient oldPatientId with newPatientId
+ * @param copyResources array of fhir Bundle entries to be copied
+ * @param oldPatientId  a patient id that the copyResources may reference
+ * @param newPatientId a patient id that should replace oldId in references
+ * @returns array of new Bundle entry copies
  */
 export function createCopiedResources(
   copyResources: fhir4.BundleEntry[],

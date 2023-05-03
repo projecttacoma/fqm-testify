@@ -12,6 +12,7 @@ const MOCK_TEST_CASE_EMPTY: TestCase = {
       id: 'example-pt',
       name: [{ given: ['Test123'], family: 'Patient456' }]
     },
+    fullUrl: 'urn:uuid:example-pt',
     resources: []
   }
 };
@@ -23,6 +24,7 @@ const MOCK_TEST_CASE_POPULATED: TestCase = {
       id: 'example-pt',
       name: [{ given: ['Test123'], family: 'Patient456' }]
     },
+    fullUrl: 'urn:uuid:example-pt',
     resources: [
       {
         resource: {

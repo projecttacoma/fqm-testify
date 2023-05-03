@@ -199,9 +199,9 @@ function ResourceDisplay() {
     if (selectedPatient && resourceId) {
       const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId);
       const resource = currentTestCases[selectedPatient].resources[resourceIndex].resource;
-      return `Are you sure you want to delete ${resource?.resourceType} ${getFhirResourceSummary(
-        resource as fhir4.FhirResource
-      )}?`;
+      if (resource) {
+        return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
+      }
     }
   };
 
@@ -222,15 +222,16 @@ function ResourceDisplay() {
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <Stack data-testid="resource-display-stack">
-          {currentTestCases[selectedPatient].resources.map(resource => {
-            if (resource.resource) {
+          {currentTestCases[selectedPatient].resources.map(bundleEntry => {
+            const resource = bundleEntry.resource;
+            if (resource) {
               return (
                 <ResourceInfoCard
-                  key={resource.resource.id}
-                  resourceType={resource.resource.resourceType}
-                  label={getFhirResourceSummary(resource.resource)}
-                  onEditClick={() => openResourceModal(resource.resource?.id)}
-                  onDeleteClick={() => openConfirmationModal(resource.resource?.id)}
+                  key={resource.id}
+                  resourceType={resource.resourceType}
+                  label={getFhirResourceSummary(resource)}
+                  onEditClick={() => openResourceModal(resource.id)}
+                  onDeleteClick={() => openConfirmationModal(resource.id)}
                 />
               );
             }

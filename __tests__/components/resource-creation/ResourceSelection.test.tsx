@@ -73,6 +73,7 @@ const MOCK_TEST_CASE_POPULATED: TestCase = {
       id: 'example-pt',
       name: [{ given: ['Test123'], family: 'Patient456' }]
     },
+    fullUrl: 'urn:uuid:example-pt',
     resources: [
       {
         resource: {

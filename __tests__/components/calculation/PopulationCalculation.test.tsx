@@ -80,6 +80,7 @@ describe('PopulationCalculation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: []
       }
     });
@@ -105,6 +106,7 @@ describe('PopulationCalculation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: [
           {
             resource: {
@@ -174,6 +176,7 @@ describe('PopulationCalculation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: [
           {
             resource: {
@@ -243,6 +246,7 @@ describe('PopulationCalculation', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: [
           {
             resource: {
