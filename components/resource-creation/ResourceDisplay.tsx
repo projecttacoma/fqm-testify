@@ -108,7 +108,7 @@ function ResourceDisplay() {
     }
   };
 
-  const updateResource = (val: string) => {
+  const updateResource = (val: string, previousId: string | null) => {
     const updatedResource = JSON.parse(val.trim());
     if (updatedResource.id) {
       const resourceId = updatedResource.id;
@@ -116,7 +116,7 @@ function ResourceDisplay() {
       // Create a new state object using immer without needing to shallow clone the entire previous object
       if (selectedPatient) {
         const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(
-          r => r.resource?.id === resourceId
+          r => r.resource?.id === previousId
         );
         const nextResourceState = produce(currentTestCases, draftState => {
           if (resourceIndexToUpdate < 0) {
@@ -125,6 +125,14 @@ function ResourceDisplay() {
             draftState[selectedPatient].resources.push(entry);
           } else {
             // update existing resource
+            // if the resource's id was updated, make sure to update the fullUrl as well
+            if (previousId && previousId !== resourceId) {
+              const previousFullUrl = draftState[selectedPatient].resources[resourceIndexToUpdate].fullUrl;
+              if (previousFullUrl) {
+                const newFullUrl = previousFullUrl.replace(previousId, resourceId);
+                draftState[selectedPatient].resources[resourceIndexToUpdate].fullUrl = newFullUrl;
+              }
+            }
             draftState[selectedPatient].resources[resourceIndexToUpdate].resource = updatedResource;
           }
         });
@@ -211,7 +219,7 @@ function ResourceDisplay() {
         open={isResourceModalOpen}
         onClose={closeResourceModal}
         title="Edit FHIR Resource"
-        onSave={updateResource}
+        onSave={value => updateResource(value, currentResource)}
         initialValue={getInitialResource()}
       />
       <ConfirmationModal
