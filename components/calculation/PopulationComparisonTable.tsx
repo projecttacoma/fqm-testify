@@ -33,8 +33,8 @@ export interface DesiredPopulations {
 }
 export interface ResultValues {
   resource: string;
-  desired: Record<string, number|undefined>;
-  actual: Record<string, number|undefined>;
+  desired: Record<string, number | undefined>;
+  actual: Record<string, number | undefined>;
 }
 
 export default function PopulationComparisonTable({ patientId }: PopulationComparisonTableProps) {
@@ -48,27 +48,46 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
   }, [measureBundle]);
 
   /**
+   * Creates a key that can be used to represent the population associated with a particular population result.
+   * This key can be used to show the user what population the results are relevant for. It generally uses the
+   * criteria expression, but makes adjustments for measure observations where the expression may not be unique.
+   */
+  function keyForResult(result: PopulationResult, group: DetailedPopulationGroupResult | undefined) {
+    let key = result.criteriaExpression as string;
+
+    if (result.populationType === 'measure-observation' && result.criteriaReferenceId) {
+      const obsPop = group?.populationResults?.find(
+        pr => pr.populationId === result.criteriaReferenceId
+      )?.populationType;
+      if (obsPop) {
+        key = `${key}-${obsPop}`;
+      } else {
+        throw new Error('Observation result criteriaReferenceId has no corresponding population');
+      }
+    }
+    return key;
+  }
+
+  /**
    * Creates an object where the population is the key and the value is 0 or 1:
    * 0 if that population is not a desired population and 1 if it is.
    */
   function constructPatientDesiredValuesArray(measurePopulations: MultiSelectData[]) {
     const desiredPopulations: DesiredPopulations = {};
     measurePopulations.forEach(measurePopulation => {
-      // TODO: keys should probably be values
       if (currentPatients[patientId].desiredPopulations?.includes(measurePopulation.value)) {
         desiredPopulations[measurePopulation.label] = 1;
       } else {
         desiredPopulations[measurePopulation.label] = 0;
       }
     });
-
     return desiredPopulations;
   }
 
   /**
-   * Creates a ResultValues object for the Patient overall results. Specifies resource (Patient), 
+   * Creates a ResultValues object for the Patient overall results. Specifies resource (Patient),
    * desired population values, and actual population values. Desired and actual are key/value pairs,
-   * where the population label (criteria) is the key and the value is 0/1: 0 if that population is 
+   * where the population label (criteria) is the key and the value is 0/1: 0 if that population is
    * not desired (or actual) and 1 if that population is desired (or actual).
    */
   function constructPatientValues(group: DetailedPopulationGroupResult | undefined) {
@@ -78,103 +97,131 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
       desired: {},
       actual: {}
     };
-    console.log('population results: ', group?.populationResults);
-    group?.populationResults?.forEach(result => {
-      // TODO: keys should probably use population codes (getMeasurePopulationsForSelection *values as opposed to *labels)
-      const key = keyForResult(result, group);
-      patientValues['actual'][key] = result?.result === true ? 1 : 0;
-      patientValues['desired'][key] = desiredPopulations[key];
-    });
+    // TODO: assumes one group, may need updating if there's more than one group
+    let scoreType = measure.group?.[0].extension?.find(
+      e => e.url === 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring'
+    )?.valueCodeableConcept?.coding?.[0].code;
+    if (!scoreType) {
+      // Score type might also be in the measure scoring field
+      scoreType = measure.scoring?.coding?.[0].code;
+    }
+    if (scoreType === 'proportion') {
+      // generate boolean population scores for proportion measures
+      group?.populationResults?.forEach(result => {
+        const key = keyForResult(result, group);
+
+        patientValues['actual'][key] = result?.result === true ? 1 : 0;
+        patientValues['desired'][key] = desiredPopulations[key];
+      });
+    } else if (scoreType === 'ratio') {
+      // generate number of episodes for each population for ratio measures
+      group?.episodeResults?.forEach(ep_result => {
+        ep_result.populationResults.forEach(result => {
+          const key = keyForResult(result, group);
+
+          if (result.populationType === 'measure-observation') {
+            patientValues['actual'][key] = undefined;
+            patientValues['desired'][key] = undefined;
+          } else {
+            // TODO: placeholder 0 value until we can set a desired total number of episodes per population
+            patientValues['desired'][key] = 0;
+            if (!patientValues['actual'][key]) patientValues['actual'][key] = 0;
+            if (result.result) {
+              patientValues['actual'][key] = (patientValues['actual'][key] as number) + 1;
+            }
+          }
+        });
+      });
+    } else {
+      throw new Error('Could not find proportion or ratio score type.');
+    }
     return patientValues;
   }
 
-  function keyForResult(result: PopulationResult, group: DetailedPopulationGroupResult | undefined){
-    let key = result.criteriaExpression as string;
-      
-    if(result.populationType === 'measure-observation' && result.criteriaReferenceId){
-      // TODO: Also check if ratio measure before adjusting? The current check might be sufficient
-      const obsPop = group?.populationResults?.find(pr => pr.populationId === result.criteriaReferenceId)?.populationType;
-      if (obsPop){
-        key = `${key}-${obsPop}`;
-      }else{
-        throw new Error('Observation result criteriaReferenceId has no corresponding population');
-      }
-    }
-    return key
-  }
-
   /**
-   * Creates an array of ResultValues objects for each of the Episode results. Specifies resource (which episode), 
+   * Creates an array of ResultValues objects for each of the Episode results. Specifies resource (which episode),
    * desired population values, and actual population values. Desired and actual are key/value pairs,
    * where the population label (criteria) is the key and the value is 0/1 or the observation value if the population
    * is a measure observation.
    */
   function constructEpisodeValues(group: DetailedPopulationGroupResult | undefined) {
-    console.log('episode results: ', group?.episodeResults);
     const results = group?.episodeResults?.map(er => {
       const episode = currentPatients[patientId].resources.find(r => r.id === er.episodeId);
       const keys = er.populationResults.map(pr => keyForResult(pr, group));
       // dummy placeholder until episodes have desired results: all values currently 0
-      const desired = keys.reduce((acc: Record<string, number|undefined>, cv) => {
+      const desired = keys.reduce((acc: Record<string, number | undefined>, cv) => {
         acc[cv] = 0;
         return acc;
-      },{});
-      const actual = er.populationResults.reduce((acc: Record<string, number|undefined>, pr: PopulationResult) => {
+      }, {});
+      const actual = er.populationResults.reduce((acc: Record<string, number | undefined>, pr: PopulationResult) => {
         const key = keyForResult(pr, group);
-        const value = pr.populationType === 'measure-observation' ? 
-          (pr.observations?.[0] ?? 0) : // observation TODO: for null observation, should value be 0 or undefined?
-          (pr.result ? 1 : 0); // population
+        const value =
+          pr.populationType === 'measure-observation'
+            ? pr.observations?.[0] // observation
+            : pr.result
+            ? 1
+            : 0; // population
         acc[key] = value;
         return acc;
-      },{});
+      }, {});
       return {
         resource: `${episode?.resourceType}: ${episode?.id}`,
         desired: desired,
         actual: actual
       };
-    })
+    });
     return results ?? [];
   }
 
-   /**
+  /**
    * Creates table rows for a single set of result values. These rows specify this resource (patient or episode),
    * desired population values, and actual population values.
    */
-  function rowsForResult(result: ResultValues, pops: string[]){
+  function rowsForResult(result: ResultValues, pops: string[]) {
     return (
-      <React.Fragment>
-        <tr key={result.resource}>
-          <td><b>{result.resource}</b></td>
+      <React.Fragment key={result.resource}>
+        <tr key={`row-${result.resource}`}>
+          <td>
+            <b>{result.resource}</b>
+          </td>
         </tr>
         <tr key={`${result.resource}-desired`}>
           <td>Desired</td>
           {pops.map(p => {
-            if (result.desired[p] === result.actual[p]){
+            if (result.desired[p] === undefined) {
+              return <td key={`${result.resource}-desired-${p}`}>N/A</td>;
+            } else if (result.desired[p] === result.actual[p]) {
               return (
-              <td className={classes.highlightGreen} key={`${result.resource}-${result.desired}-${p}` }>
-                {result.desired[p]}
-              </td>)
-            }else{
+                <td className={classes.highlightGreen} key={`${result.resource}-desired-${p}`}>
+                  {result.desired[p]}
+                </td>
+              );
+            } else {
               return (
-              <td className={classes.highlightRed} key={`${result.resource}-${result.desired}-${p}` }>
-                {result.desired[p]}
-              </td>)
+                <td className={classes.highlightRed} key={`${result.resource}-desired-${p}`}>
+                  {result.desired[p]}
+                </td>
+              );
             }
           })}
         </tr>
         <tr key={`${result.resource}-actual`}>
           <td>Actual</td>
           {pops.map(p => {
-            if (result.desired[p] === result.actual[p]){
+            if (result.actual[p] === undefined) {
+              return <td key={`${result.resource}-actual-${p}`}>N/A</td>;
+            } else if (result.desired[p] === result.actual[p]) {
               return (
-              <td className={classes.highlightGreen} key={`${result.resource}-${result.actual}-${p}` }>
-                {result.actual[p]}
-              </td>)
-            }else{
+                <td className={classes.highlightGreen} key={`${result.resource}-actual-${p}`}>
+                  {result.actual[p]}
+                </td>
+              );
+            } else {
               return (
-              <td className={classes.highlightRed} key={`${result.resource}-${result.actual}-${p}` }>
-                {result.actual[p]}
-              </td>)
+                <td className={classes.highlightRed} key={`${result.resource}-actual-${p}`}>
+                  {result.actual[p]}
+                </td>
+              );
             }
           })}
         </tr>
@@ -204,31 +251,32 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
                 </ActionIcon>
               </Popover.Target>
               <Popover.Dropdown>
-                The columns in this table represent the possible populations as specified on the uploaded Measure and the
-                rows represent the desired and actual populations as stored/calculated by FQM-Testify. The first rows are
-                for the patient, and any subsequent rows show episode results For the &apos;Actual&apos; rows, the value 
-                will be 1 if the patient calculates into the respective population, and 0 if it does not. The same is true
-                for episode population data, but observation data will show actual observation values. For the &apos;Desired&apos; 
-                rows, the value will be 1 if the respective population was selected as a desired population for the patient, 
-                and 0 if not. The episode observation &apos;Actual&apos; rows will show desired observation values for that 
-                episode. If any of the cells are highlighted red, that means the desired population/observation does not match 
-                the actual population/observation. If they are highlighted green, then they match.
+                The Population Comparison Table shows patient and episode population results for the patient selected.
+                For proportion measures, patient results show 0 or 1 to indicate belonging to a population. Actual and
+                desired populations are compared to highlight cells green if they match and red if they don&apos;t
+                match.
+                <br />
+                <br />
+                For ratio measures, the table show Patient level totals that indicate how many episodes are in each
+                population. Episode population results show a 0 or 1, and episode observation results show the observed
+                value for that episode.
               </Popover.Dropdown>
             </Popover>
           </div>
         </Group>
-        <Table>
+        <Table horizontalSpacing="xl">
           <thead>
             <tr>
               <th />
-              {pops.map(p => (<th key={p}>{p}</th>))}
+              {pops.map(p => (
+                <th key={p}>{p}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {allValues.map(r => {
               return rowsForResult(r, pops);
-            })
-            }
+            })}
           </tbody>
         </Table>
       </>

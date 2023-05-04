@@ -34,6 +34,14 @@ const TEST_MEASURE_BUNDLE: fhir4.Bundle = {
       resource: {
         resourceType: 'Measure',
         status: 'active',
+        scoring: {
+          coding: [
+            {
+              system: 'http://terminology.hl7.org/CodeSystem/measure-scoring',
+              code: 'proportion'
+            }
+          ]
+        },
         group: [
           {
             population: [
