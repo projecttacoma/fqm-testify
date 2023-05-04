@@ -128,6 +128,7 @@ const EXAMPLE_PATIENT: fhir4.Patient = {
 const MOCK_TEST_CASE: TestCase = {
   'example-pt': {
     patient: EXAMPLE_PATIENT,
+    fullUrl: 'urn:uuid:testPatient',
     resources: [],
     desiredPopulations: ['initial-population']
   }

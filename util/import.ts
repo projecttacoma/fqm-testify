@@ -64,11 +64,12 @@ export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: str
 
   return {
     patient: patientResource,
+    fullUrl: patientEntry?.fullUrl ?? `urn:uuid:${patientResource.id}`,
     resources: bundle.entry
       .filter(e => {
         return e.resource?.resourceType !== 'Patient' && !isTestCaseMeasureReport(e);
       })
-      .map(e => e.resource) as fhir4.FhirResource[],
+      .map(e => ({ fullUrl: e.fullUrl ?? `urn:uuid:${e.resource?.id}`, resource: e.resource })),
     desiredPopulations
   };
 }

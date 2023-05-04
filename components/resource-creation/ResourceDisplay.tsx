@@ -37,7 +37,7 @@ function ResourceDisplay() {
       if (
         resourceId &&
         selectedPatient &&
-        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+        currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId) >= 0
       ) {
         setCurrentResource(resourceId);
       } else {
@@ -59,7 +59,7 @@ function ResourceDisplay() {
       if (
         resourceId &&
         selectedPatient &&
-        currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId) >= 0
+        currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId) >= 0
       ) {
         setCurrentResource(resourceId);
       } else {
@@ -108,21 +108,32 @@ function ResourceDisplay() {
     }
   };
 
-  const updateResource = (val: string) => {
+  const updateResource = (val: string, previousId: string | null) => {
     const updatedResource = JSON.parse(val.trim());
     if (updatedResource.id) {
       const resourceId = updatedResource.id;
 
       // Create a new state object using immer without needing to shallow clone the entire previous object
       if (selectedPatient) {
-        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
+        const resourceIndexToUpdate = currentTestCases[selectedPatient].resources.findIndex(
+          r => r.resource?.id === previousId
+        );
         const nextResourceState = produce(currentTestCases, draftState => {
           if (resourceIndexToUpdate < 0) {
             // add new resource
-            draftState[selectedPatient].resources.push(updatedResource);
+            const entry: fhir4.BundleEntry = { resource: updatedResource, fullUrl: `urn:uuid:${resourceId}` };
+            draftState[selectedPatient].resources.push(entry);
           } else {
             // update existing resource
-            draftState[selectedPatient].resources[resourceIndexToUpdate] = updatedResource;
+            // if the resource's id was updated, make sure to update the fullUrl as well
+            if (previousId && previousId !== resourceId) {
+              const previousFullUrl = draftState[selectedPatient].resources[resourceIndexToUpdate].fullUrl;
+              if (previousFullUrl) {
+                const newFullUrl = previousFullUrl.replace(previousId, resourceId);
+                draftState[selectedPatient].resources[resourceIndexToUpdate].fullUrl = newFullUrl;
+              }
+            }
+            draftState[selectedPatient].resources[resourceIndexToUpdate].resource = updatedResource;
           }
         });
         setCurrentTestCases(nextResourceState);
@@ -143,7 +154,7 @@ function ResourceDisplay() {
 
   const deleteResource = (id: string | null) => {
     if (id && selectedPatient) {
-      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.id === id);
+      const resourceIndexToDelete = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === id);
       const nextResourceState = produce(currentTestCases, draftState => {
         if (resourceIndexToDelete >= 0) {
           draftState[selectedPatient].resources.splice(resourceIndexToDelete, 1);
@@ -168,7 +179,7 @@ function ResourceDisplay() {
     if (isResourceModalOpen) {
       if (currentResource && selectedPatient) {
         return JSON.stringify(
-          currentTestCases[selectedPatient].resources.filter(r => r.id === currentResource)[0],
+          currentTestCases[selectedPatient].resources.filter(r => r.resource?.id === currentResource)[0].resource,
           null,
           2
         );
@@ -194,9 +205,11 @@ function ResourceDisplay() {
 
   const getConfirmationModalText = (resourceId: string | null) => {
     if (selectedPatient && resourceId) {
-      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.id === resourceId);
-      const resource = currentTestCases[selectedPatient].resources[resourceIndex];
-      return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
+      const resourceIndex = currentTestCases[selectedPatient].resources.findIndex(r => r.resource?.id === resourceId);
+      const resource = currentTestCases[selectedPatient].resources[resourceIndex].resource;
+      if (resource) {
+        return `Are you sure you want to delete ${resource.resourceType} ${getFhirResourceSummary(resource)}?`;
+      }
     }
   };
 
@@ -206,7 +219,7 @@ function ResourceDisplay() {
         open={isResourceModalOpen}
         onClose={closeResourceModal}
         title="Edit FHIR Resource"
-        onSave={updateResource}
+        onSave={value => updateResource(value, currentResource)}
         initialValue={getInitialResource()}
       />
       <ConfirmationModal
@@ -217,15 +230,20 @@ function ResourceDisplay() {
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <Stack data-testid="resource-display-stack">
-          {currentTestCases[selectedPatient].resources.map(resource => (
-            <ResourceInfoCard
-              key={resource.id}
-              resourceType={resource.resourceType}
-              label={getFhirResourceSummary(resource)}
-              onEditClick={() => openResourceModal(resource.id)}
-              onDeleteClick={() => openConfirmationModal(resource.id)}
-            />
-          ))}
+          {currentTestCases[selectedPatient].resources.map(bundleEntry => {
+            const resource = bundleEntry.resource;
+            if (resource) {
+              return (
+                <ResourceInfoCard
+                  key={resource.id}
+                  resourceType={resource.resourceType}
+                  label={getFhirResourceSummary(resource)}
+                  onEditClick={() => openResourceModal(resource.id)}
+                  onDeleteClick={() => openConfirmationModal(resource.id)}
+                />
+              );
+            }
+          })}
         </Stack>
       )}
     </>

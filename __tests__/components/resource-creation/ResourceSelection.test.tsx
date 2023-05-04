@@ -73,22 +73,26 @@ const MOCK_TEST_CASE_POPULATED: TestCase = {
       id: 'example-pt',
       name: [{ given: ['Test123'], family: 'Patient456' }]
     },
+    fullUrl: 'urn:uuid:example-pt',
     resources: [
       {
-        resourceType: 'Procedure',
-        id: 'example-procedure',
-        status: 'completed',
-        subject: {
-          reference: 'Patient/example-pt'
+        resource: {
+          resourceType: 'Procedure',
+          id: 'example-procedure',
+          status: 'completed',
+          subject: {
+            reference: 'Patient/example-pt'
+          },
+          code: {
+            coding: [
+              {
+                code: 'example-code',
+                display: 'Example Code Display'
+              }
+            ]
+          }
         },
-        code: {
-          coding: [
-            {
-              code: 'example-code',
-              display: 'Example Code Display'
-            }
-          ]
-        }
+        fullUrl: 'urn:uuid:example-procedure'
       }
     ]
   }

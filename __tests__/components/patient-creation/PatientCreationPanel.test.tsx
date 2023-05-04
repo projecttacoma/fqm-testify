@@ -10,6 +10,21 @@ jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
 }));
 
+// Mock out the getClientRects function to avoid warnings
+document.createRange = () => {
+  const range = new Range();
+
+  range.getBoundingClientRect = jest.fn();
+
+  range.getClientRects = jest.fn(() => ({
+    item: () => null,
+    length: 0,
+    [Symbol.iterator]: jest.fn()
+  }));
+
+  return range;
+};
+
 describe('PatientCreationPanel', () => {
   it('should not render modal by default', () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
@@ -76,6 +91,7 @@ describe('PatientCreationPanel', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: []
       }
     });
@@ -100,6 +116,7 @@ describe('PatientCreationPanel', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: []
       }
     });
@@ -134,6 +151,7 @@ describe('PatientCreationPanel', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: []
       }
     });
@@ -168,12 +186,16 @@ describe('PatientCreationPanel', () => {
           resourceType: 'Patient',
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
+        fullUrl: 'urn:uuid:testPatient',
         resources: [
           {
-            resourceType: 'Procedure',
-            id: 'test-id',
-            status: 'completed',
-            subject: {}
+            resource: {
+              resourceType: 'Procedure',
+              id: 'test-id',
+              status: 'completed',
+              subject: {}
+            },
+            fullUrl: 'urn:uuid:test-id'
           }
         ]
       }

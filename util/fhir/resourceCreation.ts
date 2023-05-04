@@ -36,26 +36,31 @@ export function createPatientResourceString(birthDate: string): string {
 }
 
 /**
- * Creates copies of all passed in resources (without references maintained) and gives them
- * new resource ids. Replaces all patient references to the patient oldId with newId
- * @param copyResources {fhir4.FhirResource[]} array of fhir resources to be copied
- * @param oldId {String} a patient id that the copyResources may reference
- * @param newId {String} a patient id that should replace oldId in references
- * @returns {fhir4.FhirResource[]} array of new resource copies
+ * Creates copies of all passed in Bundle entries (without references maintained) and gives them
+ * new resource ids. Replaces all patient references to the patient oldPatientId with newPatientId
+ * @param copyResources array of fhir Bundle entries to be copied
+ * @param oldPatientId  a patient id that the copyResources may reference
+ * @param newPatientId a patient id that should replace oldId in references
+ * @returns array of new Bundle entry copies
  */
 export function createCopiedResources(
-  copyResources: fhir4.FhirResource[],
-  oldId: string,
-  newId: string
-): fhir4.FhirResource[] {
-  const resources: fhir4.FhirResource[] = copyResources.map(cr => {
-    let resourceString = JSON.stringify(cr);
-    const idRegexp = new RegExp(`Patient/${oldId}`, 'g');
-    resourceString = resourceString.replace(idRegexp, `Patient/${newId}`);
-    const resource: fhir4.FhirResource = JSON.parse(resourceString);
-    resource.id = uuidv4();
+  copyResources: fhir4.BundleEntry[],
+  oldPatientId: string,
+  newPatientId: string
+): fhir4.BundleEntry[] {
+  const resources: fhir4.BundleEntry[] = copyResources.map(cr => {
+    let entryString = JSON.stringify(cr);
+    const idRegexp = new RegExp(`Patient/${oldPatientId}`, 'g');
+    entryString = entryString.replace(idRegexp, `Patient/${newPatientId}`);
+    const entry: fhir4.BundleEntry = JSON.parse(entryString);
+    if (entry.resource) {
+      const newResourceId = uuidv4();
+      entry.resource.id = newResourceId;
+      entry.fullUrl = `urn:uuid:${newResourceId}`;
+    }
+
     // Note: this does not update potential cross-resource references, which we may want to support in the future
-    return resource;
+    return entry;
   });
   return resources;
 }
@@ -97,12 +102,13 @@ export function createCopiedPatientResource(copyPatient: fhir4.Patient): fhir4.P
  * Creates a string representing a patient bundle resource. Creates using a patient resource and
  * an array of the patient's associated resources
  * @param {Object} patient FHIR Patient object
- * @param {Array} resources array of FHIR resources associated with the patient
+ * @param {Array} entries array of FHIR BundleEntries associated with the patient
  * @returns {String} representation of a FHIR patient bundle resource
  */
 export function createPatientBundle(
   patient: fhir4.Patient,
-  resources: fhir4.FhirResource[],
+  entries: fhir4.BundleEntry[],
+  fullUrl?: string,
   testMeasureReport?: fhir4.MeasureReport
 ): fhir4.Bundle {
   const bundle: fhir4.Bundle = {
@@ -115,19 +121,19 @@ export function createPatientBundle(
         request: {
           method: 'PUT',
           url: `Patient/${patient.id}`
-        }
+        },
+        fullUrl: fullUrl ?? `urn:uuid:${patient.id}`
       }
     ]
   };
-  resources.forEach(resource => {
-    const entry: fhir4.BundleEntry = {
-      resource: resource,
+  entries.forEach(entry => {
+    bundle.entry?.push({
+      ...entry,
       request: {
         method: 'PUT',
-        url: `${resource.resourceType}/${resource.id}`
+        url: `${entry.resource?.resourceType}/${entry.resource?.id}`
       }
-    };
-    bundle.entry?.push(entry);
+    });
   });
   if (testMeasureReport) {
     bundle.entry?.push({
@@ -135,7 +141,8 @@ export function createPatientBundle(
       request: {
         method: 'PUT',
         url: `MeasureReport/${testMeasureReport.id}`
-      }
+      },
+      fullUrl: `urn:uuid:${testMeasureReport.id}`
     });
   }
   return bundle;
