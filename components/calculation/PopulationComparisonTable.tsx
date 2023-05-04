@@ -6,7 +6,8 @@ import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { DetailedPopulationGroupResult } from 'fqm-execution/build/types/Calculator';
+import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
+import React from 'react';
 
 const useStyles = createStyles({
   highlightRed: {
@@ -30,11 +31,10 @@ export interface PopulationComparisonTableProps {
 export interface DesiredPopulations {
   [key: string]: number;
 }
-export interface BothPopulations {
-  [key: string]: {
-    desired: number;
-    actual: number | undefined;
-  };
+export interface ResultValues {
+  resource: string;
+  desired: Record<string, number|undefined>;
+  actual: Record<string, number|undefined>;
 }
 
 export default function PopulationComparisonTable({ patientId }: PopulationComparisonTableProps) {
@@ -51,13 +51,14 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * Creates an object where the population is the key and the value is 0 or 1:
    * 0 if that population is not a desired population and 1 if it is.
    */
-  function constructDesiredPopulationsValuesArray(measurePopulations: MultiSelectData[]) {
+  function constructPatientDesiredValuesArray(measurePopulations: MultiSelectData[]) {
     const desiredPopulations: DesiredPopulations = {};
     measurePopulations.forEach(measurePopulation => {
+      // TODO: keys should probably be values
       if (currentPatients[patientId].desiredPopulations?.includes(measurePopulation.value)) {
-        desiredPopulations[measurePopulation.label as string] = 1;
+        desiredPopulations[measurePopulation.label] = 1;
       } else {
-        desiredPopulations[measurePopulation.label as string] = 0;
+        desiredPopulations[measurePopulation.label] = 0;
       }
     });
 
@@ -65,38 +66,126 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
   }
 
   /**
-   * Creates an object where the population is the key and it has two properties: actual and desired.
-   * Both properties can either be 0 or 1: 0 if that population is not desired (or actual) and 1 if
-   * that population is desired (or actual).
+   * Creates a ResultValues object for the Patient overall results. Specifies resource (Patient), 
+   * desired population values, and actual population values. Desired and actual are key/value pairs,
+   * where the population label (criteria) is the key and the value is 0/1: 0 if that population is 
+   * not desired (or actual) and 1 if that population is desired (or actual).
    */
-  function constructBothPopulationsValuesArray(group: DetailedPopulationGroupResult | undefined) {
-    const desiredPopulations = constructDesiredPopulationsValuesArray(getMeasurePopulationsForSelection(measure));
-    const bothPopulations: BothPopulations = {};
-    console.log('episode results: ', group?.episodeResults);
+  function constructPatientValues(group: DetailedPopulationGroupResult | undefined) {
+    const desiredPopulations = constructPatientDesiredValuesArray(getMeasurePopulationsForSelection(measure));
+    const patientValues: ResultValues = {
+      resource: 'Patient',
+      desired: {},
+      actual: {}
+    };
     console.log('population results: ', group?.populationResults);
     group?.populationResults?.forEach(result => {
-      // TODO: keys should probably use population codes (getMeasurePopulationsForSelection values as opposed to labels)
-      let key = result.criteriaExpression as string;
-      
-      if(result.populationType === 'measure-observation' && result.criteriaReferenceId){
-        // TODO: Also check if ratio measure before adjusting? The current check might be sufficient
-        const obsPop = group?.populationResults?.find(pr => pr.populationId === result.criteriaReferenceId)?.populationType;
-        if (obsPop){
-          key = `${key}-${obsPop}`;
-        }else{
-          throw new Error('Observation result criteriaReferenceId has no corresponding population');
-        }
-      }
-      bothPopulations[key] = {
-        desired: desiredPopulations[key],
-        actual: result?.result === true ? 1 : 0
-      };
+      // TODO: keys should probably use population codes (getMeasurePopulationsForSelection *values as opposed to *labels)
+      const key = keyForResult(result, group);
+      patientValues['actual'][key] = result?.result === true ? 1 : 0;
+      patientValues['desired'][key] = desiredPopulations[key];
     });
-    return bothPopulations;
+    return patientValues;
   }
+
+  function keyForResult(result: PopulationResult, group: DetailedPopulationGroupResult | undefined){
+    let key = result.criteriaExpression as string;
+      
+    if(result.populationType === 'measure-observation' && result.criteriaReferenceId){
+      // TODO: Also check if ratio measure before adjusting? The current check might be sufficient
+      const obsPop = group?.populationResults?.find(pr => pr.populationId === result.criteriaReferenceId)?.populationType;
+      if (obsPop){
+        key = `${key}-${obsPop}`;
+      }else{
+        throw new Error('Observation result criteriaReferenceId has no corresponding population');
+      }
+    }
+    return key
+  }
+
+  /**
+   * Creates an array of ResultValues objects for each of the Episode results. Specifies resource (which episode), 
+   * desired population values, and actual population values. Desired and actual are key/value pairs,
+   * where the population label (criteria) is the key and the value is 0/1 or the observation value if the population
+   * is a measure observation.
+   */
+  function constructEpisodeValues(group: DetailedPopulationGroupResult | undefined) {
+    console.log('episode results: ', group?.episodeResults);
+    const results = group?.episodeResults?.map(er => {
+      const episode = currentPatients[patientId].resources.find(r => r.id === er.episodeId);
+      const keys = er.populationResults.map(pr => keyForResult(pr, group));
+      // dummy placeholder until episodes have desired results: all values currently 0
+      const desired = keys.reduce((acc: Record<string, number|undefined>, cv) => {
+        acc[cv] = 0;
+        return acc;
+      },{});
+      const actual = er.populationResults.reduce((acc: Record<string, number|undefined>, pr: PopulationResult) => {
+        const key = keyForResult(pr, group);
+        const value = pr.populationType === 'measure-observation' ? 
+          (pr.observations?.[0] ?? 0) : // observation TODO: for null observation, should value be 0 or undefined?
+          (pr.result ? 1 : 0); // population
+        acc[key] = value;
+        return acc;
+      },{});
+      return {
+        resource: `${episode?.resourceType}: ${episode?.id}`,
+        desired: desired,
+        actual: actual
+      };
+    })
+    return results ?? [];
+  }
+
+   /**
+   * Creates table rows for a single set of result values. These rows specify this resource (patient or episode),
+   * desired population values, and actual population values.
+   */
+  function rowsForResult(result: ResultValues, pops: string[]){
+    return (
+      <React.Fragment>
+        <tr key={result.resource}>
+          <td><b>{result.resource}</b></td>
+        </tr>
+        <tr key={`${result.resource}-desired`}>
+          <td>Desired</td>
+          {pops.map(p => {
+            if (result.desired[p] === result.actual[p]){
+              return (
+              <td className={classes.highlightGreen} key={`${result.resource}-${result.desired}-${p}` }>
+                {result.desired[p]}
+              </td>)
+            }else{
+              return (
+              <td className={classes.highlightRed} key={`${result.resource}-${result.desired}-${p}` }>
+                {result.desired[p]}
+              </td>)
+            }
+          })}
+        </tr>
+        <tr key={`${result.resource}-actual`}>
+          <td>Actual</td>
+          {pops.map(p => {
+            if (result.desired[p] === result.actual[p]){
+              return (
+              <td className={classes.highlightGreen} key={`${result.resource}-${result.actual}-${p}` }>
+                {result.actual[p]}
+              </td>)
+            }else{
+              return (
+              <td className={classes.highlightRed} key={`${result.resource}-${result.actual}-${p}` }>
+                {result.actual[p]}
+              </td>)
+            }
+          })}
+        </tr>
+      </React.Fragment>
+    );
+  }
+
   if (measure) {
     const group = detailedResultLookup[patientId]?.detailedResults?.[0];
-    const bothPopulations = constructBothPopulationsValuesArray(group);
+    const allValues = [constructPatientValues(group), ...constructEpisodeValues(group)];
+    const pops = Object.keys(allValues[0].actual); //patient actual keys
 
     return (
       <>
@@ -132,30 +221,14 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
           <thead>
             <tr>
               <th />
-              <th>Desired Population</th>
-              <th>Actual Population</th>
+              {pops.map(p => (<th key={p}>{p}</th>))}
             </tr>
           </thead>
           <tbody>
-            {Object.entries(bothPopulations).map(e => {
-              if (e[1].desired === e[1].actual) {
-                return (
-                  <tr className={classes.highlightGreen} key={e[0]}>
-                    <td>{e[0]}</td>
-                    <td>{e[1].desired}</td>
-                    <td>{e[1].actual}</td>
-                  </tr>
-                );
-              } else {
-                return (
-                  <tr className={classes.highlightRed} key={e[0]}>
-                    <td>{e[0]}</td>
-                    <td>{e[1].desired}</td>
-                    <td>{e[1].actual}</td>
-                  </tr>
-                );
-              }
-            })}
+            {allValues.map(r => {
+              return rowsForResult(r, pops);
+            })
+            }
           </tbody>
         </Table>
       </>
