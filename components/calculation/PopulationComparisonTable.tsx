@@ -87,8 +87,9 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
   /**
    * Creates a ResultValues object for the Patient overall results. Specifies resource (Patient),
    * desired population values, and actual population values. Desired and actual are key/value pairs,
-   * where the population label (criteria) is the key and the value is 0/1: 0 if that population is
-   * not desired (or actual) and 1 if that population is desired (or actual).
+   * where the population label (criteria) is the key and the value is 0/1 for proportion measures: 
+   * 0 if that population is not desired (or actual) and 1 if that population is desired (or actual).
+   * For ratio measures, the value is the number of episodes in the population rather than a boolean 0/1.
    */
   function constructPatientValues(group: DetailedPopulationGroupResult | undefined) {
     const desiredPopulations = constructPatientDesiredValuesArray(getMeasurePopulationsForSelection(measure));

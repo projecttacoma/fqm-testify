@@ -42,7 +42,7 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
 }
 
 /**
- * Creates a label string that can be attached to the default (population code, etc.) and adjusts to show measure
+ * Creates a label string that can be attached to the default (population criteria, etc.) and adjusts to show measure
  * observation related population reference so that the population string is unique across different measure observations
  * @param {fhir4.MeasureGroupPopulation} population - FHIR population from a measure group
  * @param {fhir4.MeasureGroup} group - FHIR measure group for observation population lookup
