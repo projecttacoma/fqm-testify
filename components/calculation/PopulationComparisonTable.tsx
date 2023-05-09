@@ -147,7 +147,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    */
   function constructEpisodeValues(group: DetailedPopulationGroupResult | undefined) {
     const results = group?.episodeResults?.map(er => {
-      const episode = currentPatients[patientId].resources.find(r => r.id === er.episodeId)?.resource;
+      const episode = currentPatients[patientId].resources.find(r => r.resource?.id === er.episodeId)?.resource;
       const keys = er.populationResults.map(pr => keyForResult(pr, group));
       // dummy placeholder until episodes have desired results: all values currently 0
       const desired = keys.reduce((acc: Record<string, number | undefined>, cv) => {
