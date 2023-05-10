@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution';
+import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
 import React from 'react';
 
 const useStyles = createStyles({
@@ -98,16 +98,6 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
       desired: {},
       actual: {}
     };
-    // TODO: assumes one group, may need updating if there's more than one group
-    // let scoreType = measure.group?.[0].extension?.find(
-    //   e => e.url === 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring'
-    // )?.valueCodeableConcept?.coding?.[0].code;
-    // if (!scoreType) {
-    //   // Score type might also be in the measure scoring field
-    //   scoreType = measure.scoring?.coding?.[0].code;
-    // }
-    console.log('population results', group?.populationResults);
-    console.log('episode results', group?.episodeResults);
     if (!group?.episodeResults) {
       // generate boolean population scores for patient-based measures
       group?.populationResults?.forEach(result => {
@@ -147,9 +137,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
         });
       }
     }
-    // else {
-    //   throw new Error('Could not find proportion or ratio score type.');
-    // }
+
     return patientValues;
   }
 
