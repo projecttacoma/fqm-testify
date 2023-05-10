@@ -15,8 +15,8 @@ Tooling for analysis of Electronic Clinical Quality Measures (eCQMs) based on th
     - [Importing a Patient Bundle](#importing-a-patient-bundle)
     - [Creating Non-Patient Test Resources](#creating-non-patient-test-resources)
     - [Reading the Population Comparison Table](#reading-the-population-comparison-table)
-      - [Proportion](#proportion)
-      - [Ratio](#ratio)
+      - [Patient](#patient)
+      - [Episodes](#episodes)
   - [Exporting a Test Case](#exporting-a-test-case)
 
 - [License](#license)
@@ -100,13 +100,13 @@ A FHIR resource can be examined, edited, and deleted by selecting the patient th
 
 #### Reading the Population Comparison Table
 The columns in this table represent the possible populations as specified on the uploaded Measure and the rows represent the desired and actual populations as stored/calculated by FQM-Testify. The first rows are for the patient, and any subsequent rows show episode results.
-Both patient and episode results compare actual and desired results. If any of the cells are highlighted red, that means the desired population/observation does not match the actual population/observation. If they are highlighted green, then they match. If they are not highlighted, then the cell represents a value that is not relevant to the current patient/measure.
+Both patient and episode results compare actual and desired results. If any of the cells are highlighted red, that means the desired population/observation does not match the actual population/observation. If they are highlighted green, then they match. If they are not highlighted, then the cell represents a value that is not relevant to the current patient/measure. Some examples of a non-relevant cell are a patient level observation result for an episode of care measure or a numerator observation for an episode that doesn't fall in the numerator.
 
-##### Proportion
-Proportion measures show only patient population results. For the &apos;Actual&apos; row, the value will be 1 if the patient calculates into the respective population, and 0 if it does not. The &apos;Desired&apos; row shows a 1 for populations that the patient are expected to be a part of and 0 for populations that the patient is not expected to be a part of.
+##### Patient
+Patient-based measures show only patient population results. For the &apos;Actual&apos; row, the value will be 1 if the patient calculates into the respective population, and 0 if it does not. The &apos;Desired&apos; row shows a 1 for populations that the patient is expected to be a part of and 0 for populations that the patient is not expected to be a part of.
 
-##### Ratio
-For ratio measure result data, patient results show the total number of episodes that fall into the corresponding population. This value is not boolean, so it may be greater than 1. For episode population data, the population results are again boolean and show whether that particular episode falls into the corresponding population. For episode observation results, the observation value will be shown, which comes from a calculation on that particular episode, so it may also be a non-boolean number, greater than 1. Desired values may also be assigned a non-boolean value and matched with the actual result value accordingly for cell highlighting (desired ratio values are not yet implemented).
+##### Episodes
+For episode-based measure result data, patient results show the total number of episodes that fall into the corresponding population. This value is not boolean, so it may be greater than 1. For episode population data, the population results are again boolean and show whether that particular episode falls into the corresponding population. For episode observation results, the observation value will be shown, which comes from a calculation on that particular episode, so it may also be a non-boolean number, greater than 1. Desired values may also be assigned a non-boolean value and matched with the actual result value accordingly for cell highlighting (desired episode values are not yet implemented).
 
 ### Exporting a Test Case
 

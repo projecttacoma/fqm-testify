@@ -42,11 +42,8 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
 }
 
 /**
- * Creates a label string that can be attached to the default (population criteria, etc.) and adjusts to show measure
+ * Creates a label string that can be attached to the default label (population criteria, etc.) and adjusts to show measure
  * observation related population reference so that the population string is unique across different measure observations
- * @param {fhir4.MeasureGroupPopulation} population - FHIR population from a measure group
- * @param {fhir4.MeasureGroup} group - FHIR measure group for observation population lookup
- * @returns {string} adjustment string
  */
 export function labelAdjustment(
   population: fhir4.MeasureGroupPopulation,
@@ -58,7 +55,7 @@ export function labelAdjustment(
   })?.valueString;
   // handle measure observation
   if (group && population.code?.coding?.[0].code === 'measure-observation' && criteriaReference) {
-    const obsPop = group.population?.find(p => p && p.id === criteriaReference);
+    const obsPop = group.population?.find(p => p.id === criteriaReference);
     if (obsPop) label = `-${obsPop.code?.coding?.[0].code}`;
   }
   return label;

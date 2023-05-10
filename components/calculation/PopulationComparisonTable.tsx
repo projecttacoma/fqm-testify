@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
+import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution';
 import React from 'react';
 
 const useStyles = createStyles({
@@ -99,43 +99,57 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
       actual: {}
     };
     // TODO: assumes one group, may need updating if there's more than one group
-    let scoreType = measure.group?.[0].extension?.find(
-      e => e.url === 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring'
-    )?.valueCodeableConcept?.coding?.[0].code;
-    if (!scoreType) {
-      // Score type might also be in the measure scoring field
-      scoreType = measure.scoring?.coding?.[0].code;
-    }
-    if (scoreType === 'proportion') {
-      // generate boolean population scores for proportion measures
+    // let scoreType = measure.group?.[0].extension?.find(
+    //   e => e.url === 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring'
+    // )?.valueCodeableConcept?.coding?.[0].code;
+    // if (!scoreType) {
+    //   // Score type might also be in the measure scoring field
+    //   scoreType = measure.scoring?.coding?.[0].code;
+    // }
+    console.log('population results', group?.populationResults);
+    console.log('episode results', group?.episodeResults);
+    if (!group?.episodeResults) {
+      // generate boolean population scores for patient-based measures
       group?.populationResults?.forEach(result => {
         const key = keyForResult(result, group);
 
         patientValues['actual'][key] = result?.result === true ? 1 : 0;
         patientValues['desired'][key] = desiredPopulations[key];
       });
-    } else if (scoreType === 'ratio') {
-      // generate number of episodes for each population for ratio measures
-      group?.episodeResults?.forEach(ep_result => {
-        ep_result.populationResults.forEach(result => {
-          const key = keyForResult(result, group);
-
-          if (result.populationType === 'measure-observation') {
-            patientValues['actual'][key] = undefined;
-            patientValues['desired'][key] = undefined;
-          } else {
-            // TODO: placeholder 0 value until we can set a desired total number of episodes per population
-            patientValues['desired'][key] = 0;
-            if (!patientValues['actual'][key]) patientValues['actual'][key] = 0;
-            if (result.result) {
-              patientValues['actual'][key] = (patientValues['actual'][key] as number) + 1;
-            }
-          }
-        });
-      });
     } else {
-      throw new Error('Could not find proportion or ratio score type.');
+      // generate episode count population scores for episode-based measures
+      if (group?.episodeResults.length === 0) {
+        // show population keys with 0 results if there are no episodes
+        group?.populationResults?.forEach(result => {
+          const key = keyForResult(result, group);
+          patientValues['actual'][key] = 0;
+          // TODO: placeholder 0 value until we can set a desired total number of episodes per population
+          patientValues['desired'][key] = 0;
+        });
+      } else {
+        // generate number of episodes for each population for ratio measures
+        group.episodeResults.forEach(er => {
+          er.populationResults.forEach(result => {
+            const key = keyForResult(result, group);
+
+            if (result.populationType === 'measure-observation') {
+              patientValues['actual'][key] = undefined;
+              patientValues['desired'][key] = undefined;
+            } else {
+              // TODO: placeholder 0 value until we can set a desired total number of episodes per population
+              patientValues['desired'][key] = 0;
+              if (!patientValues['actual'][key]) patientValues['actual'][key] = 0;
+              if (result.result) {
+                patientValues['actual'][key] = (patientValues['actual'][key] as number) + 1;
+              }
+            }
+          });
+        });
+      }
     }
+    // else {
+    //   throw new Error('Could not find proportion or ratio score type.');
+    // }
     return patientValues;
   }
 
@@ -253,14 +267,21 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
               </Popover.Target>
               <Popover.Dropdown>
                 The Population Comparison Table shows patient and episode population results for the patient selected.
-                For proportion measures, patient results show 0 or 1 to indicate belonging to a population. Actual and
-                desired populations are compared to highlight cells green if they match and red if they don&apos;t
+                For patient-based measures, patient results show 0 or 1 to indicate belonging to a population. Actual
+                and desired populations are compared to highlight cells green if they match and red if they don&apos;t
                 match.
                 <br />
                 <br />
-                For ratio measures, the table show Patient level totals that indicate how many episodes are in each
-                population. Episode population results show a 0 or 1, and episode observation results show the observed
-                value for that episode.
+                For episode-based measures, the table shows patient level totals that indicate how many episodes are in
+                each population. Episode population results show a 0 or 1, and episode observation results show the
+                observed value for that episode.
+                <br />
+                <br />
+                See the{' '}
+                <a href="https://github.com/projecttacoma/fqm-testify#reading-the-population-comparison-table">
+                  fqm-testify README
+                </a>{' '}
+                for more information.
               </Popover.Dropdown>
             </Popover>
           </div>
