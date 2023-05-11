@@ -1,4 +1,4 @@
-import { ActionIcon, Autocomplete, createStyles, Group, Popover, Table, Text } from '@mantine/core';
+import { ActionIcon, Autocomplete, createStyles, Group, Popover, ScrollArea, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -317,6 +317,14 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
           data={Object.keys(defIds)}
           value={searchValue}
           onChange={setSearchValue}
+          dropdownComponent={ScrollArea}
+          maxDropdownHeight={200}
+          nothingFound={
+            <Text align="left" style={{ paddingLeft: 10 }}>
+              No Matches
+            </Text>
+          }
+          limit={100}
           label="Search CQL Expression Definition"
           onItemSubmit={item => {
             document.getElementById(defIds[item.value])?.scrollIntoView({ behavior: 'smooth' });
