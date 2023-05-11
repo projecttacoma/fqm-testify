@@ -6,6 +6,18 @@ export interface MultiSelectData {
   disabled: boolean;
 }
 
+export const PopulationShorthand: Record<string, string> = {
+  'initial-population': 'IPP',
+  denominator: 'DENOM',
+  'denominator-exclusion': 'DENEX',
+  'denominator-exception': 'DENEXCEP',
+  numerator: 'NUMER',
+  'numerator-exclusion': 'NUMEX',
+  'measure-population': 'MSRPOPL',
+  'measure-population-exclusion': 'MSRPOPLEX',
+  'measure-observation': 'OBSERV'
+};
+
 /**
  * Compiles an array of data for the MultiSelect component, using population codes
  * from the measure resource, across all groups in the measure.
@@ -21,8 +33,6 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
   // TODO: This will need to change if we want to support multiple groups
   measure.group?.[0]?.population?.forEach(population => {
     const populationCode = population.code?.coding?.[0].code;
-    const populationDisplay = population.code?.coding?.[0].display;
-    const populationCriteriaExpression = population.criteria.expression;
     // TODO: determine handling of populations that are not permitted for proportion measures
     if (
       populationCode &&
@@ -30,7 +40,7 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
       !EXCLUDED_MEASURE_POPULATIONS.find(p => p === populationCode)
     ) {
       const labelAdjust = labelAdjustment(population, measure.group?.[0]);
-      const label = (populationCriteriaExpression || populationDisplay || populationCode) + labelAdjust;
+      const label = PopulationShorthand[populationCode] + labelAdjust;
       measurePopulations.push({
         value: populationCode + labelAdjust,
         label: label,
@@ -56,7 +66,8 @@ export function labelAdjustment(
   // handle measure observation
   if (group && population.code?.coding?.[0].code === 'measure-observation' && criteriaReference) {
     const obsPop = group.population?.find(p => p.id === criteriaReference);
-    if (obsPop) label = `-${obsPop.code?.coding?.[0].code}`;
+    const obsPopCode = obsPop?.code?.coding?.[0].code;
+    if (obsPopCode) label = `-${PopulationShorthand[obsPopCode]} (${population.criteria.expression})`;
   }
   return label;
 }

@@ -141,6 +141,6 @@ describe('PopulationMultiSelect', () => {
       fireEvent.keyDown(multiselect, { key: 'Enter' });
     });
 
-    expect(screen.getByText(/denominator/i)).toBeInTheDocument();
+    expect(screen.getByText(/DENOM/i)).toBeInTheDocument();
   });
 });

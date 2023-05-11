@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
-import { getMeasurePopulationsForSelection, MultiSelectData } from '../../util/MeasurePopulations';
+import { getMeasurePopulationsForSelection, MultiSelectData, PopulationShorthand } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
@@ -53,14 +53,14 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * criteria expression, but makes adjustments for measure observations where the expression may not be unique.
    */
   function keyForResult(result: PopulationResult, group: DetailedPopulationGroupResult | undefined) {
-    let key = result.criteriaExpression as string;
+    let key = PopulationShorthand[result.populationType];
 
     if (result.populationType === 'measure-observation' && result.criteriaReferenceId) {
       const obsPop = group?.populationResults?.find(
         pr => pr.populationId === result.criteriaReferenceId
       )?.populationType;
       if (obsPop) {
-        key = `${key}-${obsPop}`;
+        key = `${key}-${PopulationShorthand[obsPop]} (${result.criteriaExpression})`;
       } else {
         throw new Error('Observation result criteriaReferenceId has no corresponding population');
       }
@@ -151,7 +151,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
     const results = group?.episodeResults?.map(er => {
       const episode = currentPatients[patientId].resources.find(r => r.resource?.id === er.episodeId)?.resource;
       const keys = er.populationResults.map(pr => keyForResult(pr, group));
-      // TODO: dummy placeholder until episodes have desired results: all values currently -1
+      // TODO: placeholder until episodes have desired results: all values currently -1
       const desired = keys.reduce((acc: Record<string, number | undefined>, cv) => {
         acc[cv] = -1;
         return acc;
