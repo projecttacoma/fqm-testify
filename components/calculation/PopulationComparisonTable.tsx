@@ -181,6 +181,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * desired population values, and actual population values.
    */
   function rowsForResult(result: ResultValues, pops: string[]) {
+    const disabled = Object.values(result.desired).includes(-1);
     return (
       <React.Fragment key={result.resource}>
         <tr key={`row-${result.resource}`}>
@@ -190,7 +191,7 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
         </tr>
         {
           /* TODO: Remove this guard once we get rid of -1 placeholder values for desired populations */
-          Object.values(result.desired).includes(-1) ? (
+          disabled ? (
             // TODO: get rid of empty row once once we get rid of -1 placeholder values for desired populations
             <tr key={`${result.resource}-desired`}>
               <td>Desired (Unavailable)</td>
@@ -224,6 +225,9 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
           {pops.map(p => {
             if (result.actual[p] === undefined) {
               return <td key={`${result.resource}-actual-${p}`}>N/A</td>;
+            } else if (disabled) {
+              // TODO: remove this disabled check and cell option once desired populations are setable for episode measures
+              return <td key={`${result.resource}-actual-${p}`}>{result.actual[p]}</td>;
             } else if (result.desired[p] === result.actual[p]) {
               return (
                 <td className={classes.highlightGreen} key={`${result.resource}-actual-${p}`}>
