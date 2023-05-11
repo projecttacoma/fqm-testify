@@ -1,4 +1,4 @@
-import { ActionIcon, createStyles, Group, Popover, Table, Text } from '@mantine/core';
+import { ActionIcon, Autocomplete, createStyles, Group, Popover, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -26,6 +26,7 @@ const useStyles = createStyles({
 
 export interface PopulationComparisonTableProps {
   patientId: string;
+  defIds: Record<string, string>;
 }
 
 export interface DesiredPopulations {
@@ -37,12 +38,14 @@ export interface ResultValues {
   actual: Record<string, number | undefined>;
 }
 
-export default function PopulationComparisonTable({ patientId }: PopulationComparisonTableProps) {
+export default function PopulationComparisonTable({ patientId, defIds }: PopulationComparisonTableProps) {
   const { classes } = useStyles();
   const measureBundle = useRecoilValue(measureBundleState);
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const [opened, setOpened] = useState(false);
+  const [searchValue, setSearchValue] = useState<string>('');
+
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
   }, [measureBundle]);
@@ -310,6 +313,15 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
             })}
           </tbody>
         </Table>
+        <Autocomplete
+          data={Object.keys(defIds)}
+          value={searchValue}
+          onChange={setSearchValue}
+          label="Search CQL Expression Definition"
+          onItemSubmit={item => {
+            document.getElementById(defIds[item.value])?.scrollIntoView();
+          }}
+        />
       </>
     );
   } else {
