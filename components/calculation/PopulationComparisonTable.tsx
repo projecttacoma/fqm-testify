@@ -319,7 +319,7 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
           onChange={setSearchValue}
           label="Search CQL Expression Definition"
           onItemSubmit={item => {
-            document.getElementById(defIds[item.value])?.scrollIntoView();
+            document.getElementById(defIds[item.value])?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
       </>

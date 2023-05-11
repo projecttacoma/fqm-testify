@@ -32,8 +32,6 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
       replace: elem => {
         if (elem.type === 'text') {
           const data = (elem as Text).data;
-          console.log(data);
-          console.log(data.match(expressionDefRegex));
           if (data.match(expressionDefRegex)) {
             const splitData = data.split('"');
             defIds[splitData[1]] = splitData[1].toLowerCase().replace(' ', '-');
