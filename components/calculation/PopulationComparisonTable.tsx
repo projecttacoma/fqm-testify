@@ -113,8 +113,8 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
         group?.populationResults?.forEach(result => {
           const key = keyForResult(result, group);
           patientValues['actual'][key] = 0;
-          // TODO: placeholder 0 value until we can set a desired total number of episodes per population
-          patientValues['desired'][key] = 0;
+          // TODO: placeholder -1 value until we can set a desired total number of episodes per population
+          patientValues['desired'][key] = -1;
         });
       } else {
         // generate number of episodes for each population for ratio measures
@@ -126,8 +126,8 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
               patientValues['actual'][key] = undefined;
               patientValues['desired'][key] = undefined;
             } else {
-              // TODO: placeholder 0 value until we can set a desired total number of episodes per population
-              patientValues['desired'][key] = 0;
+              // TODO: placeholder -1 value until we can set a desired total number of episodes per population
+              patientValues['desired'][key] = -1;
               if (!patientValues['actual'][key]) patientValues['actual'][key] = 0;
               if (result.result) {
                 patientValues['actual'][key] = (patientValues['actual'][key] as number) + 1;
@@ -151,9 +151,9 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
     const results = group?.episodeResults?.map(er => {
       const episode = currentPatients[patientId].resources.find(r => r.resource?.id === er.episodeId)?.resource;
       const keys = er.populationResults.map(pr => keyForResult(pr, group));
-      // dummy placeholder until episodes have desired results: all values currently 0
+      // TODO: dummy placeholder until episodes have desired results: all values currently -1
       const desired = keys.reduce((acc: Record<string, number | undefined>, cv) => {
-        acc[cv] = 0;
+        acc[cv] = -1;
         return acc;
       }, {});
       const actual = er.populationResults.reduce((acc: Record<string, number | undefined>, pr: PopulationResult) => {
@@ -188,26 +188,37 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
             <b>{result.resource}</b>
           </td>
         </tr>
-        <tr key={`${result.resource}-desired`}>
-          <td>Desired</td>
-          {pops.map(p => {
-            if (result.desired[p] === undefined) {
-              return <td key={`${result.resource}-desired-${p}`}>N/A</td>;
-            } else if (result.desired[p] === result.actual[p]) {
-              return (
-                <td className={classes.highlightGreen} key={`${result.resource}-desired-${p}`}>
-                  {result.desired[p]}
-                </td>
-              );
-            } else {
-              return (
-                <td className={classes.highlightRed} key={`${result.resource}-desired-${p}`}>
-                  {result.desired[p]}
-                </td>
-              );
-            }
-          })}
-        </tr>
+        {
+          /* TODO: Remove this guard once we get rid of -1 placeholder values for desired populations */
+          Object.values(result.desired).includes(-1) ? (
+            // TODO: get rid of empty row once once we get rid of -1 placeholder values for desired populations
+            <tr key={`${result.resource}-desired`}>
+              <td>Desired (Unavailable)</td>
+            </tr>
+          ) : (
+            <tr key={`${result.resource}-desired`}>
+              <td>Desired</td>
+              {pops.map(p => {
+                if (result.desired[p] === undefined) {
+                  return <td key={`${result.resource}-desired-${p}`}>N/A</td>;
+                } else if (result.desired[p] === result.actual[p]) {
+                  return (
+                    <td className={classes.highlightGreen} key={`${result.resource}-desired-${p}`}>
+                      {result.desired[p]}
+                    </td>
+                  );
+                } else {
+                  return (
+                    <td className={classes.highlightRed} key={`${result.resource}-desired-${p}`}>
+                      {result.desired[p]}
+                    </td>
+                  );
+                }
+              })}
+            </tr>
+          )
+        }
+
         <tr key={`${result.resource}-actual`}>
           <td>Actual</td>
           {pops.map(p => {
