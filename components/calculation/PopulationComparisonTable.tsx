@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
-import { getMeasurePopulationsForSelection, MultiSelectData, PopulationShorthand } from '../../util/MeasurePopulations';
+import { getMeasurePopulationsForSelection, MultiSelectData, getPopShorthand } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
@@ -53,14 +53,20 @@ export default function PopulationComparisonTable({ patientId }: PopulationCompa
    * criteria expression, but makes adjustments for measure observations where the expression may not be unique.
    */
   function keyForResult(result: PopulationResult, group: DetailedPopulationGroupResult | undefined) {
-    let key = PopulationShorthand[result.populationType];
+    let key = getPopShorthand(result.populationType);
+
+    if (!key) {
+      throw new Error(
+        'Population Type not found in measure population valueset: http://hl7.org/fhir/valueset-measure-population.html'
+      );
+    }
 
     if (result.populationType === 'measure-observation' && result.criteriaReferenceId) {
       const obsPop = group?.populationResults?.find(
         pr => pr.populationId === result.criteriaReferenceId
       )?.populationType;
       if (obsPop) {
-        key = `${key}-${PopulationShorthand[obsPop]} (${result.criteriaExpression})`;
+        key = `${key}-${getPopShorthand(obsPop)} (${result.criteriaExpression})`;
       } else {
         throw new Error('Observation result criteriaReferenceId has no corresponding population');
       }

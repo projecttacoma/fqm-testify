@@ -6,17 +6,12 @@ export interface MultiSelectData {
   disabled: boolean;
 }
 
-export const PopulationShorthand: Record<string, string> = {
-  'initial-population': 'IPP',
-  denominator: 'DENOM',
-  'denominator-exclusion': 'DENEX',
-  'denominator-exception': 'DENEXCEP',
-  numerator: 'NUMER',
-  'numerator-exclusion': 'NUMEX',
-  'measure-population': 'MSRPOPL',
-  'measure-population-exclusion': 'MSRPOPLEX',
-  'measure-observation': 'OBSERV'
-};
+export function getPopShorthand(value: string): string | undefined {
+  const enumKey = Object.keys(Enums.PopulationType).find(
+    key => Enums.PopulationType[key as keyof typeof Enums.PopulationType] === value
+  );
+  return enumKey;
+}
 
 /**
  * Compiles an array of data for the MultiSelect component, using population codes
@@ -40,7 +35,7 @@ export function getMeasurePopulationsForSelection(measure: fhir4.Measure): Multi
       !EXCLUDED_MEASURE_POPULATIONS.find(p => p === populationCode)
     ) {
       const labelAdjust = labelAdjustment(population, measure.group?.[0]);
-      const label = PopulationShorthand[populationCode] + labelAdjust;
+      const label = getPopShorthand(populationCode) + labelAdjust;
       measurePopulations.push({
         value: populationCode + labelAdjust,
         label: label,
@@ -67,7 +62,7 @@ export function labelAdjustment(
   if (group && population.code?.coding?.[0].code === 'measure-observation' && criteriaReference) {
     const obsPop = group.population?.find(p => p.id === criteriaReference);
     const obsPopCode = obsPop?.code?.coding?.[0].code;
-    if (obsPopCode) label = `-${PopulationShorthand[obsPopCode]} (${population.criteria.expression})`;
+    if (obsPopCode) label = `-${getPopShorthand(obsPopCode)} (${population.criteria.expression})`;
   }
   return label;
 }
