@@ -6,6 +6,10 @@ export interface MultiSelectData {
   disabled: boolean;
 }
 
+/**
+ * Uses the input population code value and maps it to the corresponding Enum.PopulationType name.
+ * Example: 'initial-population' (the Enum string value) maps to 'IPP' (the Enum name/key)
+ */
 export function getPopShorthand(value: string): string | undefined {
   const enumKey = Object.keys(Enums.PopulationType).find(
     key => Enums.PopulationType[key as keyof typeof Enums.PopulationType] === value
