@@ -6,7 +6,12 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { useMemo } from 'react';
 import { Text } from 'domhandler';
 
-const expressionDefRegex = new RegExp(/^define\s*.*?\".*?\"\s*:.*?/);
+/**
+ * This regex matches any string that includes the substring "define" or "define function"
+ * followed by a string of any length in quotes
+ */
+const expressionDefRegex = new RegExp(/(define(?:\s+function)?\s+)(["'])(.*?)\2/gi);
+
 const useStyles = createStyles({
   highlightedMarkup: {
     '& pre': {
