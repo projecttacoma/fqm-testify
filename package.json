@@ -42,7 +42,7 @@
     "fqm-execution": "git+https://git@github.com/projecttacoma/fqm-execution",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
-    "luxon": "^2.4.0",
+    "luxon": "^2.5.2",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
