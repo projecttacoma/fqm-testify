@@ -4,7 +4,7 @@ import { Grid, Center, Text, Stack, createStyles } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measurementPeriodEndState, measurementPeriodStartState } from '../../state/atoms/measurementPeriod';
 import {
   MeasureUploadProps,
   identifyMissingValueSets,
@@ -20,7 +20,8 @@ const useStyles = createStyles({
 
 export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
   const setMeasureBundle = useSetRecoilState(measureBundleState);
-  const setMeasurementPeriod = useSetRecoilState(measurementPeriodState);
+  const setPeriodStart = useSetRecoilState(measurementPeriodStartState);
+  const setPeriodEnd = useSetRecoilState(measurementPeriodEndState);
 
   const extractMeasureBundle = (file: File) => {
     const reader = new FileReader();
@@ -54,8 +55,9 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
       const effectivePeriod = ((measures as fhir4.BundleEntry[])[0].resource as fhir4.Measure).effectivePeriod;
 
       // Set measurement period to default period
-      const measurementPeriod = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
-      setMeasurementPeriod(measurementPeriod);
+      const { start, end } = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
+      setPeriodStart(start);
+      setPeriodEnd(end);
 
       showNotification({
         icon: <IconCircleCheck />,

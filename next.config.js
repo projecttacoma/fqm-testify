@@ -4,7 +4,6 @@ const nextConfig = {
   eslint: {
     dirs: ['pages', 'utils', 'lib', 'components', 'atoms', '__tests__', 'scripts']
   },
-  webpack5: true,
   webpack: config => {
     config.resolve.fallback = { fs: false };
 

@@ -10,14 +10,7 @@ export interface ConfirmationModalProps {
 
 export default function ConfirmationModal({ open = true, onClose, title, onConfirm }: ConfirmationModalProps) {
   return (
-    <Modal
-      data-testid="confirmation-modal"
-      overflow="outside"
-      opened={open}
-      onClose={onClose}
-      withCloseButton={false}
-      size="lg"
-    >
+    <Modal data-testid="confirmation-modal" opened={open} onClose={onClose} withCloseButton={false} size="lg">
       <Grid align="center" justify="center">
         <Grid.Col>
           <Center>

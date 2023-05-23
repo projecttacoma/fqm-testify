@@ -14,7 +14,7 @@ export default function DataRequirementSelectOption({ dataRequirement }: DataReq
   const displayString = getDataRequirementFiltersString(dataRequirement, valueSetMap);
 
   return (
-    <div style={{ overflow: 'hidden' }}>
+    <div style={{ whiteSpace: 'pre-wrap', overflowX: 'hidden' }}>
       <Text size="lg">{dataRequirement.type}</Text>
       <Text color="dimmed">{displayString}</Text>
     </div>

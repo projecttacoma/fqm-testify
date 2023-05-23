@@ -19,8 +19,10 @@ export default function ResourceInfoCard({ resourceType, label, onEditClick, onD
             multiline
             width={500}
             withArrow
-            transition="fade"
-            transitionDuration={200}
+            transitionProps={{
+              transition: 'fade',
+              duration: 200
+            }}
             label={<Text align="center">{label}</Text>}
             disabled={label === ''}
           >

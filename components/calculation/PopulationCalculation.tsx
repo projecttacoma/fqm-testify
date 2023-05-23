@@ -165,7 +165,9 @@ export default function PopulationCalculation() {
                     onClose={() => setOpened(false)}
                     position="bottom"
                     padding="md"
-                    overlayOpacity={0.3}
+                    overlayProps={{
+                      opacity: 0.3
+                    }}
                     lockScroll={false}
                     size="lg"
                   >

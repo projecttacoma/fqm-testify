@@ -1,12 +1,19 @@
-import { atom } from 'recoil';
+import { atom, selector } from 'recoil';
 
-/**
- * Atom tracking and controlling the value the measurement period
- */
-export const measurementPeriodState = atom<{ start: Date | null; end: Date | null }>({
+export const measurementPeriodStartState = atom<Date | null>({
+  key: 'measurementPeriodStartState',
+  default: null
+});
+
+export const measurementPeriodEndState = atom<Date | null>({
+  key: 'measurementPeriodEndState',
+  default: null
+});
+
+export const measurementPeriodState = selector<{ start: Date | null; end: Date | null }>({
   key: 'measurementPeriodState',
-  default: {
-    start: null,
-    end: null
-  }
+  get: ({ get }) => ({
+    start: get(measurementPeriodStartState),
+    end: get(measurementPeriodEndState)
+  })
 });
