@@ -2,8 +2,9 @@ import '@testing-library/jest-dom';
 import PopulationCalculation from '../../../components/calculation/PopulationCalculation';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
-import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
+import { createMockRouter, getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 import { DetailedResult } from '../../../util/types';
@@ -30,7 +31,9 @@ describe('PopulationCalculation', () => {
     render(
       mantineRecoilWrap(
         <>
-          <PopulationCalculation />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PopulationCalculation />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -43,7 +46,9 @@ describe('PopulationCalculation', () => {
     render(
       mantineRecoilWrap(
         <>
-          <PopulationCalculation />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PopulationCalculation />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -56,7 +61,9 @@ describe('PopulationCalculation', () => {
     render(
       mantineRecoilWrap(
         <>
-          <PopulationCalculation />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PopulationCalculation />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -90,7 +97,9 @@ describe('PopulationCalculation', () => {
         <>
           <MockMB />
           <MockPatients />
-          <PopulationCalculation />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PopulationCalculation />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -150,7 +159,9 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <PopulationCalculation />
+            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+              <PopulationCalculation />
+            </RouterContext.Provider>
           </>
         )
       );
@@ -220,7 +231,9 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <PopulationCalculation />
+            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+              <PopulationCalculation />
+            </RouterContext.Provider>
           </>
         )
       );
@@ -290,7 +303,9 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <PopulationCalculation />
+            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+              <PopulationCalculation />
+            </RouterContext.Provider>
           </>
         )
       );
