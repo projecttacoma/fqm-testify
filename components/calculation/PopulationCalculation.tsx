@@ -149,7 +149,6 @@ export default function PopulationCalculation() {
                     disabled={!enableClauseCoverageButton}
                     variant="outline"
                     onClick={() => {
-                      console.log(measureBundle.content?.id);
                       if (measureBundle.content) {
                         router.push(
                           {
