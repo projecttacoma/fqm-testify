@@ -7,10 +7,10 @@ import { measurementPeriodEndState, measurementPeriodStartState } from '../../..
 
 describe('DateSelectors', () => {
   it('renders a date range picker with proper labels', () => {
-    render(mantineRecoilWrap(<DateSelectors />));
+    render(mantineRecoilWrap(<DateSelectors setDatesValid={jest.fn()} />));
 
-    expect(screen.getByLabelText('Start')).toBeInTheDocument();
-    expect(screen.getByLabelText('End')).toBeInTheDocument();
+    expect(screen.getByLabelText(/start/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/end/i)).toBeInTheDocument();
   });
 
   it('renders date display when measurement period exists', () => {
@@ -21,7 +21,7 @@ describe('DateSelectors', () => {
         <>
           <MockPeriodStart />
           <MockPeriodEnd />
-          <DateSelectors />
+          <DateSelectors setDatesValid={jest.fn()} />
         </>
       )
     );
