@@ -7,13 +7,15 @@ import { useState } from 'react';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
-import Link from 'next/link';
 import { getPatientInfoString } from '../../util/fhir/patient';
 import { createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
+import { useRouter } from 'next/router';
 
 export default function PopulationCalculation() {
+  const router = useRouter();
+
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
@@ -135,28 +137,34 @@ export default function PopulationCalculation() {
                     &nbsp;Show Table
                   </Button>
                 </Tooltip>
-                <Link
-                  href={{ pathname: `/${measureBundle.content.id}/coverage`, query: { clauseCoverageHTML } }}
-                  as={`/${measureBundle.content.id}/coverage`}
-                  key={'coverage'}
-                  passHref
+                <Tooltip
+                  label="Disabled until calculation results are available"
+                  openDelay={1000}
+                  disabled={enableClauseCoverageButton}
                 >
-                  <Tooltip
-                    label="Disabled until calculation results are available"
-                    openDelay={1000}
-                    disabled={enableClauseCoverageButton ? true : false}
+                  <Button
+                    data-testid="show-coverage-button"
+                    aria-label="Show Clause Coverage"
+                    styles={{ root: { marginTop: 20 } }}
+                    disabled={!enableClauseCoverageButton}
+                    variant="outline"
+                    onClick={() => {
+                      if (measureBundle.content) {
+                        router.push(
+                          {
+                            pathname: `/${measureBundle.content.id}/coverage`,
+                            query: {
+                              clauseCoverageHTML
+                            }
+                          },
+                          `/${measureBundle.content.id}/coverage`
+                        );
+                      }
+                    }}
                   >
-                    <Button
-                      data-testid="show-coverage-button"
-                      aria-label="Show Clause Coverage"
-                      styles={{ root: { marginTop: 20 } }}
-                      disabled={!enableClauseCoverageButton}
-                      variant="outline"
-                    >
-                      &nbsp;Show Clause Coverage
-                    </Button>
-                  </Tooltip>
-                </Link>
+                    &nbsp;Show Clause Coverage
+                  </Button>
+                </Tooltip>
               </Group>
               {detailedResults.length > 0 && (
                 <>
@@ -165,7 +173,9 @@ export default function PopulationCalculation() {
                     onClose={() => setOpened(false)}
                     position="bottom"
                     padding="md"
-                    overlayOpacity={0.3}
+                    overlayProps={{
+                      opacity: 0.3
+                    }}
                     lockScroll={false}
                     size="lg"
                   >

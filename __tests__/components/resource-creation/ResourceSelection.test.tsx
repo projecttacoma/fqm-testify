@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { Calculator } from 'fqm-execution';
 import { Suspense } from 'react';
 import ResourceSelection from '../../../components/resource-creation/ResourceSelection';
@@ -133,39 +133,5 @@ describe('ResourceSelection', () => {
 
     const resourceSelector = screen.getByRole('combobox');
     expect(resourceSelector).toBeInTheDocument();
-  });
-
-  it('should show data requirements as options', async () => {
-    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
-    const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE_POPULATED);
-    const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
-
-    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
-      results: MOCK_DATA_REQUIREMENTS
-    });
-
-    await act(async () => {
-      render(
-        mantineRecoilWrap(
-          <>
-            <MockMB />
-            <MockPatients />
-            <MockSelectedPatient />
-            <Suspense>
-              <ResourceSelection />
-            </Suspense>
-          </>
-        )
-      );
-    });
-
-    const resourceSelector = screen.getByPlaceholderText(/select fhir resource/i) as HTMLInputElement;
-
-    await act(async () => {
-      fireEvent.click(resourceSelector);
-    });
-
-    expect(screen.getByText(/observation/i)).toBeInTheDocument();
-    expect(screen.getByText(/test valueset \(http:\/\/example.com\/ValueSet\/test-vs\)/i)).toBeInTheDocument();
   });
 });

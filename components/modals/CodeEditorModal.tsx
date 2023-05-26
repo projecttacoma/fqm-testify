@@ -32,7 +32,6 @@ export default function CodeEditorModal({
       withCloseButton={false}
       opened={open}
       onClose={onClose}
-      overflow="outside"
       styles={{
         body: {
           height: '800px'

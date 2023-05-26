@@ -1,8 +1,9 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import { RouterContext } from 'next/dist/shared/lib/router-context';
 import TestCaseEditor from '../../components/TestCaseEditor';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
+import { createMockRouter, getMockRecoilState, mantineRecoilWrap } from '../helpers/testHelpers';
 
 describe('TestCaseEditor', () => {
   it('should render placeholder text with no selected patient', () => {
@@ -12,7 +13,9 @@ describe('TestCaseEditor', () => {
       mantineRecoilWrap(
         <>
           <MockSelectedPatient />
-          <TestCaseEditor />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <TestCaseEditor />
+          </RouterContext.Provider>
         </>
       )
     );

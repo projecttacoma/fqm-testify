@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measurementPeriodEndState, measurementPeriodStartState } from '../../state/atoms/measurementPeriod';
 import {
   identifyMissingValueSets,
   MeasureUploadProps,
@@ -45,7 +45,8 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
 
   const [{ measureRepositoryUrl, isFile, selectedMeasureId, displayMap }, setMeasureBundle] =
     useRecoilState(measureBundleState);
-  const setMeasurementPeriod = useSetRecoilState(measurementPeriodState);
+  const setPeriodStart = useSetRecoilState(measurementPeriodStartState);
+  const setPeriodEnd = useSetRecoilState(measurementPeriodEndState);
 
   const idSelectData = useRecoilValue(displayMapToSelectDataState);
 
@@ -200,9 +201,10 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
       const effectivePeriod = (measures[0].resource as fhir4.Measure).effectivePeriod;
 
       // Set measurement period to default period
-      const measurementPeriod = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
+      const { start, end } = populateMeasurementPeriod(effectivePeriod?.start, effectivePeriod?.end);
       setMeasureBundle(mb => ({ ...mb, content: responseBody, isFile: false }));
-      setMeasurementPeriod(measurementPeriod);
+      setPeriodStart(start);
+      setPeriodEnd(end);
       setIsLoadingPackage(PACKAGE_STATES.SUCCESS);
       cleanNotifications();
       showNotification({

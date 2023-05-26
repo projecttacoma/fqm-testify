@@ -44,6 +44,7 @@ export default function ResourceSelection() {
   return dataRequirements?.length && Object.keys(currentPatients).length > 0 ? (
     <div>
       <Select
+        dropdownComponent="div"
         searchable={enableSearch}
         maxDropdownHeight={500}
         placeholder="Select FHIR Resource (from Data Requirements)"

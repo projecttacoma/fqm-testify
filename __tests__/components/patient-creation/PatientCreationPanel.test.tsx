@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { mantineRecoilWrap, getMockRecoilState } from '../../helpers/testHelpers';
+import { RouterContext } from 'next/dist/shared/lib/router-context';
+import { mantineRecoilWrap, getMockRecoilState, createMockRouter } from '../../helpers/testHelpers';
 import PatientCreationPanel from '../../../components/patient-creation/PatientCreationPanel';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
@@ -33,7 +34,9 @@ describe('PatientCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -49,7 +52,9 @@ describe('PatientCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -75,7 +80,9 @@ describe('PatientCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -100,7 +107,9 @@ describe('PatientCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -128,7 +137,9 @@ describe('PatientCreationPanel', () => {
         <>
           <MockPatients />
           <MockSelectedPatient />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -163,7 +174,9 @@ describe('PatientCreationPanel', () => {
         <>
           <MockPatients />
           <MockSelectedPatient />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );
@@ -205,7 +218,9 @@ describe('PatientCreationPanel', () => {
       mantineRecoilWrap(
         <>
           <MockPatients />
-          <PatientCreationPanel />
+          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+            <PatientCreationPanel />
+          </RouterContext.Provider>
         </>
       )
     );

@@ -90,15 +90,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
   };
 
   return (
-    <Modal
-      centered
-      size="xl"
-      withCloseButton={true}
-      opened={open}
-      onClose={closeAndReset}
-      overflow="outside"
-      title="Import Test Case(s)"
-    >
+    <Modal centered size="xl" withCloseButton={true} opened={open} onClose={closeAndReset} title="Import Test Case(s)">
       <Grid>
         <Grid.Col span={12}>
           <Dropzone

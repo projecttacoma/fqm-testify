@@ -6,7 +6,6 @@ import { useRecoilValue } from 'recoil';
 import MeasureFileUpload from '../components/measure-upload/MeasureFileUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
 import { measureBundleState } from '../state/atoms/measureBundle';
-import { measurementPeriodState } from '../state/atoms/measurementPeriod';
 import MeasureFileUploadHeader from '../components/utils/MeasureFileUploadHeader';
 import MeasureRepositoryUploadHeader from '../components/utils/MeasureRespositoryUploadHeader';
 import DateSelectorsHeader from '../components/utils/DateSelectorsHeader';
@@ -16,10 +15,12 @@ import { MeasureUploadError } from '../util/measureUploadUtils';
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);
-  const measurementPeriod = useRecoilValue(measurementPeriodState);
 
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [errorLog, setErrorLog] = useState<MeasureUploadError[]>([]);
+  const [datesValid, setDatesValid] = useState(false);
+
+  const isNextDisabled = !(measureBundle.content && datesValid);
 
   const logError = useCallback(
     (error: MeasureUploadError) => {
@@ -40,7 +41,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Grid justify="center">
-        <Grid.Col span={5}>
+        <Grid.Col xs={12} sm={7} md={6} lg={5}>
           <Stack justify="space-evenly" spacing="xl">
             <MeasureFileUploadHeader />
             <MeasureFileUpload logError={logError} />
@@ -48,18 +49,16 @@ const Home: NextPage = () => {
             <MeasureRepositoryUpload logError={logError} />
             <Space />
             <DateSelectorsHeader />
-            <DateSelectors />
+            <DateSelectors setDatesValid={setDatesValid} />
             <UploadErrorLog uploadSuccess={uploadSuccess} errorLog={errorLog} />
             <Group position="right">
-              <Link href="/generate-test-cases">
-                <Button
-                  sx={() => ({
-                    marginTop: 10
-                  })}
-                  disabled={!(measureBundle.content && measurementPeriod.start && measurementPeriod.end)}
-                >
-                  Next
-                </Button>
+              <Link
+                href="/generate-test-cases"
+                style={{
+                  pointerEvents: isNextDisabled ? 'none' : 'all'
+                }}
+              >
+                <Button disabled={isNextDisabled}>Next</Button>
               </Link>
             </Group>
           </Stack>

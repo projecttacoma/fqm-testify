@@ -1,5 +1,5 @@
 import { ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import { NotificationsProvider } from '@mantine/notifications';
+import { Notifications } from '@mantine/notifications';
 import { useEffect } from 'react';
 import { RecoilRoot, RecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { NextRouter } from 'next/router';
@@ -14,7 +14,8 @@ export function mantineRecoilWrap(children: JSX.Element) {
     >
       <RecoilRoot>
         <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'light' }}>
-          <NotificationsProvider position="top-center">{children}</NotificationsProvider>
+          <Notifications position="top-center" />
+          {children}
         </MantineProvider>
       </RecoilRoot>
     </ColorSchemeProvider>
@@ -60,6 +61,7 @@ export function createMockRouter(router: Partial<NextRouter>): NextRouter {
     push: jest.fn().mockImplementation(() => Promise.resolve(true)),
     reload: jest.fn(),
     replace: jest.fn(),
+    forward: jest.fn(),
     events: {
       on: jest.fn(),
       off: jest.fn(),
