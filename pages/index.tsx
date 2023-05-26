@@ -20,6 +20,8 @@ const Home: NextPage = () => {
   const [errorLog, setErrorLog] = useState<MeasureUploadError[]>([]);
   const [datesValid, setDatesValid] = useState(false);
 
+  const isNextDisabled = !(measureBundle.content && datesValid);
+
   const logError = useCallback(
     (error: MeasureUploadError) => {
       setErrorLog([error, ...errorLog]);
@@ -50,8 +52,13 @@ const Home: NextPage = () => {
             <DateSelectors setDatesValid={setDatesValid} />
             <UploadErrorLog uploadSuccess={uploadSuccess} errorLog={errorLog} />
             <Group position="right">
-              <Link href="/generate-test-cases">
-                <Button disabled={!(measureBundle.content && !datesValid)}>Next</Button>
+              <Link
+                href="/generate-test-cases"
+                style={{
+                  pointerEvents: isNextDisabled ? 'none' : 'all'
+                }}
+              >
+                <Button disabled={isNextDisabled}>Next</Button>
               </Link>
             </Group>
           </Stack>
