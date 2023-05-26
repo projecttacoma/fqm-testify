@@ -35,7 +35,9 @@ export default function ResourcePanel() {
       if (!newResource.id) {
         newResource.id = uuidv4();
       }
-      const resourceIndex = currentPatients[selectedPatient].resources.findIndex(r => r.id === newResource.id);
+      const resourceIndex = currentPatients[selectedPatient].resources.findIndex(
+        r => r.resource?.id === newResource.id
+      );
       if (resourceIndex >= 0) {
         showNotification({
           id: 'failed-upload',
@@ -46,7 +48,8 @@ export default function ResourcePanel() {
         });
       } else {
         const nextResourceState = produce(currentPatients, draftState => {
-          draftState[selectedPatient].resources.push(newResource);
+          const entry: fhir4.BundleEntry = { resource: newResource, fullUrl: `urn:uuid:${newResource.id}` };
+          draftState[selectedPatient].resources.push(entry);
         });
         setCurrentPatients(nextResourceState);
         setIsCalculationLoading(true);
