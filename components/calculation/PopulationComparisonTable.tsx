@@ -1,10 +1,10 @@
-import { ActionIcon, Autocomplete, createStyles, Group, Popover, ScrollArea, Table, Text } from '@mantine/core';
+import { ActionIcon, createStyles, Group, Popover, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData, getPopShorthand } from '../../util/MeasurePopulations';
-import { InfoCircle, Search } from 'tabler-icons-react';
+import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
 import React from 'react';
@@ -44,7 +44,6 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const [opened, setOpened] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
 
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
@@ -313,25 +312,6 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
             })}
           </tbody>
         </Table>
-        <Autocomplete
-          data={Object.keys(defIds).sort((a, b) => (a < b ? -1 : 1))}
-          value={searchValue}
-          onChange={setSearchValue}
-          dropdownComponent={ScrollArea}
-          maxDropdownHeight={200}
-          placeholder="Expression Name"
-          icon={<Search />}
-          nothingFound={
-            <Text align="left" style={{ paddingLeft: 10 }}>
-              No Matches
-            </Text>
-          }
-          limit={100}
-          label="Search CQL Expression Definition"
-          onItemSubmit={item => {
-            document.getElementById(defIds[item.value])?.scrollIntoView({ behavior: 'smooth' });
-          }}
-        />
       </>
     );
   } else {
