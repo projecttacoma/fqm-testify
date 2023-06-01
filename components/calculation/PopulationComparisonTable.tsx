@@ -24,11 +24,6 @@ const useStyles = createStyles({
   }
 });
 
-export interface PopulationComparisonTableProps {
-  patientId: string;
-  defIds: Record<string, string>;
-}
-
 export interface DesiredPopulations {
   [key: string]: number;
 }
@@ -38,12 +33,11 @@ export interface ResultValues {
   actual: Record<string, number | undefined>;
 }
 
-export default function PopulationComparisonTable({ patientId, defIds }: PopulationComparisonTableProps) {
+export default function PopulationComparisonTable({ patientId }: { patientId: string }) {
   const { classes } = useStyles();
   const measureBundle = useRecoilValue(measureBundleState);
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const currentPatients = useRecoilValue(patientTestCaseState);
-  const [opened, setOpened] = useState(false);
 
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
@@ -263,40 +257,7 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
     return (
       <>
         <div />
-        <Group>
-          <div style={{ paddingRight: 5 }}>
-            <Text size="xl" weight={700}>
-              Population Comparison Table
-            </Text>
-          </div>
-          <div>
-            <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
-              <Popover.Target>
-                <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
-                  <InfoCircle size={20} />
-                </ActionIcon>
-              </Popover.Target>
-              <Popover.Dropdown>
-                The Population Comparison Table shows patient and episode population results for the patient selected.
-                For patient-based measures, patient results show 0 or 1 to indicate belonging to a population. Actual
-                and desired populations are compared to highlight cells green if they match and red if they don&apos;t
-                match.
-                <br />
-                <br />
-                For episode-based measures, the table shows patient level totals that indicate how many episodes are in
-                each population. Episode population results show a 0 or 1, and episode observation results show the
-                observed value for that episode.
-                <br />
-                <br />
-                See the{' '}
-                <a href="https://github.com/projecttacoma/fqm-testify#reading-the-population-comparison-table">
-                  fqm-testify README
-                </a>{' '}
-                for more information.
-              </Popover.Dropdown>
-            </Popover>
-          </div>
-        </Group>
+
         <Table horizontalSpacing="xl">
           <thead>
             <tr>
@@ -317,4 +278,49 @@ export default function PopulationComparisonTable({ patientId, defIds }: Populat
   } else {
     return <Text>Measure highlighting not available</Text>;
   }
+}
+
+export function PopulationComparisonTableControl() {
+  const [opened, setOpened] = useState(false);
+  return (
+    <Group>
+      <div style={{ paddingRight: 5 }}>
+        <Text size="xl" weight={700}>
+          Population Comparison Table
+        </Text>
+      </div>
+      <div>
+        <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
+          <Popover.Target>
+            <ActionIcon
+              aria-label={'More Information'}
+              onClick={e => {
+                e.stopPropagation();
+                setOpened(o => !o);
+              }}
+            >
+              <InfoCircle size={20} />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            The Population Comparison Table shows patient and episode population results for the patient selected. For
+            patient-based measures, patient results show 0 or 1 to indicate belonging to a population. Actual and
+            desired populations are compared to highlight cells green if they match and red if they don&apos;t match.
+            <br />
+            <br />
+            For episode-based measures, the table shows patient level totals that indicate how many episodes are in each
+            population. Episode population results show a 0 or 1, and episode observation results show the observed
+            value for that episode.
+            <br />
+            <br />
+            See the{' '}
+            <a href="https://github.com/projecttacoma/fqm-testify#reading-the-population-comparison-table">
+              fqm-testify README
+            </a>{' '}
+            for more information.
+          </Popover.Dropdown>
+        </Popover>
+      </div>
+    </Group>
+  );
 }

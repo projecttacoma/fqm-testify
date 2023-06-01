@@ -1,7 +1,7 @@
-import { Autocomplete, Button, Collapse, ScrollArea, Text, createStyles } from '@mantine/core';
+import { Accordion, Autocomplete, Button, Collapse, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
-import PopulationComparisonTable from './PopulationComparisonTable';
+import PopulationComparisonTable, { PopulationComparisonTableControl } from './PopulationComparisonTable';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { useMemo, useState } from 'react';
 import { Text as DomText } from 'domhandler';
@@ -52,16 +52,20 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
 
   // handle search
   const [searchValue, setSearchValue] = useState('');
-  
-  // handle collapse
-  const [tableOpened, tableHandlers] = useDisclosure(true);
 
   return (
     <>
-      <Button onClick={tableHandlers.toggle}>Toggle table</Button>
-      <Collapse in={tableOpened}>
-        <PopulationComparisonTable patientId={patientId} defIds={defIds} />
-      </Collapse>
+      <Accordion chevronPosition="left" defaultValue="table">
+        <Accordion.Item value="table">
+          <Accordion.Control>
+            <PopulationComparisonTableControl />
+          </Accordion.Control>
+          <Accordion.Panel>
+            <PopulationComparisonTable patientId={patientId} />
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+      <Space h="md" />
       <Autocomplete
         data={Object.keys(defIds).sort((a, b) => (a < b ? -1 : 1))}
         value={searchValue}
