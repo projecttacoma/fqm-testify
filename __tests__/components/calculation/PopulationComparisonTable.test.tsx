@@ -158,7 +158,7 @@ describe('PopulationComparisonTable', () => {
             <MockSelectedPatient />
             <MockDetailedResultLookup />
             <Suspense>
-              <PopulationComparisonTable patientId={'example-pt'} defIds={{}} />
+              <PopulationComparisonTable patientId={'example-pt'} />
             </Suspense>
           </>
         )

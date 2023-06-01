@@ -2,7 +2,7 @@ import { ActionIcon, createStyles, Group, Popover, Table, Text } from '@mantine/
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { useMemo, useState } from 'react';
+import { MouseEvent, useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData, getPopShorthand } from '../../util/MeasurePopulations';
 import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
@@ -282,6 +282,12 @@ export default function PopulationComparisonTable({ patientId }: { patientId: st
 
 export function PopulationComparisonTableControl() {
   const [opened, setOpened] = useState(false);
+
+  const popoverClick = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setOpened(o => !o);
+  };
+
   return (
     <Group>
       <div style={{ paddingRight: 5 }}>
@@ -292,13 +298,7 @@ export function PopulationComparisonTableControl() {
       <div>
         <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
           <Popover.Target>
-            <ActionIcon
-              aria-label={'More Information'}
-              onClick={e => {
-                e.stopPropagation();
-                setOpened(o => !o);
-              }}
-            >
+            <ActionIcon aria-label={'More Information'} onClick={popoverClick}>
               <InfoCircle size={20} />
             </ActionIcon>
           </Popover.Target>
