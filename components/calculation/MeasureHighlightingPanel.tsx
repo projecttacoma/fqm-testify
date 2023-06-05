@@ -1,10 +1,12 @@
-import { createStyles } from '@mantine/core';
+import { Accordion, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
 import PopulationComparisonTable from './PopulationComparisonTable';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { useMemo } from 'react';
-import { Text } from 'domhandler';
+import { useMemo, useState } from 'react';
+import { Text as DomText } from 'domhandler';
+import { Search } from 'tabler-icons-react';
+import PopulationComparisonTableControl from './PopulationComparisonTableControl';
 
 /**
  * This regex matches any string that includes the substring "define" or "define function"
@@ -36,7 +38,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
     const parsedHTML = parse(detailedResultLookup[patientId]?.detailedResults?.[0].html || '', {
       replace: elem => {
         if (elem.type === 'text') {
-          const data = (elem as Text).data;
+          const data = (elem as DomText).data;
           if (data.match(expressionDefRegex)) {
             const splitData = data.split('"');
             defIds[splitData[1]] = splitData[1].toLowerCase().replace(' ', '-');
@@ -48,9 +50,41 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
     return { parsedHTML, defIds };
   }, [detailedResultLookup, patientId]);
 
+  // handle search
+  const [searchValue, setSearchValue] = useState('');
+
   return (
     <>
-      <PopulationComparisonTable patientId={patientId} defIds={defIds} />
+      <Accordion chevronPosition="left" defaultValue="table">
+        <Accordion.Item value="table">
+          <Accordion.Control>
+            <PopulationComparisonTableControl />
+          </Accordion.Control>
+          <Accordion.Panel>
+            <PopulationComparisonTable patientId={patientId} />
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+      <Space h="md" />
+      <Autocomplete
+        data={Object.keys(defIds).sort((a, b) => (a < b ? -1 : 1))}
+        value={searchValue}
+        onChange={setSearchValue}
+        dropdownComponent={ScrollArea}
+        maxDropdownHeight={200}
+        placeholder="Expression Name"
+        icon={<Search />}
+        nothingFound={
+          <Text align="left" style={{ paddingLeft: 10 }}>
+            No Matches
+          </Text>
+        }
+        limit={100}
+        label="Search CQL Expression Definition"
+        onItemSubmit={item => {
+          document.getElementById(defIds[item.value])?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
       <div className={classes.highlightedMarkup}>{parsedHTML}</div>
     </>
   );
