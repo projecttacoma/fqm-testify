@@ -1,11 +1,12 @@
 import { Accordion, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
-import PopulationComparisonTable, { PopulationComparisonTableControl } from './PopulationComparisonTable';
+import PopulationComparisonTable from './PopulationComparisonTable';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { useMemo, useState } from 'react';
 import { Text as DomText } from 'domhandler';
 import { Search } from 'tabler-icons-react';
+import PopulationComparisonTableControl from './PopulationComparisonTableControl';
 
 /**
  * This regex matches any string that includes the substring "define" or "define function"

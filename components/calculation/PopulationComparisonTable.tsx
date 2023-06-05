@@ -1,10 +1,9 @@
-import { ActionIcon, createStyles, Group, Popover, Table, Text } from '@mantine/core';
+import { createStyles, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { MouseEvent, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData, getPopShorthand } from '../../util/MeasurePopulations';
-import { InfoCircle } from 'tabler-icons-react';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
 import React from 'react';
@@ -278,49 +277,4 @@ export default function PopulationComparisonTable({ patientId }: { patientId: st
   } else {
     return <Text>Measure highlighting not available</Text>;
   }
-}
-
-export function PopulationComparisonTableControl() {
-  const [opened, setOpened] = useState(false);
-
-  const popoverClick = (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setOpened(o => !o);
-  };
-
-  return (
-    <Group>
-      <div style={{ paddingRight: 5 }}>
-        <Text size="xl" weight={700}>
-          Population Comparison Table
-        </Text>
-      </div>
-      <div>
-        <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
-          <Popover.Target>
-            <ActionIcon aria-label={'More Information'} onClick={popoverClick}>
-              <InfoCircle size={20} />
-            </ActionIcon>
-          </Popover.Target>
-          <Popover.Dropdown>
-            The Population Comparison Table shows patient and episode population results for the patient selected. For
-            patient-based measures, patient results show 0 or 1 to indicate belonging to a population. Actual and
-            desired populations are compared to highlight cells green if they match and red if they don&apos;t match.
-            <br />
-            <br />
-            For episode-based measures, the table shows patient level totals that indicate how many episodes are in each
-            population. Episode population results show a 0 or 1, and episode observation results show the observed
-            value for that episode.
-            <br />
-            <br />
-            See the{' '}
-            <a href="https://github.com/projecttacoma/fqm-testify#reading-the-population-comparison-table">
-              fqm-testify README
-            </a>{' '}
-            for more information.
-          </Popover.Dropdown>
-        </Popover>
-      </div>
-    </Group>
-  );
 }
