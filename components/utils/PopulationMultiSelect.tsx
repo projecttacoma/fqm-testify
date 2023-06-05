@@ -51,7 +51,7 @@ export default function PopulationMultiSelect() {
         newDesiredPopulations.push(Enums.PopulationType.DENOM);
       }
       // add numerator if numerator exclusion is selected
-      if ([Enums.PopulationType.NUMEX].some(p => value.includes(p)) && !value.includes(Enums.PopulationType.NUMER)) {
+      if (value.includes(Enums.PopulationType.NUMEX) && !value.includes(Enums.PopulationType.NUMER)) {
         newDesiredPopulations.push(Enums.PopulationType.NUMER);
       }
 
@@ -76,7 +76,7 @@ export default function PopulationMultiSelect() {
       }
       // remove numerator exclusion if numerator is deselected
       if (
-        [Enums.PopulationType.NUMEX].some(p => currentPatients[selectedPatient].desiredPopulations?.includes(p)) &&
+        currentPatients[selectedPatient].desiredPopulations?.includes(Enums.PopulationType.NUMEX) &&
         !value.includes(Enums.PopulationType.NUMER)
       ) {
         newDesiredPopulations = newDesiredPopulations.filter(
