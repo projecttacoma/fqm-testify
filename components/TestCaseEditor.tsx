@@ -1,4 +1,4 @@
-import { Center, createStyles, Grid, Loader, Stack, Text } from '@mantine/core';
+import { Accordion, Box, Center, createStyles, Grid, Loader, ScrollArea, Space, Text } from '@mantine/core';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
@@ -9,6 +9,8 @@ import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { CircleCheck } from 'tabler-icons-react';
 import { getPatientNameString } from '../util/fhir/patient';
+import PopulationComparisonTable from './calculation/PopulationComparisonTable';
+import PopulationComparisonTableControl from './calculation/PopulationComparisonTableControl';
 
 const useStyles = createStyles({
   panel: {
@@ -19,7 +21,7 @@ const useStyles = createStyles({
     maxHeight: '100%'
   },
   highlighting: {
-    maxHeight: 'calc(100% - 50px)',
+    maxHeight: 'calc(100% - 280px)',
     overflow: 'scroll'
   }
 });
@@ -80,7 +82,7 @@ export default function TestCaseEditor() {
           <ResourcePanel />
         </Grid.Col>
         <Grid.Col span={6} className={classes.header} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
-          <Stack style={{ height: 50 }}>
+          <Box h={50}>
             {selectedPatient ? (
               <Grid justify="space-between">
                 <Grid.Col span={4}>
@@ -91,10 +93,27 @@ export default function TestCaseEditor() {
             ) : (
               renderPanelPlaceholderText()
             )}
-          </Stack>
-          <Stack className={classes.highlighting}>
+          </Box>
+          <Space />
+          <ScrollArea h={250}>
+            {selectedPatient ? (
+              <Accordion chevronPosition="left" defaultValue="table">
+                <Accordion.Item value="table">
+                  <Accordion.Control>
+                    <PopulationComparisonTableControl />
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <PopulationComparisonTable patientId={selectedPatient} />
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
+            ) : (
+              ''
+            )}
+          </ScrollArea>
+          <ScrollArea className={classes.highlighting}>
             {selectedPatient ? <MeasureHighlightingPanel patientId={selectedPatient} /> : ''}
-          </Stack>
+          </ScrollArea>
         </Grid.Col>
       </Grid>
     </>

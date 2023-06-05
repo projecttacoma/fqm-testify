@@ -1,12 +1,10 @@
-import { Accordion, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
+import { Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import parse from 'html-react-parser';
-import PopulationComparisonTable from './PopulationComparisonTable';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { useMemo, useState } from 'react';
 import { Text as DomText } from 'domhandler';
 import { Search } from 'tabler-icons-react';
-import PopulationComparisonTableControl from './PopulationComparisonTableControl';
 
 /**
  * This regex matches any string that includes the substring "define" or "define function"
@@ -32,6 +30,7 @@ export interface MeasureHighlightingPanelProps {
 
 export default function MeasureHighlightingPanel({ patientId }: MeasureHighlightingPanelProps) {
   const { classes } = useStyles();
+  const [searchValue, setSearchValue] = useState('');
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const { parsedHTML, defIds } = useMemo(() => {
     const defIds: Record<string, string> = {};
@@ -50,21 +49,8 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
     return { parsedHTML, defIds };
   }, [detailedResultLookup, patientId]);
 
-  // handle search
-  const [searchValue, setSearchValue] = useState('');
-
   return (
     <>
-      <Accordion chevronPosition="left" defaultValue="table">
-        <Accordion.Item value="table">
-          <Accordion.Control>
-            <PopulationComparisonTableControl />
-          </Accordion.Control>
-          <Accordion.Panel>
-            <PopulationComparisonTable patientId={patientId} />
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
       <Space h="md" />
       <Autocomplete
         data={Object.keys(defIds).sort((a, b) => (a < b ? -1 : 1))}
