@@ -1,5 +1,5 @@
 import { Accordion, Box, Center, createStyles, Grid, Loader, ScrollArea, Space, Text } from '@mantine/core';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
@@ -17,11 +17,13 @@ const useStyles = createStyles({
     maxHeight: '100%',
     overflow: 'scroll'
   },
-  header: {
-    maxHeight: '100%'
+  calculation: {
+    maxHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column'
   },
   highlighting: {
-    maxHeight: 'calc(100% - 280px)',
+    flex: 1,
     overflow: 'scroll'
   }
 });
@@ -55,6 +57,7 @@ export default function TestCaseEditor() {
   const selectedPatient = useRecoilValue(selectedPatientState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const { classes } = useStyles();
+  const [accValue, setAccValue] = useState<string | null>('table');
 
   const renderPanelPlaceholderText = () => {
     return (
@@ -81,7 +84,7 @@ export default function TestCaseEditor() {
         >
           <ResourcePanel />
         </Grid.Col>
-        <Grid.Col span={6} className={classes.header} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
+        <Grid.Col span={6} className={classes.calculation} sx={theme => ({ backgroundColor: theme.colors.gray[1] })}>
           <Box h={50}>
             {selectedPatient ? (
               <Grid justify="space-between">
@@ -95,9 +98,9 @@ export default function TestCaseEditor() {
             )}
           </Box>
           <Space />
-          <ScrollArea h={250}>
+          <ScrollArea style={accValue ? { flex: 1 } : {}}>
             {selectedPatient ? (
-              <Accordion chevronPosition="left" defaultValue="table">
+              <Accordion chevronPosition="left" defaultValue="table" value={accValue} onChange={setAccValue}>
                 <Accordion.Item value="table">
                   <Accordion.Control>
                     <PopulationComparisonTableControl />
