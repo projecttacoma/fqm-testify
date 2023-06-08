@@ -28,7 +28,7 @@ export default function PopulationMultiSelect() {
 
   /**
    * Sets desired populations state (for the selected patient) based on the measure
-   * populations selected from MultiSelect component and their relevant supset populations.
+   * populations selected from MultiSelect component and their relevant subset populations.
    * @param value array of selected options from MultiSelect component
    */
   const updateDesiredPopulations = (value: string[]) => {
@@ -38,14 +38,21 @@ export default function PopulationMultiSelect() {
       if (value.length > 0 && !value.includes(Enums.PopulationType.IPP)) {
         newDesiredPopulations.push(Enums.PopulationType.IPP);
       }
-      // add denominator if numerator, numerator exclusion, or denominator exception are selected
+      // add denominator if numerator, numerator exclusion, denominator exclusion, or denominator exception are selected
       if (
-        [Enums.PopulationType.NUMER, Enums.PopulationType.NUMEX, Enums.PopulationType.DENEXCEP].some(p =>
-          value.includes(p)
-        ) &&
+        [
+          Enums.PopulationType.NUMER,
+          Enums.PopulationType.NUMEX,
+          Enums.PopulationType.DENEX,
+          Enums.PopulationType.DENEXCEP
+        ].some(p => value.includes(p)) &&
         !value.includes(Enums.PopulationType.DENOM)
       ) {
         newDesiredPopulations.push(Enums.PopulationType.DENOM);
+      }
+      // add numerator if numerator exclusion is selected
+      if (value.includes(Enums.PopulationType.NUMEX) && !value.includes(Enums.PopulationType.NUMER)) {
+        newDesiredPopulations.push(Enums.PopulationType.NUMER);
       }
 
       // remove all selected populations if initial population is deselected
@@ -55,15 +62,29 @@ export default function PopulationMultiSelect() {
       ) {
         newDesiredPopulations = [];
       }
-      // remove numerator, numerator exclusion, and/or denominator exception if denominator is deselected
+      // remove numerator, numerator exclusion, denominator exclusion, and/or denominator exception if denominator is deselected
       if (
-        [Enums.PopulationType.NUMER, Enums.PopulationType.NUMEX, Enums.PopulationType.DENEXCEP].some(p =>
-          currentPatients[selectedPatient].desiredPopulations?.includes(p)
-        ) &&
+        [
+          Enums.PopulationType.NUMER,
+          Enums.PopulationType.NUMEX,
+          Enums.PopulationType.DENEX,
+          Enums.PopulationType.DENEXCEP
+        ].some(p => currentPatients[selectedPatient].desiredPopulations?.includes(p)) &&
         !value.includes(Enums.PopulationType.DENOM)
       ) {
+        newDesiredPopulations = newDesiredPopulations.filter(p => p === Enums.PopulationType.IPP);
+      }
+      // remove numerator exclusion if numerator is deselected
+      if (
+        currentPatients[selectedPatient].desiredPopulations?.includes(Enums.PopulationType.NUMEX) &&
+        !value.includes(Enums.PopulationType.NUMER)
+      ) {
         newDesiredPopulations = newDesiredPopulations.filter(
-          p => p === Enums.PopulationType.IPP || p === Enums.PopulationType.DENEX
+          p =>
+            p === Enums.PopulationType.IPP ||
+            p === Enums.PopulationType.DENOM ||
+            p === Enums.PopulationType.DENEX ||
+            p === Enums.PopulationType.DENEXCEP
         );
       }
 
@@ -90,35 +111,23 @@ export default function PopulationMultiSelect() {
    * @returns array of filtered populations that can be selected
    */
   const updateMeasurePopulations = (populations: MultiSelectData[]): MultiSelectData[] => {
-    // disable denominator exclusion if denominator selected
-    if (value.includes(Enums.PopulationType.DENOM)) {
-      const denex = populations.find(e => e.value === Enums.PopulationType.DENEX);
-      if (denex) denex.disabled = true;
-    }
-
-    // disable all other populations (aside from IPP) if denominator exclusion selected
+    // disable all other populations (aside from IPP and denominator) if denominator exclusion selected
     if (value.includes(Enums.PopulationType.DENEX)) {
       const disabledPops = populations.filter(
-        e => e.value !== Enums.PopulationType.IPP && e.value !== Enums.PopulationType.DENEX
+        e =>
+          e.value !== Enums.PopulationType.IPP &&
+          e.value !== Enums.PopulationType.DENEX &&
+          e.value !== Enums.PopulationType.DENOM
       );
       disabledPops.forEach(pop => (pop.disabled = true));
     }
 
-    // disable numerator exclusion, denominator exclusion, denominator exception if numerator selected
+    // disable denominator exclusion and denominator exception if numerator selected
     if (value.includes(Enums.PopulationType.NUMER)) {
       const disabledPops = populations.filter(
-        p =>
-          p.value === Enums.PopulationType.NUMEX ||
-          p.value === Enums.PopulationType.DENEX ||
-          p.value === Enums.PopulationType.DENEXCEP
+        p => p.value === Enums.PopulationType.DENEX || p.value === Enums.PopulationType.DENEXCEP
       );
       disabledPops.forEach(pop => (pop.disabled = true));
-    }
-
-    // disable numerator if numerator exclusion selected
-    if (value.includes(Enums.PopulationType.NUMEX)) {
-      const numer = populations.find(e => e.value === Enums.PopulationType.NUMER);
-      if (numer) numer.disabled = true;
     }
 
     // disable denominator exclusion, numerator, and numerator exclusion if denominator exception selected
