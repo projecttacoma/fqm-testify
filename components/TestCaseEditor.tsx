@@ -1,4 +1,16 @@
-import { Accordion, Center, createStyles, Grid, Group, Loader, ScrollArea, Space, Stack, Text } from '@mantine/core';
+import {
+  Accordion,
+  Box,
+  Center,
+  createStyles,
+  Grid,
+  Group,
+  Loader,
+  ScrollArea,
+  Space,
+  Stack,
+  Text
+} from '@mantine/core';
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
@@ -8,7 +20,7 @@ import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { CircleCheck } from 'tabler-icons-react';
 import PopulationComparisonTable from './calculation/PopulationComparisonTable';
-import PopulationComparisonTableControl from './calculation/PopulationComparisonTableControl';
+import PopulationComparisonTablePopover from './calculation/PopulationComparisonTableControl';
 
 const useStyles = createStyles(theme => ({
   resourcePanelRoot: {
@@ -35,6 +47,10 @@ const useStyles = createStyles(theme => ({
     maxHeight: 'calc(100% - 50px)',
     overflowY: 'scroll',
     flex: 1
+  },
+  accordionControlBox: {
+    display: 'flex',
+    alignItems: 'center'
   }
 }));
 
@@ -93,9 +109,14 @@ export default function TestCaseEditor() {
             {selectedPatient ? (
               <Accordion chevronPosition="left" defaultValue="table" value={accValue} onChange={setAccValue}>
                 <Accordion.Item value="table">
-                  <Accordion.Control>
-                    <PopulationComparisonTableControl />
-                  </Accordion.Control>
+                  <Box className={classes.accordionControlBox}>
+                    <Accordion.Control>
+                      <Text size="xl" weight={700}>
+                        Population Comparison Table
+                      </Text>
+                    </Accordion.Control>
+                    <PopulationComparisonTablePopover />
+                  </Box>
                   <Accordion.Panel>
                     <PopulationComparisonTable patientId={selectedPatient} />
                   </Accordion.Panel>
