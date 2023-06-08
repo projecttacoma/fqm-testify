@@ -23,10 +23,22 @@ export default function App(props: AppProps) {
         <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme }}>
           <Notifications position="top-center" />
           <AppShell
-            style={{ marginTop: '-8px', marginBottom: '-8px', marginLeft: '-8px', marginRight: '-8px' }}
+            styles={{
+              main: {
+                paddingBottom: '0px',
+                marginTop: '-8px'
+              }
+            }}
             header={<Header height={120}>{<AppHeader></AppHeader>}</Header>}
           >
-            <Component {...pageProps} />
+            <div
+              style={{
+                // screen height - header size - 8px margin to make main shell flush against header
+                height: 'calc(100vh - 120px - 8px)'
+              }}
+            >
+              <Component {...pageProps} />
+            </div>
           </AppShell>
         </MantineProvider>
       </ColorSchemeProvider>

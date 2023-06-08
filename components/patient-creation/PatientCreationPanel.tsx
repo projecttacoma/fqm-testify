@@ -399,7 +399,11 @@ function PatientCreationPanel() {
         onClose={() => setIsImportModalOpen(false)}
         onImportSubmit={handleSubmittedImport}
       />
-      <Group style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+      <Group py={24} position="center">
+        <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
+          <IconUserPlus />
+          &nbsp;Create
+        </Button>
         <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="outline">
           <IconFileUpload />
           &nbsp;Import
@@ -412,10 +416,6 @@ function PatientCreationPanel() {
         >
           <IconFileDownload />
           &nbsp;Download All
-        </Button>
-        <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
-          <IconUserPlus />
-          &nbsp;Create
         </Button>
       </Group>
       {Object.keys(currentPatients).length > 0 && (

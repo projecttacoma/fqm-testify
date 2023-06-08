@@ -1,4 +1,4 @@
-import { Button, Center, Divider, Grid, Group, Menu, Paper, Sx, Text, Tooltip } from '@mantine/core';
+import { Button, Center, Divider, Grid, Group, Menu, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Copy, Dots, Download, Edit, Trash } from 'tabler-icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir/patient';
@@ -29,20 +29,21 @@ export default function PatientInfoCard({
       p="sm"
       withBorder
       sx={theme => {
-        const style: Sx = {
+        const primaryShade =
+          typeof theme.primaryShade === 'number' ? theme.primaryShade : theme.primaryShade[theme.colorScheme];
+
+        return {
           ':hover': {
             cursor: 'pointer',
             backgroundColor: theme.colors.gray[0]
-          }
+          },
+          ...(selected && {
+            // https://github.com/mantinedev/mantine/discussions/4333#discussioncomment-6051153
+            '&[data-with-border]': {
+              borderColor: theme.colors[theme.primaryColor][primaryShade]
+            }
+          })
         };
-        if (selected) {
-          // Use the configured primary color that the app already uses
-          const shade =
-            typeof theme.primaryShade === 'number' ? theme.primaryShade : theme.primaryShade[theme.colorScheme];
-
-          style.borderColor = theme.colors[theme.primaryColor][shade];
-        }
-        return style;
       }}
     >
       <Grid align="center">

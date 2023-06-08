@@ -1,4 +1,4 @@
-import { Text, Popover, Anchor, ActionIcon, Group } from '@mantine/core';
+import { Text, Popover, Anchor, ActionIcon, Group, Stack } from '@mantine/core';
 import React, { useState } from 'react';
 import { InfoCircle } from 'tabler-icons-react';
 
@@ -6,13 +6,11 @@ export default function MeasureRepositoryUploadHeader() {
   const [opened, setOpened] = useState(false);
 
   return (
-    <Group>
-      <div style={{ paddingRight: 4, justifyContent: 'center', width: '100%' }}>
-        <Text size="xl" weight={700} style={{ textAlign: 'center' }}>
-          OR
-        </Text>
-      </div>
-      <Group style={{ paddingRight: 4 }}>
+    <Stack>
+      <Text size="xl" weight={700} align="center">
+        OR
+      </Text>
+      <Group pr={4}>
         <Text size="lg" weight={400}>
           Retrieve Measure from Measure Repository Service
         </Text>
@@ -22,7 +20,7 @@ export default function MeasureRepositoryUploadHeader() {
               <InfoCircle size={20} />
             </ActionIcon>
           </Popover.Target>
-          <Popover.Dropdown style={{ width: '300px' }}>
+          <Popover.Dropdown w={300}>
             <Text>
               Enter the base URL for a{' '}
               <Anchor href="https://build.fhir.org/ig/HL7/cqf-measures/measure-repository-service.html">
@@ -40,6 +38,6 @@ export default function MeasureRepositoryUploadHeader() {
           </Popover.Dropdown>
         </Popover>
       </Group>
-    </Group>
+    </Stack>
   );
 }

@@ -13,11 +13,9 @@ export default function PopulationComparisonTableControl() {
 
   return (
     <Group>
-      <div style={{ paddingRight: 5 }}>
-        <Text size="xl" weight={700}>
-          Population Comparison Table
-        </Text>
-      </div>
+      <Text size="xl" weight={700}>
+        Population Comparison Table
+      </Text>
       <div>
         <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
           <Popover.Target>

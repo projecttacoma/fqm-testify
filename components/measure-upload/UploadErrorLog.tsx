@@ -1,4 +1,4 @@
-import { Center, ScrollArea, Stack, Text } from '@mantine/core';
+import { Center, createStyles, ScrollArea, Stack, Text } from '@mantine/core';
 import React from 'react';
 import { MeasureUploadError } from '../../util/measureUploadUtils';
 import UploadErrorInfo from '../utils/UploadErrorInfo';
@@ -8,7 +8,19 @@ export interface UploadErrorLogProps {
   errorLog: MeasureUploadError[];
 }
 
+const useStyles = createStyles(theme => ({
+  errorContainer: {
+    border: `1px solid ${theme.colors.gray[5]}`,
+    padding: '12px 8px 8px 12px'
+  },
+  errorBox: {
+    height: '300px'
+  }
+}));
+
 export default function UploadErrorLog({ uploadSuccess, errorLog }: UploadErrorLogProps) {
+  const { classes } = useStyles();
+
   const renderErrorLog = () => {
     return errorLog.length > 0 ? (
       <Stack>
@@ -19,7 +31,7 @@ export default function UploadErrorLog({ uploadSuccess, errorLog }: UploadErrorL
         ))}
       </Stack>
     ) : (
-      <Center style={{ height: 400 }}>
+      <Center h={300}>
         <Text color="dimmed">No Errors!</Text>
       </Center>
     );
@@ -31,11 +43,8 @@ export default function UploadErrorLog({ uploadSuccess, errorLog }: UploadErrorL
         Errors
       </Text>
 
-      <ScrollArea
-        type="scroll"
-        sx={theme => ({ border: `1px solid ${theme.colors.gray[5]}`, padding: '12px 8px 8px 12px' })}
-      >
-        <div style={{ height: '400px' }}>{renderErrorLog()}</div>
+      <ScrollArea type="scroll" className={classes.errorContainer}>
+        <div className={classes.errorBox}>{renderErrorLog()}</div>
       </ScrollArea>
     </>
   );

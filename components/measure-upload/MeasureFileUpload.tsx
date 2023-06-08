@@ -1,8 +1,8 @@
 import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
-import { Grid, Center, Text, Stack, createStyles } from '@mantine/core';
+import { Center, Text, createStyles } from '@mantine/core';
 import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodEndState, measurementPeriodStartState } from '../../state/atoms/measurementPeriod';
 import {
@@ -19,9 +19,11 @@ const useStyles = createStyles({
 });
 
 export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
-  const setMeasureBundle = useSetRecoilState(measureBundleState);
   const setPeriodStart = useSetRecoilState(measurementPeriodStartState);
   const setPeriodEnd = useSetRecoilState(measurementPeriodEndState);
+  const [measureBundle, setMeasureBundle] = useRecoilState(measureBundleState);
+
+  const { classes } = useStyles();
 
   const extractMeasureBundle = (file: File) => {
     const reader = new FileReader();
@@ -84,41 +86,27 @@ export default function MeasureFileUpload({ logError }: MeasureUploadProps) {
         }
         accept={['application/json']}
         multiple={false}
-        style={{ minHeight: 200 }}
+        p={36}
       >
-        <DropzoneChildren />
-      </Dropzone>
-    </>
-  );
-}
-
-function DropzoneChildren() {
-  const measureBundle = useRecoilValue(measureBundleState);
-  const { classes } = useStyles();
-
-  return (
-    <Grid justify="center" align="center" style={{ minHeight: 200 }}>
-      <Stack>
         <Center>
           {measureBundle.fileName && measureBundle.isFile ? (
-            <IconFileCheck size={80} color="green" />
+            <IconFileCheck size={48} color="green" />
           ) : (
-            <IconFileImport size={80} />
+            <IconFileImport size={48} />
           )}
         </Center>
-        <Center>
-          <Text
-            size="xl"
-            inline
-            className={classes.text}
-            style={{ color: measureBundle.fileName && measureBundle.isFile ? 'green' : 'black' }}
-          >
-            {measureBundle.fileName && measureBundle.isFile
-              ? measureBundle.fileName
-              : 'Drag a Measure Bundle JSON file here or click to select files'}
-          </Text>
-        </Center>
-      </Stack>
-    </Grid>
+        <Text
+          align="center"
+          size="lg"
+          inline
+          className={classes.text}
+          style={{ color: measureBundle.fileName && measureBundle.isFile ? 'green' : 'black' }}
+        >
+          {measureBundle.fileName && measureBundle.isFile
+            ? measureBundle.fileName
+            : 'Drag a Measure Bundle JSON file here or click to select file'}
+        </Text>
+      </Dropzone>
+    </>
   );
 }

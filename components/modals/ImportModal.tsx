@@ -124,11 +124,11 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
                 {isZipInfoExpanded ? <IconCaretDown /> : <IconCaretRight />}Show Contained Bundles
               </Button>
               <Collapse in={isZipInfoExpanded}>
-                <ScrollArea style={{ height: 200 }}>
+                <ScrollArea h={200}>
                   {files.map(f => {
                     const baseName = f.name.substring(f.name.lastIndexOf('/') + 1);
                     return (
-                      <Text key={f.name} style={{ paddingLeft: '18px' }} color="gray" size="sm">
+                      <Text key={f.name} pl={18} color="gray" size="sm">
                         {baseName}
                       </Text>
                     );
@@ -138,11 +138,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
             </>
           )}
           <Center>
-            <Group
-              style={{
-                paddingTop: '12px'
-              }}
-            >
+            <Group pt={12}>
               <Button
                 onClick={() => {
                   onImportSubmit(files);

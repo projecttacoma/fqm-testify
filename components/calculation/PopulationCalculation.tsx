@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Drawer, Group, Tooltip } from '@mantine/core';
+import { Button, Center, Drawer, Group, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
@@ -109,91 +109,92 @@ export default function PopulationCalculation() {
     <>
       {Object.keys(currentPatients).length > 0 && measureBundle.content && (
         <Center>
-          <Grid>
-            <Grid.Col span={12}>
-              <Group>
-                <Button
-                  data-testid="calculate-all-button"
-                  aria-label="Calculate Population Results"
-                  styles={{ root: { marginTop: 20 } }}
-                  onClick={() => runCalculation()}
-                  variant="outline"
+          <Group position="center">
+            <Button
+              data-testid="calculate-all-button"
+              aria-label="Calculate Population Results"
+              styles={{ root: { marginTop: 20 } }}
+              onClick={() => runCalculation()}
+              variant="outline"
+            >
+              &nbsp;Calculate Population Results
+            </Button>
+            <Tooltip
+              label="Disabled until calculation results are available"
+              openDelay={1000}
+              disabled={enableTableButton ? true : false}
+            >
+              <Button
+                data-testid="show-table-button"
+                aria-label="Show Table"
+                styles={{ root: { marginTop: 20 } }}
+                disabled={!enableTableButton}
+                onClick={() => setOpened(true)}
+                variant="outline"
+              >
+                &nbsp;Show Table
+              </Button>
+            </Tooltip>
+            <Tooltip
+              label="Disabled until calculation results are available"
+              openDelay={1000}
+              disabled={enableClauseCoverageButton}
+            >
+              <Button
+                data-testid="show-coverage-button"
+                aria-label="Show Clause Coverage"
+                styles={{ root: { marginTop: 20 } }}
+                disabled={!enableClauseCoverageButton}
+                variant="outline"
+                onClick={() => {
+                  if (measureBundle.content) {
+                    router.push(
+                      {
+                        pathname: `/${measureBundle.content.id}/coverage`,
+                        query: {
+                          clauseCoverageHTML
+                        }
+                      },
+                      `/${measureBundle.content.id}/coverage`
+                    );
+                  }
+                }}
+              >
+                &nbsp;Show Clause Coverage
+              </Button>
+            </Tooltip>
+          </Group>
+          {detailedResults.length > 0 && (
+            <>
+              <Drawer
+                opened={opened}
+                onClose={() => setOpened(false)}
+                position="bottom"
+                padding="md"
+                overlayProps={{
+                  opacity: 0.3
+                }}
+                lockScroll={false}
+                size="lg"
+                styles={{
+                  body: {
+                    height: '100%'
+                  }
+                }}
+              >
+                <h2>Population Results</h2>
+                <div
+                  data-testid="results-table"
+                  style={{
+                    height: '100%',
+                    overflow: 'scroll'
+                  }}
                 >
-                  &nbsp;Calculate Population Results
-                </Button>
-                <Tooltip
-                  label="Disabled until calculation results are available"
-                  openDelay={1000}
-                  disabled={enableTableButton ? true : false}
-                >
-                  <Button
-                    data-testid="show-table-button"
-                    aria-label="Show Table"
-                    styles={{ root: { marginTop: 20 } }}
-                    disabled={!enableTableButton}
-                    onClick={() => setOpened(true)}
-                    variant="outline"
-                  >
-                    &nbsp;Show Table
-                  </Button>
-                </Tooltip>
-                <Tooltip
-                  label="Disabled until calculation results are available"
-                  openDelay={1000}
-                  disabled={enableClauseCoverageButton}
-                >
-                  <Button
-                    data-testid="show-coverage-button"
-                    aria-label="Show Clause Coverage"
-                    styles={{ root: { marginTop: 20 } }}
-                    disabled={!enableClauseCoverageButton}
-                    variant="outline"
-                    onClick={() => {
-                      if (measureBundle.content) {
-                        router.push(
-                          {
-                            pathname: `/${measureBundle.content.id}/coverage`,
-                            query: {
-                              clauseCoverageHTML
-                            }
-                          },
-                          `/${measureBundle.content.id}/coverage`
-                        );
-                      }
-                    }}
-                  >
-                    &nbsp;Show Clause Coverage
-                  </Button>
-                </Tooltip>
-              </Group>
-              {detailedResults.length > 0 && (
-                <>
-                  <Drawer
-                    opened={opened}
-                    onClose={() => setOpened(false)}
-                    position="bottom"
-                    padding="md"
-                    overlayProps={{
-                      opacity: 0.3
-                    }}
-                    lockScroll={false}
-                    size="lg"
-                  >
-                    <h2>Population Results</h2>
-                    <div
-                      data-testid="results-table"
-                      style={{
-                        height: '15vh',
-                        overflow: 'scroll'
-                      }}
-                    >
-                      <PopulationResultTable results={detailedResults} />
-                    </div>
-                  </Drawer>
-                </>
-              )}
-            </Grid.Col>
-          </Grid>
+                  <PopulationResultTable results={detailedResults} />
+                </div>
+              </Drawer>
+            </>
+          )}
         </Center>
       )}
     </>

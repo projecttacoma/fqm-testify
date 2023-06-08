@@ -112,9 +112,12 @@ export default function ResourcePanel() {
           title="Add JSON for new FHIR Resource"
           onSave={createNewResource}
         />
-        <Text>
-          {getPatientNameString(currentPatients[selectedPatient].patient)} Resources (
-          {currentPatients[selectedPatient].resources.length})
+        <Text size="xl">{getPatientNameString(currentPatients[selectedPatient].patient)}</Text>
+        <Text data-testid="resource-count-summary">
+          <Text display="inline" fw="bold">
+            {currentPatients[selectedPatient].resources.length} resource(s)
+          </Text>{' '}
+          on record
         </Text>
         <div
           style={{
