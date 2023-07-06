@@ -85,15 +85,15 @@ export default function TestCaseEditor() {
                 <Center pr={20}>
                   {isCalculationLoading ? (
                     <Center>
-                      <Loader size={40} />
-                      <Text italic color="dimmed">
+                      <Loader size={24} />
+                      <Text italic color="dimmed" pl={4}>
                         Calculating...
                       </Text>
                     </Center>
                   ) : (
                     <Center>
-                      <CircleCheck color="green" size={40} />
-                      <Text italic color="dimmed">
+                      <CircleCheck color="green" size={24} />
+                      <Text italic color="dimmed" pl={4}>
                         Up to date
                       </Text>
                     </Center>
