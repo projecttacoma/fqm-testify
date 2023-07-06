@@ -1,4 +1,4 @@
-import { Modal, useMantineColorScheme, Button, Center, Group, Text, Grid } from '@mantine/core';
+import { Modal, Button, Center, Group, Text, Grid } from '@mantine/core';
 import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
@@ -21,7 +21,6 @@ export default function CodeEditorModal({
   onSave,
   initialValue = ''
 }: CodeEditorModalProps) {
-  const { colorScheme } = useMantineColorScheme();
   const [currentValue, setCurrentValue] = useState(initialValue);
   const [linterError, setLinterError] = useState<string | null>(null);
 
@@ -46,7 +45,7 @@ export default function CodeEditorModal({
             height="700px"
             value={initialValue}
             extensions={[json(), linter(jsonLinter)]}
-            theme={colorScheme}
+            theme='light'
             onUpdate={v => {
               const diagnosticMessages = jsonLinter(v.view).map(d => d.message);
 
