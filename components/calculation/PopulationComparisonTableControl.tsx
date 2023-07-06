@@ -22,7 +22,8 @@ export default function PopulationComparisonTablePopover() {
         <ScrollArea h={180}>
           The Population Comparison Table shows patient and episode population results for the selected patient. For
           patient-based measures, patient results show 0 or 1 to indicate belonging to a population. Actual and desired
-          populations are compared, and the cells are highlighted green if the populations match and red if they don&apos;t match.
+          populations are compared, and the cells are highlighted green if the populations match and red if they
+          don&apos;t match.
           <br />
           <br />
           For episode-based measures, the table shows patient-level totals that indicate how many episodes are in each

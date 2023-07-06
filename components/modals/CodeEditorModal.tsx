@@ -45,7 +45,7 @@ export default function CodeEditorModal({
             height="700px"
             value={initialValue}
             extensions={[json(), linter(jsonLinter)]}
-            theme='light'
+            theme="light"
             onUpdate={v => {
               const diagnosticMessages = jsonLinter(v.view).map(d => d.message);
 
