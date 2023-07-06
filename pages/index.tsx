@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, createStyles, Divider, Grid, Group, Stack, Text } from '@mantine/core';
+import { Box, Button, createStyles, Divider, Grid, Group, Stack, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import MeasureFileUpload from '../components/measure-upload/MeasureFileUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
@@ -98,7 +98,9 @@ const Home: NextPage = () => {
               <Button disabled={isNextDisabled}>Next</Button>
             </Link>
           </Group>
-          <UploadErrorLog uploadSuccess={uploadSuccess} errorLog={errorLog} />
+          <Box pb={24}>
+            <UploadErrorLog uploadSuccess={uploadSuccess} errorLog={errorLog} />
+          </Box>
         </Stack>
       </Stack>
     </>
