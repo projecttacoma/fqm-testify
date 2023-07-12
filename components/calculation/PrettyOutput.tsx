@@ -12,9 +12,11 @@ export default function PrettyOutput({ statement }: PrettyOutputProps) {
 
   return (
     <>
-      <Button compact variant="outline" color="gray" onClick={toggle}>
-        {buttonText}
-      </Button>
+      <div style={{ width: 120 }}>
+        <Button fullWidth compact variant="outline" color="gray" onClick={toggle}>
+          {buttonText}
+        </Button>
+      </div>
       <Collapse in={opened}>
         <Space />
         <Paper shadow="xs">
