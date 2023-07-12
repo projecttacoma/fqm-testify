@@ -53,7 +53,10 @@ describe('ResourcePanel', () => {
       );
     });
 
-    expect(screen.getByText(/test123 patient456 resources \(0\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/test123 patient456/i)).toBeInTheDocument();
+
+    const container = screen.getByTestId('resource-count-summary');
+    expect(container).toHaveTextContent(/0 resource\(s\) on record/i);
   });
 
   it('should render button for adding custom resource when patient is selected', async () => {

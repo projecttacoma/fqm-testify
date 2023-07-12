@@ -15,35 +15,27 @@ const ClauseCoveragePage = () => {
   const { classes } = useStyles();
   const router = useRouter();
   const { clauseCoverageHTML, measureId } = router.query;
+
   if (typeof clauseCoverageHTML === 'string' && clauseCoverageHTML.length > 0) {
     return (
-      <>
-        <Group>
-          <BackButton />
-          <h2>Clause coverage for measure bundle: {`${measureId}`}</h2>
-        </Group>
-        <Center>
-          <div
-            className={classes.highlightedMarkup}
-            style={{
-              maxHeight: '90vh',
-              overflow: 'scroll',
-              marginLeft: '5px'
-            }}
-          >
-            {parse(clauseCoverageHTML)}
-          </div>
-        </Center>
-      </>
+      <Center>
+        <div>
+          <Group>
+            <BackButton />
+            <h2>Clause coverage for measure bundle: {`${measureId}`}</h2>
+          </Group>
+          <div className={classes.highlightedMarkup}>{parse(clauseCoverageHTML)}</div>
+        </div>
+      </Center>
     );
   } else
     return (
-      <>
+      <div>
         <Group>
           <BackButton />
           <h2>No clause coverage results available for measure bundle: {`${measureId}`} </h2>
         </Group>
-      </>
+      </div>
     );
 };
 

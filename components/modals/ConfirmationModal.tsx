@@ -25,7 +25,7 @@ export default function ConfirmationModal({ open = true, onClose, title, onConfi
         </Grid.Col>
         <Grid.Col>
           <Center>
-            <Group style={{ paddingTop: '5px' }}>
+            <Group pt={8}>
               <Button data-testid="yes-button" onClick={() => onConfirm()}>
                 Yes
               </Button>

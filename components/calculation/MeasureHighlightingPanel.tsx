@@ -61,7 +61,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
         placeholder="Expression Name"
         icon={<Search />}
         nothingFound={
-          <Text align="left" style={{ paddingLeft: 10 }}>
+          <Text align="left" pl={10}>
             No Matches
           </Text>
         }

@@ -13,17 +13,12 @@ export default function UploadErrorInfo({ error }: UploadErrorInfoProps) {
   return (
     <Paper withBorder shadow="md" p="md">
       <Group spacing="xs">
-        <Text weight={600}>{error.attemptedBundleDisplay}</Text>
+        <Text weight="bold">{error.attemptedBundleDisplay}</Text>
         <Text color="dimmed">{error.timestamp}</Text>
       </Group>
       {error.isValueSetMissingError ? (
         <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between'
-            }}
-          >
+          <Group position="apart">
             <div>
               <Text>Bundle is missing required ValueSets.</Text>
               {error.isThrownFromMrs && (
@@ -36,7 +31,7 @@ export default function UploadErrorInfo({ error }: UploadErrorInfoProps) {
             <Button variant="subtle" color="gray" onClick={() => setIsDetailOpen(!isDetailOpen)}>
               {isDetailOpen ? 'Hide ' : 'Show '}Missing ValueSet URLs
             </Button>
-          </div>
+          </Group>
           <Collapse in={isDetailOpen}>
             {(Array.isArray(error.message) ? error.message : [error.message]).map(vsUrl => (
               <Text key={vsUrl}>

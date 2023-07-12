@@ -7,15 +7,11 @@ export default function MeasureFileUploadHeader() {
 
   return (
     <div>
-      <div style={{ paddingRight: 4 }}>
-        <Text size="xl" weight={700}>
-          Step 1:
-        </Text>
-      </div>
+      <Text size="xl" weight="bold">
+        Step 1:
+      </Text>
       <Group>
-        <Text size="lg" weight={400}>
-          Upload a Measure Bundle
-        </Text>
+        <Text weight="lighter">Upload a Measure Bundle</Text>
         <Popover opened={opened} onClose={() => setOpened(false)}>
           <Popover.Target>
             <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>

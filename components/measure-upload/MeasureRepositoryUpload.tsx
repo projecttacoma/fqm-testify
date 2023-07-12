@@ -220,13 +220,13 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
 
   return (
     <div>
-      <Group position="apart" style={{ alignItems: 'flex-end' }}>
+      <Group position="apart" align="flex-end">
         <TextInput
           label="Measure Repository Service URL"
-          placeholder="http://example.com"
+          placeholder="http://example.com/fhir"
           value={measureRepositoryUrl}
           onChange={handleMrsUrlChange}
-          style={{ flex: 1 }}
+          style={{ flexGrow: 1 }}
         />
         <Button onClick={retrieveMeasures} loading={isLoadingIds} disabled={measureRepositoryUrl === ''}>
           Get Measures

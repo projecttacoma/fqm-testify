@@ -14,7 +14,7 @@ describe('MeasureUpload', () => {
   it('renders a dropzone with generic label when no measure uploaded', () => {
     render(mantineRecoilWrap(<MeasureUpload logError={jest.fn()} />));
 
-    const title = screen.getByText('Drag a Measure Bundle JSON file here or click to select files');
+    const title = screen.getByText('Drag a Measure Bundle JSON file here or click to select file');
     expect(title).toBeInTheDocument();
   });
 

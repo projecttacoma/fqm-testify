@@ -1,4 +1,4 @@
-import { Grid } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons';
 import { useEffect, useState } from 'react';
@@ -29,31 +29,27 @@ export default function DateSelectors({ setDatesValid }: DateSelectorsProps) {
   }, [periodStart, periodEnd, setDatesValid]);
 
   return (
-    <Grid>
-      <Grid.Col span={6}>
-        <DateInput
-          required
-          label="Start"
-          value={periodStart}
-          onChange={setPeriodStart}
-          icon={<IconCalendar size={25} />}
-          defaultLevel="decade"
-          placeholder="yyyy-mm-dd"
-          error={dateInputError}
-        />
-      </Grid.Col>
-      <Grid.Col span={6}>
-        <DateInput
-          required
-          label="End"
-          value={periodEnd}
-          onChange={setPeriodEnd}
-          icon={<IconCalendar size={25} />}
-          defaultLevel="decade"
-          placeholder="yyyy-mm-dd"
-          error={dateInputError}
-        />
-      </Grid.Col>
-    </Grid>
+    <Group grow>
+      <DateInput
+        required
+        label="Start"
+        value={periodStart}
+        onChange={setPeriodStart}
+        icon={<IconCalendar size={25} />}
+        defaultLevel="decade"
+        placeholder="yyyy-mm-dd"
+        error={dateInputError}
+      />
+      <DateInput
+        required
+        label="End"
+        value={periodEnd}
+        onChange={setPeriodEnd}
+        icon={<IconCalendar size={25} />}
+        defaultLevel="decade"
+        placeholder="yyyy-mm-dd"
+        error={dateInputError}
+      />
+    </Group>
   );
 }

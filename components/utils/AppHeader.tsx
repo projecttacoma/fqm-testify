@@ -1,4 +1,4 @@
-import { Card, Button, Text } from '@mantine/core';
+import { Card, Button, Text, Group, createStyles } from '@mantine/core';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import Link from 'next/link';
@@ -7,26 +7,32 @@ import { useRouter } from 'next/router';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 
+const useStyles = createStyles(theme => ({
+  headerContainer: {
+    backgroundColor: theme.colors.gray[9],
+    height: '100%',
+    padding: '0px 20px 0px 20px'
+  },
+  mbCardContainer: {
+    flexGrow: 2
+  },
+  mbCard: {
+    width: 'fit-content'
+  }
+}));
+
 export default function AppHeader() {
   const { start, end } = useRecoilValue(measurementPeriodState);
   const measureBundle = useRecoilValue(measureBundleState);
   const router = useRouter();
+  const { classes } = useStyles();
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        backgroundColor: 'black',
-        height: '100%',
-        width: '100%',
-        padding: 20
-      }}
-    >
+    <Group className={classes.headerContainer}>
       {router.pathname !== '/' && start && end && measureBundle.content && (
-        <div style={{ flexGrow: 2 }}>
-          <Card sx={() => ({ width: 'fit-content', justifySelf: 'start' })}>
-            <div style={{ display: 'flex', justifyContent: 'space-around', gap: 10, alignItems: 'center' }}>
+        <div className={classes.mbCardContainer}>
+          <Card className={classes.mbCard}>
+            <Group spacing="xs">
               <div>
                 <Text size="md" color="dimmed">
                   {measureBundle.isFile
@@ -42,14 +48,14 @@ export default function AppHeader() {
                   <Edit />
                 </Button>
               </Link>
-            </div>
+            </Group>
           </Card>
         </div>
       )}
-      <Text color="dimmed" size="xl" sx={() => ({ justifySelf: 'flex-end' })}>
+      <Text color="dimmed" size="xl">
         FQM Testify: an eCQM Analysis Tool
       </Text>
-    </div>
+    </Group>
   );
 }
 const retrieveDateString = (date: Date) => {
@@ -59,6 +65,7 @@ const retrieveDateString = (date: Date) => {
     year: 'numeric'
   });
 };
+
 const retrieveMeasurementPeriodString = (start: Date, end: Date) => {
   return `${retrieveDateString(start)} - ${retrieveDateString(end)}`;
 };
