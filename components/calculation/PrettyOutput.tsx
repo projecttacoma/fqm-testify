@@ -1,4 +1,4 @@
-import { Button, Collapse, Paper, Space } from '@mantine/core';
+import { Button, Collapse, Paper } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { StatementResult } from 'fqm-execution';
 
@@ -12,14 +12,11 @@ export default function PrettyOutput({ statement }: PrettyOutputProps) {
 
   return (
     <>
-      <div style={{ width: 120 }}>
-        <Button fullWidth compact variant="outline" color="gray" onClick={toggle}>
-          {buttonText}
-        </Button>
-      </div>
+      <Button fullWidth compact variant="outline" color="gray" onClick={toggle} w={120}>
+        {buttonText}
+      </Button>
       <Collapse in={opened}>
-        <Space />
-        <Paper shadow="xs">
+        <Paper shadow="xs" pl={8}>
           <pre>{statement?.pretty}</pre>
         </Paper>
       </Collapse>
