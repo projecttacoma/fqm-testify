@@ -32,8 +32,9 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
       replace: elem => {
         if ((elem as DomElement).attribs?.['data-statement-name']) {
           const statementName = (elem as DomElement).attribs?.['data-statement-name'];
+          const libraryName = (elem as DomElement).attribs?.['data-library-name'];
           const statementResult = detailedResultLookup[patientId]?.detailedResults?.[0].statementResults.find(
-            statement => statement.statementName === statementName
+            statement => statement.statementName === statementName && statement.libraryName === libraryName
           );
           return (
             <>
