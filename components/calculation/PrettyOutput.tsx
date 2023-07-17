@@ -8,12 +8,11 @@ export interface PrettyOutputProps {
 
 export default function PrettyOutput({ statement }: PrettyOutputProps) {
   const [opened, { toggle }] = useDisclosure(false);
-  const buttonText = opened ? 'Hide Results' : 'Show Results';
 
   return (
     <>
       <Button fullWidth compact variant="outline" color="gray" onClick={toggle} w={120}>
-        {buttonText}
+        {opened ? 'Hide Results' : 'Show Results'}
       </Button>
       <Collapse in={opened}>
         <Paper shadow="xs" pl={8}>
