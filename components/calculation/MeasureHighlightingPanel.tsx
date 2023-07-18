@@ -1,16 +1,11 @@
-import { Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
+import { ActionIcon, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
-import parse from 'html-react-parser';
+import parse, { domToReact } from 'html-react-parser';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { useMemo, useState } from 'react';
-import { Text as DomText } from 'domhandler';
-import { Search } from 'tabler-icons-react';
-
-/**
- * This regex matches any string that includes the substring "define" or "define function"
- * followed by a string of any length in quotes
- */
-const expressionDefRegex = new RegExp(/(define(?:\s+function)?\s+)(["'])(.*?)\2/gi);
+import { Element as DomElement } from 'domhandler';
+import { Search, X } from 'tabler-icons-react';
+import PrettyOutput from './PrettyOutput';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -32,28 +27,36 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
   const { classes } = useStyles();
   const [searchValue, setSearchValue] = useState('');
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
-  const { parsedHTML, defIds } = useMemo(() => {
-    const defIds: Record<string, string> = {};
+  const parsedHTML = useMemo(() => {
     const parsedHTML = parse(detailedResultLookup[patientId]?.detailedResults?.[0].html || '', {
       replace: elem => {
-        if (elem.type === 'text') {
-          const data = (elem as DomText).data;
-          if (data.match(expressionDefRegex)) {
-            const splitData = data.split('"');
-            defIds[splitData[1]] = splitData[1].toLowerCase().replace(' ', '-');
-            return <span id={defIds[splitData[1]]}>{data}</span>;
-          }
+        if ((elem as DomElement).attribs?.['data-statement-name']) {
+          const statementName = (elem as DomElement).attribs['data-statement-name'];
+          const libraryName = (elem as DomElement).attribs['data-library-name'];
+          const statementResult = detailedResultLookup[patientId]?.detailedResults?.[0].statementResults.find(
+            statement => statement.statementName === statementName && statement.libraryName === libraryName
+          );
+          return (
+            <>
+              {domToReact([elem])}
+              <PrettyOutput statement={statementResult} />
+            </>
+          );
         }
       }
     });
-    return { parsedHTML, defIds };
+    return parsedHTML;
   }, [detailedResultLookup, patientId]);
 
   return (
     <>
       <Space h="md" />
       <Autocomplete
-        data={Object.keys(defIds).sort((a, b) => (a < b ? -1 : 1))}
+        data={
+          detailedResultLookup[patientId]?.detailedResults?.[0].statementResults
+            .filter(statementResult => statementResult.relevance !== 'NA')
+            .map(s => `${s.libraryName}."${s.statementName}"`) || ['']
+        }
         value={searchValue}
         onChange={setSearchValue}
         dropdownComponent={ScrollArea}
@@ -68,8 +71,21 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
         limit={100}
         label="Search CQL Expression Definition"
         onItemSubmit={item => {
-          document.getElementById(defIds[item.value])?.scrollIntoView({ behavior: 'smooth' });
+          document
+            .querySelector(
+              `pre[data-statement-name="${item.value.split('"')[1]}"][data-library-name="${item.value.split('.')[0]}"]`
+            )
+            ?.scrollIntoView({ behavior: 'smooth' });
         }}
+        rightSection={
+          <ActionIcon
+            onClick={() => {
+              setSearchValue('');
+            }}
+          >
+            <X size={16} />
+          </ActionIcon>
+        }
       />
       <div className={classes.highlightedMarkup}>{parsedHTML}</div>
     </>
