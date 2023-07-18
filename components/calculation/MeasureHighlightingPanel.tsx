@@ -73,7 +73,7 @@ export default function MeasureHighlightingPanel({ patientId }: MeasureHighlight
         onItemSubmit={item => {
           document
             .querySelector(
-              `pre[data-statement-name="${item.value.split('"')[1]}"[data-library-name="${item.value.split('"')[0]}"]`
+              `pre[data-statement-name="${item.value.split('"')[1]}"][data-library-name="${item.value.split('.')[0]}"]`
             )
             ?.scrollIntoView({ behavior: 'smooth' });
         }}
