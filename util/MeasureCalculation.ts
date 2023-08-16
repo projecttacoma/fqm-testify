@@ -20,7 +20,8 @@ export async function calculateDetailedResult(
     reportType: 'individual',
     measurementPeriodStart: mpStart,
     measurementPeriodEnd: mpEnd,
-    useElmJsonsCaching: true
+    useElmJsonsCaching: true,
+    trustMetaProfile: true
   };
 
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);

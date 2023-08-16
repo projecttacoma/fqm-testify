@@ -34,7 +34,7 @@
     "dayjs": "^1.11.7",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
-    "fqm-execution": "git+https://git@github.com/projecttacoma/fqm-execution.git",
+    "fqm-execution": "git+https://git@github.com/projecttacoma/fqm-execution.git#datareqs-gaps-catch-uncalculable-intervals",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
     "luxon": "^2.5.2",

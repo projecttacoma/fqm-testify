@@ -47,11 +47,12 @@ export default function PopulationCalculation() {
     // TODO: revisit options after new fqm-execution release (calculateSDEs set to true throws error)
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: false,
-      calculateSDEs: false,
+      calculateSDEs: true,
       calculateClauseCoverage: true,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
-      measurementPeriodEnd: measurementPeriod.end?.toISOString()
+      measurementPeriodEnd: measurementPeriod.end?.toISOString(),
+      trustMetaProfile: true
     };
 
     // get all patient bundles as array to feed into fqm-execution
