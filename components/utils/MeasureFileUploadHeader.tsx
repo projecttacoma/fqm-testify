@@ -7,11 +7,10 @@ export default function MeasureFileUploadHeader() {
 
   return (
     <div>
-      <Text size="xl" weight="bold">
-        Step 1:
-      </Text>
       <Group>
-        <Text weight="lighter">Upload a Measure Bundle</Text>
+        <Text size="xl" weight="bold">
+          Step 1:
+        </Text>
         <Popover opened={opened} onClose={() => setOpened(false)}>
           <Popover.Target>
             <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
@@ -34,6 +33,7 @@ export default function MeasureFileUploadHeader() {
           </Popover.Dropdown>
         </Popover>
       </Group>
+      <Text weight="lighter">Upload a Measure Bundle</Text>
     </div>
   );
 }

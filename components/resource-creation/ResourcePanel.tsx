@@ -17,6 +17,7 @@ import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { getPatientNameString } from '../../util/fhir/patient';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
+import { trustMetaProfile } from '../../state/atoms/trustMetaProfile';
 
 export default function ResourcePanel() {
   const selectedPatient = useRecoilValue(selectedPatientState);
@@ -26,6 +27,7 @@ export default function ResourcePanel() {
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
+  const useTrustMetaProfile = useRecoilValue(trustMetaProfile);
 
   const createNewResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -62,7 +64,8 @@ export default function ResourcePanel() {
                   nextResourceState[selectedPatient],
                   measureBundle.content,
                   measurementPeriod.start?.toISOString(),
-                  measurementPeriod.end?.toISOString()
+                  measurementPeriod.end?.toISOString(),
+                  useTrustMetaProfile
                 );
               } catch (error) {
                 if (error instanceof Error) {

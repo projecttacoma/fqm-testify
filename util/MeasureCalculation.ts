@@ -2,6 +2,8 @@ import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import { createPatientBundle } from './fhir/resourceCreation';
 import { DetailedResult } from './types';
+import { trustMetaProfile } from '../state/atoms/trustMetaProfile';
+import { useRecoilValue } from 'recoil';
 
 /**
  * Takes in a patient's test case info, a measure bundle, and a measurement
@@ -11,7 +13,8 @@ export async function calculateDetailedResult(
   patientTestCase: TestCaseInfo,
   mb: fhir4.Bundle,
   mpStart: string | undefined,
-  mpEnd: string | undefined
+  mpEnd: string | undefined,
+  trustMetaProfile: boolean
 ): Promise<DetailedResult> {
   const options: CalculatorTypes.CalculationOptions = {
     calculateHTML: true,
@@ -21,7 +24,7 @@ export async function calculateDetailedResult(
     measurementPeriodStart: mpStart,
     measurementPeriodEnd: mpEnd,
     useElmJsonsCaching: true,
-    trustMetaProfile: true
+    trustMetaProfile: trustMetaProfile
   };
 
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);

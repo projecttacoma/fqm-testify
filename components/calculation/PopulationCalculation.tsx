@@ -12,6 +12,7 @@ import { createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
 import { useRouter } from 'next/router';
+import { trustMetaProfile } from '../../state/atoms/trustMetaProfile';
 
 export default function PopulationCalculation() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function PopulationCalculation() {
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
+  const useTrustMetaProfile = useRecoilValue(trustMetaProfile);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -44,7 +46,6 @@ export default function PopulationCalculation() {
    */
   const calculateDetailedResults = async (): Promise<DetailedResult[] | void> => {
     // specify options for calculation
-    // TODO: revisit options after new fqm-execution release (calculateSDEs set to true throws error)
     const options: CalculatorTypes.CalculationOptions = {
       calculateHTML: false,
       calculateSDEs: true,
@@ -52,7 +53,7 @@ export default function PopulationCalculation() {
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString(),
-      trustMetaProfile: true
+      trustMetaProfile: useTrustMetaProfile
     };
 
     // get all patient bundles as array to feed into fqm-execution
