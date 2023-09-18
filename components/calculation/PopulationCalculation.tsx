@@ -12,7 +12,7 @@ import { createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
 import { useRouter } from 'next/router';
-import { trustMetaProfile } from '../../state/atoms/trustMetaProfile';
+import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 
 export default function PopulationCalculation() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function PopulationCalculation() {
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
-  const useTrustMetaProfile = useRecoilValue(trustMetaProfile);
+  const trustMetaProfile = useRecoilValue(trustMetaProfileState);
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -53,7 +53,7 @@ export default function PopulationCalculation() {
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString(),
-      trustMetaProfile: useTrustMetaProfile
+      trustMetaProfile: trustMetaProfile
     };
 
     // get all patient bundles as array to feed into fqm-execution

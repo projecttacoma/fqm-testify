@@ -30,7 +30,7 @@ import { cqfmTestMRLookupState } from '../../state/selectors/cqfmTestMRLookup';
 import { getMeasurePopulations } from '../../util/MeasurePopulations';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
-import { trustMetaProfile } from '../../state/atoms/trustMetaProfile';
+import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -49,7 +49,7 @@ function PatientCreationPanel() {
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
   }, [measureBundle]);
-  const useTrustMetaProfile = useRecoilValue(trustMetaProfile);
+  const trustMetaProfile = useRecoilValue(trustMetaProfileState);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -85,7 +85,7 @@ function PatientCreationPanel() {
               measureBundle.content,
               measurementPeriod.start?.toISOString(),
               measurementPeriod.end?.toISOString(),
-              useTrustMetaProfile
+              trustMetaProfile
             );
           } catch (error) {
             if (error instanceof Error) {
@@ -140,7 +140,7 @@ function PatientCreationPanel() {
                 measureBundle.content,
                 measurementPeriod.start?.toISOString(),
                 measurementPeriod.end?.toISOString(),
-                useTrustMetaProfile
+                trustMetaProfile
               );
             } catch (error) {
               if (error instanceof Error) {

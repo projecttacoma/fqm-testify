@@ -13,7 +13,7 @@ import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../util/MeasureCalculation';
-import { trustMetaProfile } from '../state/atoms/trustMetaProfile';
+import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
 
 const TestCaseEditorPage: NextPage = () => {
   const { start, end } = useRecoilValue(measurementPeriodState);
@@ -21,7 +21,7 @@ const TestCaseEditorPage: NextPage = () => {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
-  const useTrustMetaProfile = useRecoilValue(trustMetaProfile);
+  const trustMetaProfile = useRecoilValue(trustMetaProfileState);
 
   // re-runs the detailedResults calculation whenever the user navigates to the generate-test-cases page
   useEffect(() => {
@@ -36,7 +36,7 @@ const TestCaseEditorPage: NextPage = () => {
               mb,
               start?.toISOString(),
               end?.toISOString(),
-              useTrustMetaProfile
+              trustMetaProfile
             );
           } catch (error) {
             if (error instanceof Error) {

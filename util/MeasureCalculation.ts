@@ -2,8 +2,6 @@ import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import { createPatientBundle } from './fhir/resourceCreation';
 import { DetailedResult } from './types';
-import { trustMetaProfile } from '../state/atoms/trustMetaProfile';
-import { useRecoilValue } from 'recoil';
 
 /**
  * Takes in a patient's test case info, a measure bundle, and a measurement

@@ -24,7 +24,7 @@ import MeasureRepositoryUploadHeader from '../components/utils/MeasureRespositor
 import UploadErrorLog from '../components/measure-upload/UploadErrorLog';
 import MeasureRepositoryUpload from '../components/measure-upload/MeasureRepositoryUpload';
 import { MeasureUploadError } from '../util/measureUploadUtils';
-import { trustMetaProfile } from '../state/atoms/trustMetaProfile';
+import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
 import { InfoCircle } from 'tabler-icons-react';
 
 const useStyles = createStyles(theme => ({
@@ -43,7 +43,7 @@ const useStyles = createStyles(theme => ({
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);
-  const [useTrustMetaProfile, setUseTrustMetaProfile] = useRecoilState(trustMetaProfile);
+  const [trustMetaProfile, setUseTrustMetaProfile] = useRecoilState(trustMetaProfileState);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [errorLog, setErrorLog] = useState<MeasureUploadError[]>([]);
   const [datesValid, setDatesValid] = useState(false);
@@ -137,7 +137,7 @@ const Home: NextPage = () => {
                   onLabel="YES"
                   offLabel="NO"
                   size="lg"
-                  checked={useTrustMetaProfile}
+                  checked={trustMetaProfile}
                   onChange={event => setUseTrustMetaProfile(event.currentTarget.checked)}
                 ></Switch>
               </Group>
