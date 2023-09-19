@@ -48,7 +48,7 @@ const Home: NextPage = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [errorLog, setErrorLog] = useState<MeasureUploadError[]>([]);
   const [datesValid, setDatesValid] = useState(false);
-  const [opened, setOpened] = useState(false);
+  const [trustMetaPopoverOpened, setTrustMetaPopoverOpened] = useState(false);
 
   const { classes } = useStyles();
 
@@ -118,9 +118,9 @@ const Home: NextPage = () => {
                   checked={trustMetaProfile}
                   onChange={event => setUseTrustMetaProfile(event.currentTarget.checked)}
                 />
-                <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
+                <Popover opened={trustMetaPopoverOpened} onClose={() => setTrustMetaPopoverOpened(false)} width={500}>
                   <Popover.Target>
-                    <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
+                    <ActionIcon aria-label={'More Information'} onClick={() => setTrustMetaPopoverOpened(o => !o)}>
                       <InfoCircle size={20} />
                     </ActionIcon>
                   </Popover.Target>
@@ -133,46 +133,6 @@ const Home: NextPage = () => {
               </Group>
             </Grid.Col>
           </Grid>
-          {/* <Divider className={classes.divider} />
-          <Grid columns={3} align="center">
-            <Grid.Col sm={3} md={1}>
-              <Group align="center" className={classes.headerContainer}>
-                <div>
-                  <Group>
-                    <Text size="xl" weight="bold">
-                      Step 3:
-                    </Text>
-                    <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
-                      <Popover.Target>
-                        <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
-                          <InfoCircle size={20} />
-                        </ActionIcon>
-                      </Popover.Target>
-                      <Popover.Dropdown>
-                        If set to use trustMetaProfile, trust the content of meta.profile as a source of truth for what
-                        profiles the data that cql-exec-fhir grabs validates against. Read more about trustMetaProfile{' '}
-                        <Anchor href="https://github.com/projecttacoma/fqm-execution#metaprofile-checking">here</Anchor>
-                        .
-                      </Popover.Dropdown>
-                    </Popover>
-                  </Group>
-                  <Text weight="lighter">Filter out resources that do not have a valid meta.profile attribute</Text>
-                </div>
-              </Group>
-            </Grid.Col>
-            <Grid.Col sm={3} md={2}>
-              <Group position="center" align="center">
-                <Switch
-                  label="Use trustMetaProfile"
-                  onLabel="YES"
-                  offLabel="NO"
-                  size="lg"
-                  checked={trustMetaProfile}
-                  onChange={event => setUseTrustMetaProfile(event.currentTarget.checked)}
-                ></Switch>
-              </Group>
-            </Grid.Col>
-          </Grid> */}
           <Divider className={classes.divider} />
           <Group position="right">
             <Link
