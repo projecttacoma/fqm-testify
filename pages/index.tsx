@@ -1,8 +1,22 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, createStyles, Divider, Grid, Group, Stack, Text } from '@mantine/core';
-import { useRecoilValue } from 'recoil';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActionIcon,
+  Anchor,
+  Box,
+  Button,
+  createStyles,
+  Divider,
+  Grid,
+  Group,
+  Popover,
+  Space,
+  Stack,
+  Switch,
+  Text
+} from '@mantine/core';
+import { useRecoilValue, useRecoilState } from 'recoil';
 import MeasureFileUpload from '../components/measure-upload/MeasureFileUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
 import { measureBundleState } from '../state/atoms/measureBundle';
@@ -11,6 +25,8 @@ import MeasureRepositoryUploadHeader from '../components/utils/MeasureRespositor
 import UploadErrorLog from '../components/measure-upload/UploadErrorLog';
 import MeasureRepositoryUpload from '../components/measure-upload/MeasureRepositoryUpload';
 import { MeasureUploadError } from '../util/measureUploadUtils';
+import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
+import { InfoCircle } from 'tabler-icons-react';
 
 const useStyles = createStyles(theme => ({
   headerContainer: {
@@ -28,10 +44,11 @@ const useStyles = createStyles(theme => ({
 
 const Home: NextPage = () => {
   const measureBundle = useRecoilValue(measureBundleState);
-
+  const [trustMetaProfile, setUseTrustMetaProfile] = useRecoilState(trustMetaProfileState);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [errorLog, setErrorLog] = useState<MeasureUploadError[]>([]);
   const [datesValid, setDatesValid] = useState(false);
+  const [trustMetaPopoverOpened, setTrustMetaPopoverOpened] = useState(false);
 
   const { classes } = useStyles();
 
@@ -85,6 +102,35 @@ const Home: NextPage = () => {
             </Grid.Col>
             <Grid.Col sm={3} md={2}>
               <DateSelectors setDatesValid={setDatesValid} />
+            </Grid.Col>
+            <Grid.Col sm={3} md={1}>
+              <Space h="md" />
+              <Text weight="lighter">Filter out resources that do not have a valid meta.profile attribute</Text>
+            </Grid.Col>
+            <Grid.Col sm={3} md={2}>
+              <Space h="md" />
+              <Group position="center" align="center">
+                <Switch
+                  label="Use trustMetaProfile"
+                  onLabel="YES"
+                  offLabel="NO"
+                  size="lg"
+                  checked={trustMetaProfile}
+                  onChange={event => setUseTrustMetaProfile(event.currentTarget.checked)}
+                />
+                <Popover opened={trustMetaPopoverOpened} onClose={() => setTrustMetaPopoverOpened(false)} width={500}>
+                  <Popover.Target>
+                    <ActionIcon aria-label={'More Information'} onClick={() => setTrustMetaPopoverOpened(o => !o)}>
+                      <InfoCircle size={20} />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    If set to use trustMetaProfile, trust the content of meta.profile as a source of truth for what
+                    profiles the data that cql-exec-fhir grabs validates against. Read more about trustMetaProfile{' '}
+                    <Anchor href="https://github.com/projecttacoma/fqm-execution#metaprofile-checking">here</Anchor>.
+                  </Popover.Dropdown>
+                </Popover>
+              </Group>
             </Grid.Col>
           </Grid>
           <Divider className={classes.divider} />

@@ -11,7 +11,8 @@ export async function calculateDetailedResult(
   patientTestCase: TestCaseInfo,
   mb: fhir4.Bundle,
   mpStart: string | undefined,
-  mpEnd: string | undefined
+  mpEnd: string | undefined,
+  trustMetaProfile: boolean
 ): Promise<DetailedResult> {
   const options: CalculatorTypes.CalculationOptions = {
     calculateHTML: true,
@@ -20,7 +21,8 @@ export async function calculateDetailedResult(
     reportType: 'individual',
     measurementPeriodStart: mpStart,
     measurementPeriodEnd: mpEnd,
-    useElmJsonsCaching: true
+    useElmJsonsCaching: true,
+    trustMetaProfile: trustMetaProfile
   };
 
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);

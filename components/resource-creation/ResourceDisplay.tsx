@@ -19,6 +19,7 @@ import { getFhirResourceSummary } from '../../util/fhir/codes';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedResult } from '../../util/types';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
+import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -31,6 +32,7 @@ function ResourceDisplay() {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
+  const trustMetaProfile = useRecoilValue(trustMetaProfileState);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -93,7 +95,8 @@ function ResourceDisplay() {
           nextResourceState[selectedPatient],
           measureBundle.content,
           measurementPeriod.start?.toISOString(),
-          measurementPeriod.end?.toISOString()
+          measurementPeriod.end?.toISOString(),
+          trustMetaProfile
         );
       } catch (error) {
         if (error instanceof Error) {
