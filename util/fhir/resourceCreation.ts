@@ -6,31 +6,58 @@ import { getResourcePatientReference } from './patient';
 import { getResourceCode } from './codes';
 import { Enums } from 'fqm-execution';
 
-export function createPatientResourceString(birthDate: string): string {
+export function createPatientResourceString(qicorePatient: boolean, birthDate: string): string {
   const id = uuidv4();
+  let pt: fhir4.Patient;
 
   // NOTE: should add non-binary genders in the future
   const gender = Math.random() < 0.5 ? 'male' : 'female';
 
-  const pt: fhir4.Patient = {
-    resourceType: 'Patient',
-    id,
-    identifier: [
-      {
-        use: 'usual',
-        system: 'http://example.com/test-id',
-        value: `test-patient-${id}`
-      }
-    ],
-    name: [
-      {
-        family: getRandomLastName(),
-        given: [getRandomFirstName(gender)]
-      }
-    ],
-    gender,
-    birthDate
-  };
+  // if qicorePatient is true, add qicore-patient to the patient's meta.profile
+  if (qicorePatient) {
+    pt = {
+      resourceType: 'Patient',
+      id,
+      meta: {
+        profile: ['http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient']
+      },
+      identifier: [
+        {
+          use: 'usual',
+          system: 'http://example.com/test-id',
+          value: `test-patient-${id}`
+        }
+      ],
+      name: [
+        {
+          family: getRandomLastName(),
+          given: [getRandomFirstName(gender)]
+        }
+      ],
+      gender,
+      birthDate
+    };
+  } else {
+    pt = {
+      resourceType: 'Patient',
+      id,
+      identifier: [
+        {
+          use: 'usual',
+          system: 'http://example.com/test-id',
+          value: `test-patient-${id}`
+        }
+      ],
+      name: [
+        {
+          family: getRandomLastName(),
+          given: [getRandomFirstName(gender)]
+        }
+      ],
+      gender,
+      birthDate
+    };
+  }
 
   return JSON.stringify(pt, null, 2);
 }
@@ -166,6 +193,9 @@ export function createFHIRResourceString(
     resourceType: dr.type,
     id: uuidv4()
   };
+  if (dr.profile) {
+    resource.meta = { profile: dr.profile };
+  }
   getResourceCode(resource, dr, mb);
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);

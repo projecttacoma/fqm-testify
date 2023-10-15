@@ -31,6 +31,7 @@ import { getMeasurePopulations } from '../../util/MeasurePopulations';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
+import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -50,6 +51,7 @@ function PatientCreationPanel() {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
   }, [measureBundle]);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
+  const dataRequirements = useRecoilValue(dataRequirementsState);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -203,7 +205,7 @@ function PatientCreationPanel() {
     download(filename, bundleString);
   };
 
-  const getInitialPatientResource = () => {
+  const getInitialPatientResource = (dataReqs: fhir4.DataRequirement[] | null) => {
     if (isPatientModalOpen) {
       if (currentPatient) {
         return JSON.stringify(currentPatients[currentPatient].patient, null, 2);
@@ -215,7 +217,13 @@ function PatientCreationPanel() {
         // Default to age 21 at time of measurement period, if specified
         const birthDate = measurementPeriod.start ? new Date(measurementPeriod.start) : new Date();
         birthDate.setFullYear(birthDate.getFullYear() - 21);
-        return createPatientResourceString(birthDate.toISOString().split('T')[0]);
+        // make an array of all the profiles on each data requirement if they exist
+        const profiles = dataReqs?.flatMap(dr => dr.profile);
+        // set qicorePatient to true is the profile on any of the data requirements is qicore
+        const qicorePatient = profiles?.find(p => p?.includes('http://hl7.org/fhir/us/qicore/StructureDefinition'))
+          ? true
+          : false;
+        return createPatientResourceString(qicorePatient, birthDate.toISOString().split('T')[0]);
       }
     }
     return undefined;
@@ -390,7 +398,7 @@ function PatientCreationPanel() {
         onClose={closePatientModal}
         title="Edit Patient Resource"
         onSave={updatePatientTestCase}
-        initialValue={getInitialPatientResource()}
+        initialValue={getInitialPatientResource(dataRequirements)}
       />
       <ConfirmationModal
         open={isConfirmationModalOpen}

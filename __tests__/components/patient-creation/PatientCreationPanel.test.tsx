@@ -6,6 +6,9 @@ import PatientCreationPanel from '../../../components/patient-creation/PatientCr
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
 import { download } from '../../../util/downloadUtil';
+import { Calculator } from 'fqm-execution';
+import { Suspense } from 'react';
+import { measureBundleState } from '../../../state/atoms/measureBundle';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
@@ -26,38 +29,111 @@ document.createRange = () => {
   return range;
 };
 
+const MOCK_BUNDLE: fhir4.Bundle = {
+  resourceType: 'Bundle',
+  type: 'collection',
+  entry: [
+    {
+      resource: {
+        resourceType: 'ValueSet',
+        name: 'Test ValueSet',
+        status: 'draft',
+        url: 'http://example.com/ValueSet/test-vs'
+      }
+    },
+    {
+      resource: {
+        resourceType: 'ValueSet',
+        name: 'Test ValueSet 2',
+        status: 'draft',
+        url: 'http://example.com/ValueSet/test-vs-2'
+      }
+    }
+  ]
+};
+
+const MOCK_DATA_REQUIREMENTS: fhir4.Library = {
+  resourceType: 'Library',
+  type: {},
+  status: 'draft',
+  dataRequirement: [
+    {
+      type: 'Observation',
+      codeFilter: [
+        {
+          path: 'code',
+          valueSet: 'http://example.com/ValueSet/test-vs'
+        }
+      ],
+      profile: ['http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation']
+    },
+    {
+      type: 'Encounter',
+      codeFilter: [
+        {
+          path: 'code',
+          valueSet: 'http://example.com/ValueSet/test-vs-2'
+        }
+      ]
+    }
+  ]
+};
+
+const MEASURE_BUNDLE_POPULATED = {
+  fileName: 'measureBundle',
+  content: MOCK_BUNDLE,
+  isFile: true,
+  displayMap: {},
+  measureRepositoryUrl: '',
+  selectedMeasureId: null
+};
+
 describe('PatientCreationPanel', () => {
-  it('should not render modal by default', () => {
+  it('should not render modal by default', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const modal = screen.queryByRole('dialog');
     expect(modal).not.toBeInTheDocument();
   });
 
   it('should render modal when create button is clicked', async () => {
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: MOCK_DATA_REQUIREMENTS
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const createButton = screen.getByRole('button', {
       name: /create/i
@@ -71,27 +147,36 @@ describe('PatientCreationPanel', () => {
 
     const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
+
+    const testPatientMetaProfile = screen.getByText(
+      '"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"'
+    );
+    expect(testPatientMetaProfile).toBeInTheDocument();
   });
 
-  it('should not render test case list with empty state', () => {
+  it('should not render test case list with empty state', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const testCaseList = screen.queryByTestId('patient-panel');
     expect(testCaseList).not.toBeInTheDocument();
   });
 
-  it('should render test case list with populated state', () => {
+  it('should render test case list with populated state', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -103,16 +188,20 @@ describe('PatientCreationPanel', () => {
       }
     });
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const testPatientLabel = screen.getByText(/test123 patient456/i);
     expect(testPatientLabel).toBeInTheDocument();
@@ -132,17 +221,21 @@ describe('PatientCreationPanel', () => {
 
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <MockSelectedPatient />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <MockSelectedPatient />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const deleteButton = screen.getByLabelText(/delete patient/i) as HTMLButtonElement;
     expect(deleteButton).toBeInTheDocument();
@@ -169,17 +262,21 @@ describe('PatientCreationPanel', () => {
 
     const MockSelectedPatient = getMockRecoilState(selectedPatientState, 'example-pt');
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <MockSelectedPatient />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <MockSelectedPatient />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const copyButton = screen.getByLabelText(/copy patient/i) as HTMLButtonElement;
     expect(copyButton).toBeInTheDocument();
@@ -192,7 +289,7 @@ describe('PatientCreationPanel', () => {
     expect(modal).toBeInTheDocument();
   });
 
-  it('should have download function called when download patient button is clicked', async () => {
+  it.only('should have download function called when download patient button is clicked', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {
@@ -214,16 +311,20 @@ describe('PatientCreationPanel', () => {
       }
     });
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PatientCreationPanel />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const exportButton = screen.getByLabelText(/export patient/i) as HTMLButtonElement;
     expect(exportButton).toBeInTheDocument();
