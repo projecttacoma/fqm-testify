@@ -8,55 +8,34 @@ import { Enums } from 'fqm-execution';
 
 export function createPatientResourceString(qicorePatient: boolean, birthDate: string): string {
   const id = uuidv4();
-  let pt: fhir4.Patient;
 
   // NOTE: should add non-binary genders in the future
   const gender = Math.random() < 0.5 ? 'male' : 'female';
 
+  const pt: fhir4.Patient = {
+    resourceType: 'Patient',
+    id,
+    identifier: [
+      {
+        use: 'usual',
+        system: 'http://example.com/test-id',
+        value: `test-patient-${id}`
+      }
+    ],
+    name: [
+      {
+        family: getRandomLastName(),
+        given: [getRandomFirstName(gender)]
+      }
+    ],
+    gender,
+    birthDate
+  };
+
   // if qicorePatient is true, add qicore-patient profile to the patient's meta.profile
   if (qicorePatient) {
-    pt = {
-      resourceType: 'Patient',
-      id,
-      meta: {
-        profile: ['http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient']
-      },
-      identifier: [
-        {
-          use: 'usual',
-          system: 'http://example.com/test-id',
-          value: `test-patient-${id}`
-        }
-      ],
-      name: [
-        {
-          family: getRandomLastName(),
-          given: [getRandomFirstName(gender)]
-        }
-      ],
-      gender,
-      birthDate
-    };
-  } else {
-    pt = {
-      resourceType: 'Patient',
-      id,
-      identifier: [
-        {
-          use: 'usual',
-          system: 'http://example.com/test-id',
-          value: `test-patient-${id}`
-        }
-      ],
-      name: [
-        {
-          family: getRandomLastName(),
-          given: [getRandomFirstName(gender)]
-        }
-      ],
-      gender,
-      birthDate
-    };
+    pt['meta'] = {};
+    pt['meta']['profile'] = ['http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient'];
   }
 
   return JSON.stringify(pt, null, 2);
