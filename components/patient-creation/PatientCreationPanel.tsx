@@ -219,7 +219,7 @@ function PatientCreationPanel() {
         birthDate.setFullYear(birthDate.getFullYear() - 21);
         // make an array of all the profiles on each data requirement if they exist
         const profiles = dataReqs?.flatMap(dr => dr.profile);
-        // set qicorePatient to true is the profile on any of the data requirements is qicore
+        // set qicorePatient to true if the profile on any of the data requirements is qicore
         const qicorePatient = profiles?.find(p => p?.includes('http://hl7.org/fhir/us/qicore/StructureDefinition'))
           ? true
           : false;

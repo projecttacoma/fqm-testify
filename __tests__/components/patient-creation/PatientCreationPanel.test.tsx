@@ -289,7 +289,7 @@ describe('PatientCreationPanel', () => {
     expect(modal).toBeInTheDocument();
   });
 
-  it.only('should have download function called when download patient button is clicked', async () => {
+  it('should have download function called when download patient button is clicked', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {
       'example-pt': {
         patient: {

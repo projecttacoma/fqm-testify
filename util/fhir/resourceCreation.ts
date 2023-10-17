@@ -13,7 +13,7 @@ export function createPatientResourceString(qicorePatient: boolean, birthDate: s
   // NOTE: should add non-binary genders in the future
   const gender = Math.random() < 0.5 ? 'male' : 'female';
 
-  // if qicorePatient is true, add qicore-patient to the patient's meta.profile
+  // if qicorePatient is true, add qicore-patient profile to the patient's meta.profile
   if (qicorePatient) {
     pt = {
       resourceType: 'Patient',
