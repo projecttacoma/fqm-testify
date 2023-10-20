@@ -34,7 +34,7 @@
     "dayjs": "^1.11.7",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
-    "fqm-execution": "^1.3.1",
+    "fqm-execution": "^1.3.2",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
     "luxon": "^2.5.2",
