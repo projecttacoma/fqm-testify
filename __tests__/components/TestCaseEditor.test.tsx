@@ -1,10 +1,10 @@
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
-import { RouterContext } from 'next/dist/shared/lib/router-context';
 import TestCaseEditor from '../../components/TestCaseEditor';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { createMockRouter, getMockRecoilState, mantineRecoilWrap, mockResizeObserver } from '../helpers/testHelpers';
 import { Suspense } from 'react';
+import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 describe('TestCaseEditor', () => {
   beforeAll(() => {

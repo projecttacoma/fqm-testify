@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { createMockRouter, getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import AppHeader from '../../../components/utils/AppHeader';
-import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { MOCK_MEASURE_BUNDLE } from '../../../fixtures/test/measureBundle';
 import { measurementPeriodEndState, measurementPeriodStartState } from '../../../state/atoms/measurementPeriod';
 import { DateTime } from 'luxon';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
+import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 describe('AppHeader', () => {
   it('renders a heading with title and no card for base url', () => {

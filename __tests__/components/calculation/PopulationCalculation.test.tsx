@@ -4,10 +4,10 @@ import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
 import { createMockRouter, getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 import { DetailedResult } from '../../../util/types';
+import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 const MOCK_DETAILED_RESULT: DetailedResult = {
   patientId: '',

@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { mantineRecoilWrap, getMockRecoilState, createMockRouter } from '../../helpers/testHelpers';
 import PatientCreationPanel from '../../../components/patient-creation/PatientCreationPanel';
 import { patientTestCaseState } from '../../../state/atoms/patientTestCase';
@@ -9,6 +8,7 @@ import { download } from '../../../util/downloadUtil';
 import { Calculator } from 'fqm-execution';
 import { Suspense } from 'react';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
+import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
