@@ -6,7 +6,7 @@ import { getResourcePatientReference } from './patient';
 import { getResourceCode } from './codes';
 import { Enums } from 'fqm-execution';
 
-export function createPatientResourceString(birthDate: string): string {
+export function createPatientResourceString(qicorePatient: boolean, birthDate: string): string {
   const id = uuidv4();
 
   // NOTE: should add non-binary genders in the future
@@ -31,6 +31,12 @@ export function createPatientResourceString(birthDate: string): string {
     gender,
     birthDate
   };
+
+  // if qicorePatient is true, add qicore-patient profile to the patient's meta.profile
+  if (qicorePatient) {
+    pt['meta'] = {};
+    pt['meta']['profile'] = ['http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient'];
+  }
 
   return JSON.stringify(pt, null, 2);
 }
@@ -166,6 +172,9 @@ export function createFHIRResourceString(
     resourceType: dr.type,
     id: uuidv4()
   };
+  if (dr.profile) {
+    resource.meta = { profile: dr.profile };
+  }
   getResourceCode(resource, dr, mb);
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);

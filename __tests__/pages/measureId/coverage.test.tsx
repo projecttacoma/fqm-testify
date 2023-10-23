@@ -1,8 +1,8 @@
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '../../helpers/testHelpers';
 import ClauseCoveragePage from '../../../pages/[measureId]/coverage';
+import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 describe('coverage page rendering', () => {
   it('should display back button', async () => {
