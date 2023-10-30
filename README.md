@@ -25,7 +25,7 @@ Tooling for analysis of Electronic Clinical Quality Measures (eCQMs) based on th
 
 ### Prerequisites
 
-- [Node.js >=11.15.0](https://nodejs.org/en/)
+- [Node.js >=18.0.0](https://nodejs.org/en/)
 - [Git](https://git-scm.com/)
 
 ### Local Installation
