@@ -21,6 +21,7 @@ import { calculationLoading } from '../state/atoms/calculationLoading';
 import { CircleCheck } from 'tabler-icons-react';
 import PopulationComparisonTable from './calculation/PopulationComparisonTable';
 import PopulationComparisonTablePopover from './calculation/PopulationComparisonTableControl';
+import ResultPanel from './calculation/ResultPanel';
 
 const useStyles = createStyles(theme => ({
   resourcePanelRoot: {
@@ -39,7 +40,7 @@ const useStyles = createStyles(theme => ({
     overflowY: 'scroll'
   },
   calculation: {
-    maxHeight: '100%',
+    maxHeight: '100vh',
     display: 'flex',
     flexDirection: 'column'
   },
@@ -79,7 +80,8 @@ export default function TestCaseEditor() {
           <ResourcePanel />
         </Grid.Col>
         <Grid.Col span={6} className={cx(classes.calculation, classes.highlightPanelRoot)}>
-          <Stack h={50}>
+          {selectedPatient ? <ResultPanel patientId={selectedPatient} /> : renderPanelPlaceholderText()}
+          {/* <Stack h={50}>
             {selectedPatient ? (
               <Group position="right">
                 <Center pr={20}>
@@ -130,7 +132,7 @@ export default function TestCaseEditor() {
             <Stack className={classes.highlighting}>
               <MeasureHighlightingPanel patientId={selectedPatient} />
             </Stack>
-          )}
+          )} */}
         </Grid.Col>
       </Grid>
     </>

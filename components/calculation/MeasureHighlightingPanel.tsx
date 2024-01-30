@@ -1,59 +1,51 @@
 import { ActionIcon, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
-import { useRecoilValue } from 'recoil';
 import parse, { domToReact } from 'html-react-parser';
-import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Element as DomElement } from 'domhandler';
 import { Search, X } from 'tabler-icons-react';
 import PrettyOutput from './PrettyOutput';
+import { DetailedPopulationGroupResult } from 'fqm-execution';
 
 const useStyles = createStyles({
   highlightedMarkup: {
     '& pre': {
       whiteSpace: 'pre-wrap'
     }
-  },
-  panel: {
-    maxHeight: '100%',
-    overflow: 'scroll'
   }
 });
 
 export interface MeasureHighlightingPanelProps {
-  patientId: string;
+  dr: DetailedPopulationGroupResult;
 }
 
-export default function MeasureHighlightingPanel({ patientId }: MeasureHighlightingPanelProps) {
+export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPanelProps) {
   const { classes } = useStyles();
   const [searchValue, setSearchValue] = useState('');
-  const detailedResultLookup = useRecoilValue(detailedResultLookupState);
-  const parsedHTML = useMemo(() => {
-    const parsedHTML = parse(detailedResultLookup[patientId]?.detailedResults?.[0].html || '', {
-      replace: elem => {
-        if ((elem as DomElement).attribs?.['data-statement-name']) {
-          const statementName = (elem as DomElement).attribs['data-statement-name'];
-          const libraryName = (elem as DomElement).attribs['data-library-name'];
-          const statementResult = detailedResultLookup[patientId]?.detailedResults?.[0].statementResults.find(
-            statement => statement.statementName === statementName && statement.libraryName === libraryName
-          );
-          return (
-            <>
-              {domToReact([elem])}
-              <PrettyOutput statement={statementResult} />
-            </>
-          );
-        }
+
+  const parsedHTML = parse(dr.html || '', {
+    replace: elem => {
+      if ((elem as DomElement).attribs?.['data-statement-name']) {
+        const statementName = (elem as DomElement).attribs['data-statement-name'];
+        const libraryName = (elem as DomElement).attribs['data-library-name'];
+        const statementResult = dr.statementResults.find(
+          statement => statement.statementName === statementName && statement.libraryName === libraryName
+        );
+        return (
+          <>
+            {domToReact([elem])}
+            <PrettyOutput statement={statementResult} />
+          </>
+        );
       }
-    });
-    return parsedHTML;
-  }, [detailedResultLookup, patientId]);
+    }
+  });
 
   return (
     <>
       <Space h="md" />
       <Autocomplete
         data={
-          detailedResultLookup[patientId]?.detailedResults?.[0].statementResults
+          dr.statementResults
             .filter(statementResult => statementResult.relevance !== 'NA')
             .map(s => `${s.libraryName}."${s.statementName}"`) || ['']
         }
