@@ -1,12 +1,12 @@
-import { createStyles, Table, Text } from '@mantine/core';
+import { Accordion, Box, createStyles, ScrollArea, Table, Text } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { getMeasurePopulationsForSelection, MultiSelectData, getPopShorthand } from '../../util/MeasurePopulations';
-import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { DetailedPopulationGroupResult, PopulationResult } from 'fqm-execution/build/types/Calculator';
 import React from 'react';
+import PopulationComparisonTablePopover from './PopulationComparisonTableControl';
 
 const useStyles = createStyles({
   highlightRed: {
@@ -20,6 +20,10 @@ const useStyles = createStyles({
     color: '#20744c',
     borderBottomColor: '#20744c',
     borderBottomStyle: 'solid'
+  },
+  accordionControlBox: {
+    display: 'flex',
+    alignItems: 'center'
   }
 });
 
@@ -32,11 +36,16 @@ export interface ResultValues {
   actual: Record<string, number | undefined>;
 }
 
-export default function PopulationComparisonTable({ patientId }: { patientId: string }) {
+export interface PopulationComparisonTableProps {
+  patientId: string;
+  dr: DetailedPopulationGroupResult;
+}
+
+export default function PopulationComparisonTable({ patientId, dr }: PopulationComparisonTableProps) {
   const { classes } = useStyles();
   const measureBundle = useRecoilValue(measureBundleState);
-  const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const currentPatients = useRecoilValue(patientTestCaseState);
+  const [accValue, setAccValue] = useState<string | null>('table');
 
   const measure = useMemo(() => {
     return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
@@ -249,29 +258,44 @@ export default function PopulationComparisonTable({ patientId }: { patientId: st
   }
 
   if (measure) {
-    const group = detailedResultLookup[patientId]?.detailedResults?.[0];
+    const group = dr;
     const allValues = [constructPatientValues(group), ...constructEpisodeValues(group)];
     const pops = Object.keys(allValues[0].actual); //patient actual keys
 
     return (
       <>
-        <div />
-
-        <Table horizontalSpacing="xl">
-          <thead>
-            <tr>
-              <th />
-              {pops.map(p => (
-                <th key={p}>{p}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {allValues.map(r => {
-              return rowsForResult(r, pops);
-            })}
-          </tbody>
-        </Table>
+        <ScrollArea style={accValue ? { flex: 1 } : {}}>
+          <Accordion chevronPosition="left" defaultValue="table" value={accValue} onChange={setAccValue}>
+            <Accordion.Item value="table">
+              <Box className={classes.accordionControlBox}>
+                <Accordion.Control>
+                  <Text size="xl" weight={700}>
+                    Population Comparison Table
+                  </Text>
+                </Accordion.Control>
+                <PopulationComparisonTablePopover />
+              </Box>
+              <Accordion.Panel>
+                <div />
+                <Table horizontalSpacing="xl">
+                  <thead>
+                    <tr>
+                      <th />
+                      {pops.map(p => (
+                        <th key={p}>{p}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allValues.map(r => {
+                      return rowsForResult(r, pops);
+                    })}
+                  </tbody>
+                </Table>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
+        </ScrollArea>
       </>
     );
   } else {

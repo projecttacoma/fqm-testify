@@ -1,17 +1,4 @@
-import {
-  Accordion,
-  Box,
-  Center,
-  createStyles,
-  Grid,
-  Group,
-  Loader,
-  ScrollArea,
-  Space,
-  Stack,
-  Tabs,
-  Text
-} from '@mantine/core';
+import { Center, createStyles, Grid, Group, Loader, Space, Stack, Tabs, Text } from '@mantine/core';
 import React, { useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
@@ -21,7 +8,6 @@ import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
 import { CircleCheck } from 'tabler-icons-react';
-import PopulationComparisonTablePopover from './calculation/PopulationComparisonTableControl';
 import PopulationComparisonTable from './calculation/PopulationComparisonTable';
 
 const useStyles = createStyles(theme => ({
@@ -55,10 +41,6 @@ const useStyles = createStyles(theme => ({
     overflowY: 'scroll',
     flex: 1
   },
-  accordionControlBox: {
-    display: 'flex',
-    alignItems: 'center'
-  },
   tabsList: {
     height: '75px'
   }
@@ -67,7 +49,6 @@ const useStyles = createStyles(theme => ({
 export default function TestCaseEditor() {
   const isCalculationLoading = useRecoilValue(calculationLoading);
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const [accValue, setAccValue] = useState<string | null>('table');
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
   const [activeTab, setActiveTab] = useState<string | null>('first');
 
@@ -130,23 +111,7 @@ export default function TestCaseEditor() {
                     </Group>
                   </Stack>
                   <Space />
-                  <ScrollArea style={accValue ? { flex: 1 } : {}}>
-                    <Accordion chevronPosition="left" defaultValue="table" value={accValue} onChange={setAccValue}>
-                      <Accordion.Item value="table">
-                        <Box className={classes.accordionControlBox}>
-                          <Accordion.Control>
-                            <Text size="xl" weight={700}>
-                              Population Comparison Table
-                            </Text>
-                          </Accordion.Control>
-                          <PopulationComparisonTablePopover />
-                        </Box>
-                        <Accordion.Panel>
-                          <PopulationComparisonTable patientId={selectedPatient} />
-                        </Accordion.Panel>
-                      </Accordion.Item>
-                    </Accordion>
-                  </ScrollArea>
+                  <PopulationComparisonTable patientId={selectedPatient} dr={dr} />
                   <Stack className={classes.highlighting}>
                     <MeasureHighlightingPanel dr={dr} />
                   </Stack>
