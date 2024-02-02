@@ -50,7 +50,7 @@ export default function TestCaseEditor() {
   const isCalculationLoading = useRecoilValue(calculationLoading);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
-  const [activeTab, setActiveTab] = useState<string | null>('first');
+  const [activeTab, setActiveTab] = useState<string | null>('0');
 
   const { classes, cx } = useStyles();
 
@@ -81,14 +81,14 @@ export default function TestCaseEditor() {
           {selectedPatient ? (
             <Tabs value={activeTab} onTabChange={setActiveTab} className={classes.calculation}>
               <Tabs.List className={classes.tabsList}>
-                {detailedResults?.map(dr => (
-                  <Tabs.Tab value={dr.groupId} key={dr.groupId}>
+                {detailedResults?.map((dr, index) => (
+                  <Tabs.Tab value={index.toString()} key={dr.groupId}>
                     {dr.groupId}
                   </Tabs.Tab>
                 ))}
               </Tabs.List>
-              {detailedResults?.map(dr => (
-                <Tabs.Panel value={dr.groupId} key={dr.groupId} className={classes.tabsPanel}>
+              {detailedResults?.map((dr, index) => (
+                <Tabs.Panel value={index.toString()} key={dr.groupId} className={classes.tabsPanel}>
                   <Stack h={50}>
                     <Group position="right">
                       <Center pr={20}>
