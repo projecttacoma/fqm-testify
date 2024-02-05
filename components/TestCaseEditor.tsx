@@ -1,14 +1,11 @@
-import { Center, createStyles, Grid, Group, Loader, Space, Stack, Tabs, Text } from '@mantine/core';
-import React, { useMemo, useState } from 'react';
+import { createStyles, Grid, Text } from '@mantine/core';
+import React, { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
 import ResourcePanel from './resource-creation/ResourcePanel';
-import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
-import { calculationLoading } from '../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
-import { CircleCheck } from 'tabler-icons-react';
-import PopulationComparisonTable from './calculation/PopulationComparisonTable';
+import PopulationResults from './calculation/PopuulationResults';
 
 const useStyles = createStyles(theme => ({
   resourcePanelRoot: {
@@ -47,10 +44,8 @@ const useStyles = createStyles(theme => ({
 }));
 
 export default function TestCaseEditor() {
-  const isCalculationLoading = useRecoilValue(calculationLoading);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const detailedResultLookup = useRecoilValue(detailedResultLookupState);
-  const [activeTab, setActiveTab] = useState<string | null>('0');
 
   const { classes, cx } = useStyles();
 
@@ -78,46 +73,8 @@ export default function TestCaseEditor() {
           <ResourcePanel />
         </Grid.Col>
         <Grid.Col span={6} className={cx(classes.calculation, classes.highlightPanelRoot)}>
-          {selectedPatient ? (
-            <Tabs value={activeTab} onTabChange={setActiveTab} className={classes.calculation}>
-              <Tabs.List className={classes.tabsList}>
-                {detailedResults?.map((dr, index) => (
-                  <Tabs.Tab value={index.toString()} key={dr.groupId}>
-                    {dr.groupId}
-                  </Tabs.Tab>
-                ))}
-              </Tabs.List>
-              {detailedResults?.map((dr, index) => (
-                <Tabs.Panel value={index.toString()} key={dr.groupId} className={classes.tabsPanel}>
-                  <Stack h={50}>
-                    <Group position="right">
-                      <Center pr={20}>
-                        {isCalculationLoading ? (
-                          <Center>
-                            <Loader size={24} />
-                            <Text italic color="dimmed" pl={4}>
-                              Calculating...
-                            </Text>
-                          </Center>
-                        ) : (
-                          <Center>
-                            <CircleCheck color="green" size={24} />
-                            <Text italic color="dimmed" pl={4}>
-                              Up to date
-                            </Text>
-                          </Center>
-                        )}
-                      </Center>
-                    </Group>
-                  </Stack>
-                  <Space />
-                  <PopulationComparisonTable patientId={selectedPatient} dr={dr} />
-                  <Stack className={classes.highlighting}>
-                    <MeasureHighlightingPanel dr={dr} />
-                  </Stack>
-                </Tabs.Panel>
-              ))}
-            </Tabs>
+          {selectedPatient && detailedResults ? (
+            <PopulationResults detailedResults={detailedResults} patientId={selectedPatient} />
           ) : (
             renderPanelPlaceholderText()
           )}
