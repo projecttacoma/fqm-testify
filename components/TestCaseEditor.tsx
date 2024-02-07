@@ -1,26 +1,11 @@
-import {
-  Accordion,
-  Box,
-  Center,
-  createStyles,
-  Grid,
-  Group,
-  Loader,
-  ScrollArea,
-  Space,
-  Stack,
-  Text
-} from '@mantine/core';
-import React, { useState } from 'react';
+import { createStyles, Grid, Text } from '@mantine/core';
+import React, { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
 import ResourcePanel from './resource-creation/ResourcePanel';
-import MeasureHighlightingPanel from './calculation/MeasureHighlightingPanel';
-import { calculationLoading } from '../state/atoms/calculationLoading';
-import { CircleCheck } from 'tabler-icons-react';
-import PopulationComparisonTable from './calculation/PopulationComparisonTable';
-import PopulationComparisonTablePopover from './calculation/PopulationComparisonTableControl';
+import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
+import PopulationResults from './calculation/PopuulationResults';
 
 const useStyles = createStyles(theme => ({
   resourcePanelRoot: {
@@ -43,23 +28,32 @@ const useStyles = createStyles(theme => ({
     display: 'flex',
     flexDirection: 'column'
   },
+  tabsPanel: {
+    maxHeight: 'calc(100% - 75px)',
+    display: 'flex',
+    flexDirection: 'column'
+  },
   highlighting: {
     maxHeight: 'calc(100% - 50px)',
     overflowY: 'scroll',
     flex: 1
   },
-  accordionControlBox: {
-    display: 'flex',
-    alignItems: 'center'
+  tabsList: {
+    height: '75px'
   }
 }));
 
 export default function TestCaseEditor() {
-  const isCalculationLoading = useRecoilValue(calculationLoading);
   const selectedPatient = useRecoilValue(selectedPatientState);
-  const [accValue, setAccValue] = useState<string | null>('table');
+  const detailedResultLookup = useRecoilValue(detailedResultLookupState);
 
   const { classes, cx } = useStyles();
+
+  const detailedResults = useMemo(() => {
+    if (selectedPatient) {
+      return detailedResultLookup[selectedPatient]?.detailedResults;
+    }
+  }, [detailedResultLookup, selectedPatient]);
 
   const renderPanelPlaceholderText = () => {
     return (
@@ -79,57 +73,10 @@ export default function TestCaseEditor() {
           <ResourcePanel />
         </Grid.Col>
         <Grid.Col span={6} className={cx(classes.calculation, classes.highlightPanelRoot)}>
-          <Stack h={50}>
-            {selectedPatient ? (
-              <Group position="right">
-                <Center pr={20}>
-                  {isCalculationLoading ? (
-                    <Center>
-                      <Loader size={24} />
-                      <Text italic color="dimmed" pl={4}>
-                        Calculating...
-                      </Text>
-                    </Center>
-                  ) : (
-                    <Center>
-                      <CircleCheck color="green" size={24} />
-                      <Text italic color="dimmed" pl={4}>
-                        Up to date
-                      </Text>
-                    </Center>
-                  )}
-                </Center>
-              </Group>
-            ) : (
-              renderPanelPlaceholderText()
-            )}
-          </Stack>
-          <Space />
-          <ScrollArea style={accValue ? { flex: 1 } : {}}>
-            {selectedPatient ? (
-              <Accordion chevronPosition="left" defaultValue="table" value={accValue} onChange={setAccValue}>
-                <Accordion.Item value="table">
-                  <Box className={classes.accordionControlBox}>
-                    <Accordion.Control>
-                      <Text size="xl" weight={700}>
-                        Population Comparison Table
-                      </Text>
-                    </Accordion.Control>
-                    <PopulationComparisonTablePopover />
-                  </Box>
-                  <Accordion.Panel>
-                    <PopulationComparisonTable patientId={selectedPatient} />
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </Accordion>
-            ) : (
-              ''
-            )}
-          </ScrollArea>
-          {selectedPatient && (
-            <Stack className={classes.highlighting}>
-              <MeasureHighlightingPanel patientId={selectedPatient} />
-            </Stack>
+          {selectedPatient && detailedResults ? (
+            <PopulationResults detailedResults={detailedResults} patientId={selectedPatient} />
+          ) : (
+            renderPanelPlaceholderText()
           )}
         </Grid.Col>
       </Grid>

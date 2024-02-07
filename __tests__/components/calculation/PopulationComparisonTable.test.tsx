@@ -5,8 +5,8 @@ import PopulationComparisonTable from '../../../components/calculation/Populatio
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { patientTestCaseState, TestCase } from '../../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../../state/atoms/selectedPatient';
-import { getMockRecoilState, mantineRecoilWrap } from '../../helpers/testHelpers';
-import { Enums } from 'fqm-execution';
+import { getMockRecoilState, mantineRecoilWrap, mockResizeObserver } from '../../helpers/testHelpers';
+import { DetailedPopulationGroupResult, Enums } from 'fqm-execution';
 import { detailedResultLookupState } from '../../../state/atoms/detailedResultLookup';
 import { DetailedResult } from '../../../util/types';
 
@@ -23,6 +23,17 @@ const MOCK_DETAILED_RESULT: DetailedResult = {
         { populationType: Enums.PopulationType.NUMER, criteriaExpression: 'Numerator', result: true }
       ]
     }
+  ]
+};
+
+const MOCK_DETAILED_GROUP_RESULT: DetailedPopulationGroupResult = {
+  groupId: '',
+  statementResults: [],
+  populationResults: [
+    { populationType: Enums.PopulationType.IPP, criteriaExpression: 'Initial Population', result: true },
+    { populationType: Enums.PopulationType.DENOM, criteriaExpression: 'Denominator', result: false },
+    { populationType: Enums.PopulationType.DENEX, criteriaExpression: 'Denominator Exclusion', result: true },
+    { populationType: Enums.PopulationType.NUMER, criteriaExpression: 'Numerator', result: true }
   ]
 };
 
@@ -143,6 +154,10 @@ const MOCK_TEST_CASE: TestCase = {
 };
 
 describe('PopulationComparisonTable', () => {
+  beforeAll(() => {
+    window.ResizeObserver = mockResizeObserver;
+  });
+
   it('should render population comparison table', async () => {
     const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
     const MockPatients = getMockRecoilState(patientTestCaseState, MOCK_TEST_CASE);
@@ -158,7 +173,7 @@ describe('PopulationComparisonTable', () => {
             <MockSelectedPatient />
             <MockDetailedResultLookup />
             <Suspense>
-              <PopulationComparisonTable patientId={'example-pt'} />
+              <PopulationComparisonTable patientId={'example-pt'} dr={MOCK_DETAILED_GROUP_RESULT} />
             </Suspense>
           </>
         )
