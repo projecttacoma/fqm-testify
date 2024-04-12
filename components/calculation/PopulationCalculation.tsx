@@ -25,6 +25,7 @@ export default function PopulationCalculation() {
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
+  const [clauseUncoverageHTML, setClauseUncoverageHTML] = useState<string | null>(null);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
 
   /**
@@ -50,6 +51,7 @@ export default function PopulationCalculation() {
       calculateHTML: false,
       calculateSDEs: true,
       calculateClauseCoverage: true,
+      calculateClauseUncoverage: true,
       reportType: 'individual',
       measurementPeriodStart: measurementPeriod.start?.toISOString(),
       measurementPeriodEnd: measurementPeriod.end?.toISOString(),
@@ -64,9 +66,15 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
-      const { results, coverageHTML } = await Calculator.calculate(measureBundle.content, patientBundles, options);
+      const { results, coverageHTML, groupClauseUncoverageHTML } = await Calculator.calculate(measureBundle.content, patientBundles, options);
       if (coverageHTML) {
         setClauseCoverageHTML(coverageHTML);
+      }
+      if (groupClauseUncoverageHTML){
+        for (const key in groupClauseUncoverageHTML) {
+          const temp = groupClauseUncoverageHTML[key];
+          setClauseUncoverageHTML(temp); // TODO: will need to change for multiple groups 
+        }   
       }
       return results;
     } else return;
@@ -154,7 +162,8 @@ export default function PopulationCalculation() {
                       {
                         pathname: `/${measureBundle.content.id}/coverage`,
                         query: {
-                          clauseCoverageHTML
+                          clauseCoverageHTML,
+                          clauseUncoverageHTML
                         }
                       },
                       `/${measureBundle.content.id}/coverage`
