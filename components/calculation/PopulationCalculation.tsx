@@ -71,10 +71,8 @@ export default function PopulationCalculation() {
         setClauseCoverageHTML(coverageHTML);
       }
       if (groupClauseUncoverageHTML){
-        for (const key in groupClauseUncoverageHTML) {
-          const temp = groupClauseUncoverageHTML[key];
-          setClauseUncoverageHTML(temp); // TODO: will need to change for multiple groups 
-        }   
+        // TODO: use groupClauseUncoverageHTML key (the group id) to separate this HTML into multiple tabs (or similar)
+        setClauseUncoverageHTML(Object.values(groupClauseUncoverageHTML).join('<br>')); 
       }
       return results;
     } else return;
