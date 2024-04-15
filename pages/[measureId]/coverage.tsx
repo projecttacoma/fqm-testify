@@ -15,7 +15,6 @@ const ClauseCoveragePage = () => {
     clauseUncoverageHTML.length > 0
   ) {
     return (
-
       <Container size={'90%'}>
         <Group>
           <BackButton />
@@ -23,12 +22,8 @@ const ClauseCoveragePage = () => {
         </Group>
         <Tabs defaultValue="coverage" classNames={classes}>
           <Tabs.List grow>
-            <Tabs.Tab value="coverage" /*leftSection={<IconPhoto style={iconStyle} />} */>
-              Coverage
-            </Tabs.Tab>
-            <Tabs.Tab value="uncoverage" /*leftSection={<IconMessageCircle style={iconStyle} />}*/>
-              Uncoverage
-            </Tabs.Tab>
+            <Tabs.Tab value="coverage" /*leftSection={<IconPhoto style={iconStyle} />} */>Coverage</Tabs.Tab>
+            <Tabs.Tab value="uncoverage" /*leftSection={<IconMessageCircle style={iconStyle} />}*/>Uncoverage</Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="coverage">

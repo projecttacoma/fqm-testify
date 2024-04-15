@@ -1,16 +1,24 @@
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { createMockRouter } from '../../helpers/testHelpers';
+import { createMockRouter, mockResizeObserver } from '../../helpers/testHelpers';
 import ClauseCoveragePage from '../../../pages/[measureId]/coverage';
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
 
 describe('coverage page rendering', () => {
+  beforeAll(() => {
+    window.ResizeObserver = mockResizeObserver;
+  });
+
   it('should display back button', async () => {
     await act(async () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
+            query: {
+              measureId: 'measure-EXM130-7.3.000',
+              clauseCoverageHTML: 'test html',
+              clauseUncoverageHTML: 'test uncoverage html'
+            }
           })}
         >
           <ClauseCoveragePage />
@@ -27,7 +35,11 @@ describe('coverage page rendering', () => {
       render(
         <RouterContext.Provider
           value={createMockRouter({
-            query: { measureId: 'measure-EXM130-7.3.000', clauseCoverageHTML: 'test html' }
+            query: {
+              measureId: 'measure-EXM130-7.3.000',
+              clauseCoverageHTML: 'test html',
+              clauseUncoverageHTML: 'test uncoverage html'
+            }
           })}
         >
           <ClauseCoveragePage />
@@ -56,5 +68,9 @@ describe('coverage page rendering', () => {
     expect(
       screen.getByText('No clause coverage results available for measure bundle: measure-EXM130-7.3.000')
     ).toBeInTheDocument();
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 });
