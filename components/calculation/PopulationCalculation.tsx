@@ -66,17 +66,16 @@ export default function PopulationCalculation() {
     });
 
     if (measureBundle.content) {
-      const { results, coverageHTML, groupClauseUncoverageHTML } = await Calculator.calculate(
+      const { results, groupClauseCoverageHTML, groupClauseUncoverageHTML } = await Calculator.calculate(
         measureBundle.content,
         patientBundles,
         options
       );
-      if (coverageHTML) {
-        setClauseCoverageHTML(coverageHTML);
+      if (groupClauseCoverageHTML) {
+        setClauseCoverageHTML(JSON.stringify(groupClauseCoverageHTML));
       }
       if (groupClauseUncoverageHTML) {
-        // TODO: use groupClauseUncoverageHTML key (the group id) to separate this HTML into multiple tabs (or similar)
-        setClauseUncoverageHTML(Object.values(groupClauseUncoverageHTML).join('<br>'));
+        setClauseUncoverageHTML(JSON.stringify(groupClauseUncoverageHTML));
       }
       return results;
     } else return;
