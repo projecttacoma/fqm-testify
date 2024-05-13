@@ -26,52 +26,53 @@ const ClauseCoveragePage = () => {
           <BackButton />
           <h2>Clause coverage for measure bundle: {`${measureId}`}</h2>
         </Group>
-          <SegmentedControl
-            value={covValue}
-            onChange={setCovValue}
-            data={[
-              { label: 'Coverage', value: 'coverage' },
-              { label: 'Uncoverage', value: 'uncoverage' }
-            ]}
-          />
-        {covValue === 'coverage' ? 
-        <div>
-          <Tabs value={activeTab} onTabChange={setActiveTab} classNames={classes}>
-            <Tabs.List className={classes.tabsList}>
+        <SegmentedControl
+          value={covValue}
+          onChange={setCovValue}
+          data={[
+            { label: 'Coverage', value: 'coverage' },
+            { label: 'Uncoverage', value: 'uncoverage' }
+          ]}
+        />
+        {covValue === 'coverage' ? (
+          <div>
+            <Tabs value={activeTab} onTabChange={setActiveTab} classNames={classes}>
+              <Tabs.List className={classes.tabsList}>
+                {Object.keys(coverageRecord).map((key, index) => (
+                  <Tabs.Tab value={index.toString()} key={key}>
+                    {key}
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
               {Object.keys(coverageRecord).map((key, index) => (
-                <Tabs.Tab value={index.toString()} key={key}>
-                  {key}
-                </Tabs.Tab>
-              ))}
-            </Tabs.List>
-            {Object.keys(coverageRecord).map((key, index) => (
                 <Tabs.Panel value={index.toString()} key={key} className={classes.tabsPanel}>
                   <ScrollArea>
                     <div>{parse(coverageRecord[key])}</div>
                   </ScrollArea>
                 </Tabs.Panel>
               ))}
-          </Tabs>
-        </div> : 
-        <div>
-        <Tabs value={activeTab} onTabChange={setActiveTab} classNames={classes}>
-          <Tabs.List className={classes.tabsList}>
-            {Object.keys(uncoverageRecord).map((key, index) => (
-              <Tabs.Tab value={index.toString()} key={key}>
-                {key}
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
-          {Object.keys(uncoverageRecord).map((key, index) => (
-              <Tabs.Panel value={index.toString()} key={key} className={classes.tabsPanel}>
-                <ScrollArea>
-                  <div>{parse(uncoverageRecord[key])}</div>
-                </ScrollArea>
-              </Tabs.Panel>
-            ))}
-        </Tabs>
-      </div>
-        }
+            </Tabs>
+          </div>
+        ) : (
+          <div>
+            <Tabs value={activeTab} onTabChange={setActiveTab} classNames={classes}>
+              <Tabs.List className={classes.tabsList}>
+                {Object.keys(uncoverageRecord).map((key, index) => (
+                  <Tabs.Tab value={index.toString()} key={key}>
+                    {key}
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+              {Object.keys(uncoverageRecord).map((key, index) => (
+                <Tabs.Panel value={index.toString()} key={key} className={classes.tabsPanel}>
+                  <ScrollArea>
+                    <div>{parse(uncoverageRecord[key])}</div>
+                  </ScrollArea>
+                </Tabs.Panel>
+              ))}
+            </Tabs>
+          </div>
+        )}
       </Container>
     );
   } else {
