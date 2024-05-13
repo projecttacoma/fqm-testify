@@ -5,7 +5,7 @@ import { selectedPatientState } from '../state/atoms/selectedPatient';
 import PatientCreationPanel from './patient-creation/PatientCreationPanel';
 import ResourcePanel from './resource-creation/ResourcePanel';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
-import PopulationResults from './calculation/PopuulationResults';
+import PopulationResults from './calculation/PopulationResults';
 
 const useStyles = createStyles(theme => ({
   resourcePanelRoot: {

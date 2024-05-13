@@ -16,8 +16,8 @@ describe('coverage page rendering', () => {
           value={createMockRouter({
             query: {
               measureId: 'measure-EXM130-7.3.000',
-              clauseCoverageHTML: 'test html',
-              clauseUncoverageHTML: 'test uncoverage html'
+              clauseCoverageHTML: '{"testgroupID": "test html"}',
+              clauseUncoverageHTML: '{"testgroupID": "test uncoverage html"}'
             }
           })}
         >
@@ -37,8 +37,8 @@ describe('coverage page rendering', () => {
           value={createMockRouter({
             query: {
               measureId: 'measure-EXM130-7.3.000',
-              clauseCoverageHTML: 'test html',
-              clauseUncoverageHTML: 'test uncoverage html'
+              clauseCoverageHTML: '{"testgroupID": "test html"}',
+              clauseUncoverageHTML: '{"testgroupID": "test uncoverage html"}'
             }
           })}
         >
