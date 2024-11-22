@@ -30,8 +30,8 @@ export default function MeasureRepositoryUploadHeader() {
             </Text>
             <Text>
               The server must support the{' '}
-              <Anchor href="https://build.fhir.org/ig/HL7/cqf-measures/measure-repository-service.html#package">
-                $package
+              <Anchor href="https://build.fhir.org/ig/HL7/cqf-measures/OperationDefinition-cqfm-package.html">
+                $cqfm.package
               </Anchor>{' '}
               operation for Measure resources with the &quot;include-terminology&quot; parameter.
             </Text>
