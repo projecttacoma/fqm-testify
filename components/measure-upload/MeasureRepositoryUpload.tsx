@@ -149,7 +149,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
   }
 
   /**
-   * Sends a `POST` request to the `Measure/:id/$package` endpoint of the specified Measure
+   * Sends a `POST` request to the `Measure/:id/$cqfm.package` endpoint of the specified Measure
    * Repository Service. Checks the resulting bundle is valid and saves it if so.
    */
   async function retrieveMeasurePackage(id: string) {
@@ -163,7 +163,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
         color: 'blue'
       });
       setIsLoadingPackage(PACKAGE_STATES.LOADING);
-      const response = await fetch(`${measureRepositoryUrl}/Measure/${id}/$package`, MEASURE_RETRIEVAL_OPTIONS);
+      const response = await fetch(`${measureRepositoryUrl}/Measure/${id}/$cqfm.package`, MEASURE_RETRIEVAL_OPTIONS);
       const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
       if (responseBody.resourceType !== 'Bundle') {
         if (responseBody.resourceType === 'OperationOutcome') {
