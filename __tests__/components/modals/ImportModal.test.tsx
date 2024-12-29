@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import ImportModal, { ImportModalProps } from '../../../components/modals/ImportModal';
+import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
 describe('ImportModal', () => {
   it('should render a modal when set to open', () => {
@@ -9,7 +10,7 @@ describe('ImportModal', () => {
       onClose: jest.fn(),
       onImportSubmit: jest.fn()
     };
-    render(<ImportModal {...testImportModalProps} />);
+    render(mantineRecoilWrap(<ImportModal {...testImportModalProps} />));
 
     const modal = screen.getByRole('dialog');
     expect(modal).toBeInTheDocument();
@@ -21,7 +22,7 @@ describe('ImportModal', () => {
       onClose: jest.fn(),
       onImportSubmit: jest.fn()
     };
-    render(<ImportModal {...testImportModalProps} />);
+    render(mantineRecoilWrap(<ImportModal {...testImportModalProps} />));
 
     const modal = screen.queryByRole('dialog');
     expect(modal).not.toBeInTheDocument();
@@ -34,7 +35,7 @@ describe('ImportModal', () => {
       onImportSubmit: jest.fn()
     };
 
-    render(<ImportModal {...testImportModalProps} />);
+    render(mantineRecoilWrap(<ImportModal {...testImportModalProps} />));
 
     const submitButton = screen.getByRole('button', { name: 'Import' });
     expect(submitButton).toBeInTheDocument();
@@ -72,7 +73,7 @@ describe('ImportModal', () => {
       onImportSubmit: jest.fn()
     };
 
-    render(<ImportModal {...testImportModalProps} />);
+    render(mantineRecoilWrap(<ImportModal {...testImportModalProps} />));
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
     expect(cancelButton).toBeInTheDocument();

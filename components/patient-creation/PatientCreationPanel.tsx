@@ -32,6 +32,9 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
+import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
+import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
+import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsByType';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -52,6 +55,8 @@ function PatientCreationPanel() {
   }, [measureBundle]);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
   const dataRequirements = useRecoilValue(dataRequirementsState);
+  const drLookupByType = useRecoilValue(dataRequirementsLookupByType);
+  const switchOn = useRecoilValue(resourceSwitchOn);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -335,6 +340,9 @@ function PatientCreationPanel() {
                 </>
               );
               return;
+            }
+            if (switchOn) {
+              testCase.resources = minimizeTestCaseResources(testCase, measureBundle.content, drLookupByType);
             }
 
             draftState[testCase.patient.id] = testCase;
