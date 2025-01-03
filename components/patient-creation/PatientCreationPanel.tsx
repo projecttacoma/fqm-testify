@@ -34,7 +34,7 @@ import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
 import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
-import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsByType';
+import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);

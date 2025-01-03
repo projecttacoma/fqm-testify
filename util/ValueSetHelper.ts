@@ -1,7 +1,7 @@
 import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import fhirpath from 'fhirpath';
 import { parsedCodePaths } from '../util/codePaths';
-import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequirementsByType';
+import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequirementsLookupByType';
 
 export interface GetValueSetCodesProps {
   code?: string;
