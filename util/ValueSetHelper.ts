@@ -49,7 +49,6 @@ export function minimizeTestCaseResources(
       // see if it matches any data requirements in the lookup object
       const matchingDRType = drLookupByType[r.resource.resourceType];
       if (matchingDRType) {
-        // get the
         const codeInfo = parsedCodePaths[r.resource.resourceType];
         // if the matching resource type's lookup object has keepAll set to true, meaning
         // the codeFilter on the data requirement was undefined, keep any resources of that type

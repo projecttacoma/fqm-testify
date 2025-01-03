@@ -56,7 +56,7 @@ function PatientCreationPanel() {
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
   const dataRequirements = useRecoilValue(dataRequirementsState);
   const drLookupByType = useRecoilValue(dataRequirementsLookupByType);
-  const switchOn = useRecoilValue(resourceSwitchOn);
+  const minResources = useRecoilValue(resourceSwitchOn);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -341,7 +341,7 @@ function PatientCreationPanel() {
               );
               return;
             }
-            if (switchOn) {
+            if (minResources) {
               testCase.resources = minimizeTestCaseResources(testCase, measureBundle.content, drLookupByType);
             }
 
