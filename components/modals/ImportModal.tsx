@@ -180,8 +180,14 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
                 <Popover.Dropdown>
                   If set to minimize the resources on the Test Case, only resources relevant to the measure will be
                   included. Resources relevant to the measure are defined as resources included in the data requirements
-                  of the measure.
-                  <Anchor href="https://github.com/projecttacoma/fqm-testify#importing-a-patient-bundle">here</Anchor>.
+                  of the measure. See details{' '}
+                  <Anchor
+                    href="https://github.com/projecttacoma/fqm-testify#importing-a-patient-bundle"
+                    target="_blank"
+                  >
+                    here
+                  </Anchor>
+                  .
                 </Popover.Dropdown>
               </Popover>
               <Button
