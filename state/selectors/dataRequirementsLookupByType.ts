@@ -23,7 +23,8 @@ export const dataRequirementsLookupByType = selector<Record<string, DataRequirem
               dr.codeFilter.forEach(cf => {
                 if (cf.valueSet) {
                   result[dr.type].valueSets = result[dr.type].valueSets.concat(cf.valueSet);
-                } else if (cf.code) {
+                }
+                if (cf.code) {
                   result[dr.type].directCodes = result[dr.type].directCodes.concat(cf.code);
                 }
               });
@@ -34,10 +35,15 @@ export const dataRequirementsLookupByType = selector<Record<string, DataRequirem
             result[dr.type] = { keepAll: true, valueSets: [], directCodes: [] };
           } else {
             dr.codeFilter.forEach(cf => {
-              if (cf.valueSet) {
-                result[dr.type] = { keepAll: false, valueSets: [cf.valueSet], directCodes: [] };
-              } else if (cf.code) {
-                result[dr.type] = { keepAll: false, valueSets: [], directCodes: cf.code };
+              if (cf.valueSet && cf.code) {
+                result[dr.type] = { keepAll: false, valueSets: [cf.valueSet], directCodes: cf.code };
+              } else {
+                if (cf.valueSet) {
+                  result[dr.type] = { keepAll: false, valueSets: [cf.valueSet], directCodes: [] };
+                }
+                if (cf.code) {
+                  result[dr.type] = { keepAll: false, valueSets: [], directCodes: cf.code };
+                }
               }
             });
           }
