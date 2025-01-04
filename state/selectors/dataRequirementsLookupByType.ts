@@ -20,6 +20,10 @@ export const dataRequirementsLookupByType = selector<Record<string, DataRequirem
             if (dr.codeFilter === undefined) {
               result[dr.type].keepAll = true;
             } else {
+              // Note: even though the codeFilters on a DataRequirement are ANDed together, we are looking at them
+              // separately to see if there are ANY matches. Therefore, this lookup object is simply a list of
+              // all of the codeFilters and ignores any relationship they may have with each other based on their
+              // parent DataRequirement
               dr.codeFilter.forEach(cf => {
                 if (cf.valueSet) {
                   result[dr.type].valueSets = result[dr.type].valueSets.concat(cf.valueSet);
