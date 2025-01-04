@@ -111,25 +111,9 @@ export function minimizeTestCaseResources(
                   codeInfo.primaryCodePath
                 ) as fhir4.CodeableConcept[];
                 if (primaryCodeValue) {
-                  if (matchingDRType.valueSets.length > 0) {
-                    const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
-                    primaryCodeValue.forEach(pcv => {
-                      if (
-                        vsCodesAndSystems.find(vscas =>
-                          pcv.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
-                        )
-                      ) {
-                        newResources.push(r);
-                      }
-                    });
-                  }
-                  if (matchingDRType.directCodes.length > 0) {
-                    primaryCodeValue.forEach(pcv => {
-                      if (matchingDRType.directCodes.find(dc => pcv.coding?.find(c => c.code === dc.code))) {
-                        newResources.push(r);
-                      }
-                    });
-                  }
+                  primaryCodeValue.forEach(pcv => {
+                    checkCodesAndValueSets(pcv, matchingDRType, measureBundle, r, newResources);
+                  });
                 }
               } else {
                 const primaryCodeValue = fhirpath.evaluate(
@@ -150,20 +134,18 @@ export function minimizeTestCaseResources(
                   `${codeInfo.primaryCodePath}Coding`
                 ) as fhir4.Coding;
                 if (primaryCodeValue) {
-                  if (matchingDRType.valueSets.length > 0) {
+                  if (
+                    matchingDRType.directCodes.length > 0 &&
+                    matchingDRType.directCodes.find(
+                      dc => dc.code === primaryCodeValue.code && dc.system === primaryCodeValue.system
+                    )
+                  ) {
+                    newResources.push(r);
+                  } else if (matchingDRType.valueSets.length > 0) {
                     const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
                     if (
                       vsCodesAndSystems.find(
                         vscas => primaryCodeValue.code === vscas.code && primaryCodeValue.system === vscas.system
-                      )
-                    ) {
-                      newResources.push(r);
-                    }
-                  }
-                  if (matchingDRType.directCodes.length > 0) {
-                    if (
-                      matchingDRType.directCodes.find(
-                        dc => dc.code === primaryCodeValue.code && dc.system === primaryCodeValue.system
                       )
                     ) {
                       newResources.push(r);
