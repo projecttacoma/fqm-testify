@@ -94,7 +94,8 @@ const MOCK_TEST_CASE_POPULATED: TestCase = {
         },
         fullUrl: 'urn:uuid:example-procedure'
       }
-    ]
+    ],
+    minResources: false
   }
 };
 

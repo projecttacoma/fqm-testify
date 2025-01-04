@@ -132,6 +132,7 @@ function PatientCreationPanel() {
           patient: pt,
           fullUrl: draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
           resources: resources,
+          minResources: draftState[patientId]?.minResources,
           desiredPopulations: currentPatients[patientId]?.desiredPopulations
         };
       });
@@ -343,6 +344,9 @@ function PatientCreationPanel() {
             }
             if (minResources) {
               testCase.resources = minimizeTestCaseResources(testCase, measureBundle.content, drLookupByType);
+              testCase.minResources = true;
+            } else {
+              testCase.minResources = false;
             }
 
             draftState[testCase.patient.id] = testCase;

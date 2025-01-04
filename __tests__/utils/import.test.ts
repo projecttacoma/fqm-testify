@@ -118,6 +118,7 @@ describe('bundleToTestCase', () => {
       patient: TEST_PATIENT,
       fullUrl: 'urn:uuid:test-patient',
       resources: [{ resource: TEST_CONDITION, fullUrl: 'urn:uuid:test-condition' }],
+      minResources: false,
       desiredPopulations: []
     });
   });
@@ -183,6 +184,7 @@ describe('bundleToTestCase', () => {
       patient: TEST_PATIENT,
       fullUrl: 'urn:uuid:test-patient',
       resources: [{ resource: TEST_CONDITION, fullUrl: 'urn:uuid:test-condition' }],
+      minResources: false,
       desiredPopulations: ['initial-population', 'numerator', 'denominator']
     });
   });

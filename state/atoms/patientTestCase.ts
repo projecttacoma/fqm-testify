@@ -4,6 +4,7 @@ export interface TestCaseInfo {
   patient: fhir4.Patient;
   fullUrl: string;
   resources: fhir4.BundleEntry[];
+  minResources: boolean;
   desiredPopulations?: string[];
 }
 

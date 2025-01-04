@@ -61,7 +61,8 @@ const MOCK_TEST_CASE: TestCase = {
   'example-pt': {
     patient: EXAMPLE_PATIENT,
     fullUrl: 'urn:uuid:example-pt',
-    resources: []
+    resources: [],
+    minResources: false
   }
 };
 
