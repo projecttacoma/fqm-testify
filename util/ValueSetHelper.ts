@@ -2,6 +2,7 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import fhirpath from 'fhirpath';
 import { parsedCodePaths } from '../util/codePaths';
 import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequirementsLookupByType';
+import { CodeableConcept } from 'fhir/r2';
 
 export interface GetValueSetCodesProps {
   code?: string;
@@ -22,6 +23,39 @@ function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetVa
     });
   });
   return codesAndSystems;
+}
+
+/**
+ * Helper function for repeated logic in minimizeTestCaseResources that takes a primaryCodeValue,
+ * a resource, a matching DataRequirement of the same resourceType, a measureBundle, and a newResources
+ * array, checks that the primaryCodeValue exists and if the primaryCodeValue matches any of the
+ * directCodes or ValueSet codes of a DataRequirement of the same resourceType, the resource is added
+ * to the newResources array
+ */
+function checkCodesAndValueSets(
+  primaryCodeValue: fhir4.CodeableConcept,
+  matchingDRType: DataRequirementsLookupByTypeProps,
+  measureBundle: fhir4.Bundle | null,
+  resource: fhir4.BundleEntry,
+  newResources: fhir4.BundleEntry[]
+) {
+  if (primaryCodeValue) {
+    if (
+      matchingDRType.directCodes.length > 0 &&
+      matchingDRType.directCodes.find(dc => primaryCodeValue.coding?.find(c => c.code === dc.code))
+    ) {
+      newResources.push(resource);
+    } else if (matchingDRType.valueSets.length > 0) {
+      const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
+      if (
+        vsCodesAndSystems.find(vscas =>
+          primaryCodeValue.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
+        )
+      ) {
+        newResources.push(resource);
+      }
+    }
+  }
 }
 
 /**
@@ -67,23 +101,7 @@ export function minimizeTestCaseResources(
                   r.resource,
                   `${codeInfo.primaryCodePath}CodeableConcept`
                 )[0] as fhir4.CodeableConcept;
-                if (primaryCodeValue) {
-                  if (matchingDRType.valueSets.length > 0) {
-                    const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
-                    if (
-                      vsCodesAndSystems.find(vscas =>
-                        primaryCodeValue.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
-                      )
-                    ) {
-                      newResources.push(r);
-                    }
-                  }
-                  if (matchingDRType.directCodes.length > 0) {
-                    if (matchingDRType.directCodes.find(dc => primaryCodeValue.coding?.find(c => c.code === dc.code))) {
-                      newResources.push(r);
-                    }
-                  }
-                }
+                checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle, r, newResources);
               }
             } else {
               if (primaryCodeInfo.multipleCardinality === true) {
@@ -118,23 +136,7 @@ export function minimizeTestCaseResources(
                   r.resource,
                   codeInfo.primaryCodePath
                 )[0] as fhir4.CodeableConcept;
-                if (primaryCodeValue) {
-                  if (matchingDRType.valueSets.length > 0) {
-                    const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
-                    if (
-                      vsCodesAndSystems.find(vscas =>
-                        primaryCodeValue.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
-                      )
-                    ) {
-                      newResources.push(r);
-                    }
-                  }
-                  if (matchingDRType.directCodes.length > 0) {
-                    if (matchingDRType.directCodes.find(dc => primaryCodeValue.coding?.find(c => c.code === dc.code))) {
-                      newResources.push(r);
-                    }
-                  }
-                }
+                checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle, r, newResources);
               }
             }
           } else if (primaryCodeInfo.codeType === 'FHIR.Coding') {
