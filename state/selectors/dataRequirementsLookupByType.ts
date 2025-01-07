@@ -1,5 +1,6 @@
 import { selector } from 'recoil';
 import { dataRequirementsState } from './dataRequirements';
+import { parsedCodePaths } from '../../util/codePaths';
 
 export interface DataRequirementsLookupByTypeProps {
   keepAll: boolean;
@@ -24,11 +25,12 @@ export const dataRequirementsLookupByType = selector<Record<string, DataRequirem
               // separately to see if there are ANY matches. Therefore, this lookup object is simply a list of
               // all of the codeFilters and ignores any relationship they may have with each other based on their
               // parent DataRequirement
+              const primaryCodePath = parsedCodePaths[dr.type].primaryCodePath;
               dr.codeFilter.forEach(cf => {
-                if (cf.valueSet) {
+                if (cf.valueSet && cf.path === primaryCodePath) {
                   result[dr.type].valueSets = result[dr.type].valueSets.concat(cf.valueSet);
                 }
-                if (cf.code) {
+                if (cf.code && cf.path === primaryCodePath) {
                   result[dr.type].directCodes = result[dr.type].directCodes.concat(cf.code);
                 }
               });
