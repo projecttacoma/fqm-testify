@@ -34,16 +34,14 @@ function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetVa
 function checkCodesAndValueSets(
   primaryCodeValue: fhir4.CodeableConcept,
   matchingDRType: DataRequirementsLookupByTypeProps,
-  measureBundle: fhir4.Bundle | null,
-  resource: fhir4.BundleEntry,
-  newResources: fhir4.BundleEntry[]
-) {
+  measureBundle: fhir4.Bundle | null
+): boolean {
   if (primaryCodeValue) {
     if (
       matchingDRType.directCodes.length > 0 &&
       matchingDRType.directCodes.find(dc => primaryCodeValue.coding?.find(c => c.code === dc.code))
     ) {
-      newResources.push(resource);
+      return true;
     } else if (matchingDRType.valueSets.length > 0) {
       const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
       if (
@@ -51,10 +49,13 @@ function checkCodesAndValueSets(
           primaryCodeValue.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
         )
       ) {
-        newResources.push(resource);
+        return true;
+      } else {
+        return false;
       }
     }
   }
+  return false;
 }
 
 /**
@@ -95,7 +96,10 @@ export function minimizeTestCaseResources(
                   r.resource,
                   `${codeInfo.primaryCodePath}CodeableConcept`
                 )[0] as fhir4.CodeableConcept;
-                checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle, r, newResources);
+                const matchingCode = checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle);
+                if (matchingCode) {
+                  newResources.push(r);
+                }
               }
             } else {
               if (primaryCodeInfo.multipleCardinality === true) {
@@ -106,7 +110,10 @@ export function minimizeTestCaseResources(
                 ) as fhir4.CodeableConcept[];
                 if (primaryCodeValue) {
                   primaryCodeValue.forEach(pcv => {
-                    checkCodesAndValueSets(pcv, matchingDRType, measureBundle, r, newResources);
+                    const matchingCode = checkCodesAndValueSets(pcv, matchingDRType, measureBundle);
+                    if (matchingCode) {
+                      newResources.push(r);
+                    }
                   });
                 }
               } else {
@@ -114,7 +121,10 @@ export function minimizeTestCaseResources(
                   r.resource,
                   codeInfo.primaryCodePath
                 )[0] as fhir4.CodeableConcept;
-                checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle, r, newResources);
+                const matchingCode = checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle);
+                if (matchingCode) {
+                  newResources.push(r);
+                }
               }
             }
           } else if (primaryCodeInfo.codeType === 'FHIR.Coding') {
