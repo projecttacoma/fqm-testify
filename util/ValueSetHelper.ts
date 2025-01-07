@@ -73,7 +73,6 @@ export function minimizeTestCaseResources(
   testCase.resources.forEach(r => {
     // throw out any resources that are not in any of the dataRequirements
     // iterate over every resource in each bundle
-    // keep Patient and MeasureReport
     if (r.resource && r.resource?.resourceType) {
       // see if it matches any data requirements in the lookup object
       const matchingDRType = drLookupByType[r.resource.resourceType];
