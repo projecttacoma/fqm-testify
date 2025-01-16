@@ -1,20 +1,23 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Edit, Trash } from 'tabler-icons-react';
+import { PrimaryDatePaths } from 'fhir-spec-tools';
 
 export interface ResourceInfoCardProps {
   resourceType: string;
   label: string;
+  date: any;
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
 }
 
-export default function ResourceInfoCard({ resourceType, label, onEditClick, onDeleteClick }: ResourceInfoCardProps) {
+export default function ResourceInfoCard({ resourceType, label, date, onEditClick, onDeleteClick }: ResourceInfoCardProps) {
   return (
     <Paper withBorder p="sm" shadow="sm">
       <Grid align="center">
         <Grid.Col span={9}>
           <Text>{resourceType}</Text>
+          <Text color="gray" size="xs">{date}</Text>
           <Tooltip
             multiline
             width={500}

@@ -1,4 +1,4 @@
-import { Stack } from '@mantine/core';
+import { Stack, Container, Text, Tooltip } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -20,6 +20,8 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { DetailedResult } from '../../util/types';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
+import { PrimaryDatePaths } from 'fhir-spec-tools'; 
+import { format } from 'date-fns';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -83,6 +85,70 @@ function ResourceDisplay() {
     setCurrentResource(null);
     setSelectedDataRequirement({ name: '', content: null });
   };
+
+  const dateForResource = (resource: any) => {
+    if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths) {
+      throw new Error('Error: Invalid resource or PrimaryDatePaths');
+    }
+
+    const dateinfo =  PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType] 
+    if (!dateinfo) {
+      throw new Error('Error: No date information found for the resourceType');
+    }
+
+    for (const nameOfResourceDate of Object.keys(dateinfo)) {
+      // If only one dataType
+      if(dateinfo[nameOfResourceDate].dataTypes.length == 1 && resource[nameOfResourceDate]){
+        // If the only dataType is a period 
+        if(dateinfo[nameOfResourceDate].dataTypes[0] == 'Period'){
+          return formatPeriod(resource[nameOfResourceDate], nameOfResourceDate)
+        }
+        // If the only dataType is either dateTime or date
+        else {
+          return (
+            <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + nameOfResourceDate} withArrow position='top-start'>
+              <Text >{formatDate(resource[nameOfResourceDate])}</Text>
+            </Tooltip>  
+          )
+        }
+      }
+      
+      // If isChoiceType is true
+      else {
+        for (const dataType of dateinfo[nameOfResourceDate].dataTypes) {
+          // Capitalize the first char of dataType and append for proper resource date name
+          const fullResourceDateName = nameOfResourceDate + dataType.charAt(0).toUpperCase() + dataType.slice(1);
+          if (resource[fullResourceDateName]) {
+            if (dataType == 'Period') {
+              return formatPeriod(resource[fullResourceDateName], fullResourceDateName);
+            }
+            // Else if dataType == 'dateTime' || 'Date'
+            return (
+              <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + fullResourceDateName} withArrow position='top-start'>
+                <Text>{formatDate(resource[fullResourceDateName])}</Text>
+              </Tooltip>
+            )
+          }
+        }
+      }
+    }
+    return 'No Date Found'
+  }
+
+  // Formatter for if the date is a period
+  const formatPeriod = (resourcePeriod: any, dateTypeName: string) => {
+    return (
+      <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + dateTypeName} withArrow position='top-start'>
+        <Text>{formatDate(resourcePeriod.start)} - {(formatDate(resourcePeriod.end))}</Text>
+      </Tooltip>
+    )
+  }
+
+  // Using date-fns to format (other date formats available)
+  const formatDate = (dateString: string) => {
+    const formattedDate = format(new Date(dateString), 'MM/DD/YYYY')
+    return formattedDate
+  }
 
   const detailedResultCalculation = async (
     draftState: WritableDraft<Record<string, DetailedResult>>,
@@ -241,6 +307,7 @@ function ResourceDisplay() {
                   key={resource.id}
                   resourceType={resource.resourceType}
                   label={getFhirResourceSummary(resource)}
+                  date = {dateForResource(resource)}
                   onEditClick={() => openResourceModal(resource.id)}
                   onDeleteClick={() => openConfirmationModal(resource.id)}
                 />
