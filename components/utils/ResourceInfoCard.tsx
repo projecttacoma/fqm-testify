@@ -1,8 +1,6 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Edit, Trash } from 'tabler-icons-react';
-import { PrimaryDatePaths } from 'fhir-spec-tools';
-
 export interface ResourceInfoCardProps {
   resourceType: string;
   label: string;
