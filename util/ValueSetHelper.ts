@@ -39,20 +39,14 @@ function checkCodesAndValueSets(
   if (primaryCodeValue) {
     if (
       matchingDRType.directCodes.length > 0 &&
-      matchingDRType.directCodes.find(dc => primaryCodeValue.coding?.find(c => c.code === dc.code))
+      matchingDRType.directCodes.some(dc => primaryCodeValue.coding?.some(c => c.code === dc.code))
     ) {
       return true;
     } else if (matchingDRType.valueSets.length > 0) {
       const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
-      if (
-        vsCodesAndSystems.find(vscas =>
-          primaryCodeValue.coding?.find(c => c.code === vscas.code && c.system === vscas.system)
-        )
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+      return vsCodesAndSystems.some(vscas =>
+        primaryCodeValue.coding?.some(c => c.code === vscas.code && c.system === vscas.system)
+      );
     }
   }
   return false;
@@ -69,8 +63,7 @@ export function minimizeTestCaseResources(
   measureBundle: fhir4.Bundle | null,
   drLookupByType: Record<string, DataRequirementsLookupByTypeProps>
 ): fhir4.BundleEntry[] {
-  const newResources: fhir4.BundleEntry[] = [];
-  testCase.resources.forEach(r => {
+  const newResources = testCase.resources.filter(r => {
     // throw out any resources that are not in any of the dataRequirements
     // iterate over every resource in each bundle
     if (r.resource && r.resource?.resourceType) {
@@ -81,7 +74,7 @@ export function minimizeTestCaseResources(
         // if the matching resource type's lookup object has keepAll set to true, meaning
         // the codeFilter on the data requirement was undefined, keep any resources of that type
         if (matchingDRType.keepAll === true) {
-          newResources.push(r);
+          return true;
         } else if (codeInfo) {
           const primaryCodeInfo = codeInfo.paths[codeInfo.primaryCodePath];
 
@@ -97,7 +90,7 @@ export function minimizeTestCaseResources(
                 )[0] as fhir4.CodeableConcept;
                 const matchingCode = checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle);
                 if (matchingCode) {
-                  newResources.push(r);
+                  return true;
                 }
               }
             } else {
@@ -108,12 +101,9 @@ export function minimizeTestCaseResources(
                   codeInfo.primaryCodePath
                 ) as fhir4.CodeableConcept[];
                 if (primaryCodeValue) {
-                  primaryCodeValue.forEach(pcv => {
-                    const matchingCode = checkCodesAndValueSets(pcv, matchingDRType, measureBundle);
-                    if (matchingCode) {
-                      newResources.push(r);
-                    }
-                  });
+                  if (primaryCodeValue.some(pcv => checkCodesAndValueSets(pcv, matchingDRType, measureBundle))) {
+                    return true;
+                  }
                 }
               } else {
                 const primaryCodeValue = fhirpath.evaluate(
@@ -122,7 +112,7 @@ export function minimizeTestCaseResources(
                 )[0] as fhir4.CodeableConcept;
                 const matchingCode = checkCodesAndValueSets(primaryCodeValue, matchingDRType, measureBundle);
                 if (matchingCode) {
-                  newResources.push(r);
+                  return true;
                 }
               }
             }
@@ -139,19 +129,19 @@ export function minimizeTestCaseResources(
                 if (primaryCodeValue) {
                   if (
                     matchingDRType.directCodes.length > 0 &&
-                    matchingDRType.directCodes.find(
+                    matchingDRType.directCodes.some(
                       dc => dc.code === primaryCodeValue.code && dc.system === primaryCodeValue.system
                     )
                   ) {
-                    newResources.push(r);
+                    return true;
                   } else if (matchingDRType.valueSets.length > 0) {
                     const vsCodesAndSystems = getValueSetCodes(matchingDRType.valueSets, measureBundle);
                     if (
-                      vsCodesAndSystems.find(
+                      vsCodesAndSystems.some(
                         vscas => primaryCodeValue.code === vscas.code && primaryCodeValue.system === vscas.system
                       )
                     ) {
-                      newResources.push(r);
+                      return true;
                     }
                   }
                 }
@@ -177,6 +167,7 @@ export function minimizeTestCaseResources(
         }
       }
     }
+    return false;
   });
   return newResources;
 }
