@@ -22,6 +22,7 @@ import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 import { PrimaryDatePaths } from 'fhir-spec-tools'; 
 import { format } from 'date-fns';
+import fhirpath from 'fhirpath';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -86,7 +87,7 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const dateForResource = (resource: any) => {
+  const dateForResource = (resource: fhir4.FhirResource ) => {
     if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths) {
       throw new Error('Error: Invalid resource or PrimaryDatePaths');
     }
@@ -98,16 +99,17 @@ function ResourceDisplay() {
 
     for (const nameOfResourceDate of Object.keys(dateinfo)) {
       // If only one dataType
-      if(dateinfo[nameOfResourceDate].dataTypes.length == 1 && resource[nameOfResourceDate]){
+      const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0]
+      if(dateinfo[nameOfResourceDate].dataTypes.length == 1 && resourceDateData){
         // If the only dataType is a period 
         if(dateinfo[nameOfResourceDate].dataTypes[0] == 'Period'){
-          return formatPeriod(resource[nameOfResourceDate], nameOfResourceDate)
+          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate)
         }
         // If the only dataType is either dateTime or date
         else {
           return (
             <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + nameOfResourceDate} withArrow position='top-start'>
-              <Text >{formatDate(resource[nameOfResourceDate])}</Text>
+              <Text >{formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0])}</Text>
             </Tooltip>  
           )
         }
@@ -118,16 +120,18 @@ function ResourceDisplay() {
         for (const dataType of dateinfo[nameOfResourceDate].dataTypes) {
           // Capitalize the first char of dataType and append for proper resource date name
           const fullResourceDateName = nameOfResourceDate + dataType.charAt(0).toUpperCase() + dataType.slice(1);
-          if (resource[fullResourceDateName]) {
+          if (fhirpath.evaluate(resource, fullResourceDateName)[0]) {
             if (dataType == 'Period') {
-              return formatPeriod(resource[fullResourceDateName], fullResourceDateName);
+              return formatPeriod(resource, fullResourceDateName, fullResourceDateName);
             }
             // Else if dataType == 'dateTime' || 'Date'
-            return (
-              <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + fullResourceDateName} withArrow position='top-start'>
-                <Text>{formatDate(resource[fullResourceDateName])}</Text>
-              </Tooltip>
-            )
+            else {
+              return (
+                <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + fullResourceDateName} withArrow position='top-start'>
+                  <Text>{formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0])}</Text>
+                </Tooltip>
+              )
+            }
           }
         }
       }
@@ -135,11 +139,14 @@ function ResourceDisplay() {
     return 'No Date Found'
   }
 
+
   // Formatter for if the date is a period
-  const formatPeriod = (resourcePeriod: any, dateTypeName: string) => {
+  const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
+    const startTime = fhirpath.evaluate(resource, resourcePeriod + ".start")[0]
+    const endTime = fhirpath.evaluate(resource,  resourcePeriod + ".end")[0]
     return (
       <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={'Date Type: ' + dateTypeName} withArrow position='top-start'>
-        <Text>{formatDate(resourcePeriod.start)} - {(formatDate(resourcePeriod.end))}</Text>
+        <Text>{formatDate(startTime)} - {(formatDate(endTime))}</Text>
       </Tooltip>
     )
   }
