@@ -89,12 +89,12 @@ function ResourceDisplay() {
 
   const dateForResource = (resource: fhir4.FhirResource ) => {
     if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths) {
-      throw new Error('Error: Invalid resource or PrimaryDatePaths');
+      return 'N/A'
     }
 
     const dateinfo =  PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType] 
     if (!dateinfo) {
-      throw new Error('Error: No date information found for the resourceType');
+      return 'N/A'
     }
 
     for (const nameOfResourceDate of Object.keys(dateinfo)) {
@@ -136,14 +136,14 @@ function ResourceDisplay() {
         }
       }
     }
-    return 'No Date Found'
+    return 'N/A'
   }
 
 
   // Formatter for if the date is a period
   const formatPeriod = (resource: fhir4.Period, resourcePeriod: string, dateTypeName: string) => {
-    const startTime = fhirpath.evaluate(resource, resourcePeriod + ".start")[0]
-    const endTime = fhirpath.evaluate(resource,  resourcePeriod + ".end")[0]
+    const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0]
+    const endTime = fhirpath.evaluate(resource,  resourcePeriod + '.end')[0]
     return (
       <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={dateTypeName} withArrow position='top-start'>
         <Text>{formatDate(startTime)} - {(formatDate(endTime))}</Text>
@@ -154,6 +154,9 @@ function ResourceDisplay() {
   // Using date-fns to format (other date formats available)
   const formatDate = (dateString: string) => {
     const formattedDate = format(new Date(dateString), 'MM/DD/YYYY')
+    if (formattedDate == 'Invalid Date') {
+      return 'N/A'
+    }
     return formattedDate
   }
 
@@ -294,7 +297,7 @@ function ResourceDisplay() {
       <CodeEditorModal
         open={isResourceModalOpen}
         onClose={closeResourceModal}
-        title="Edit FHIR Resource"
+        title='Edit FHIR Resource'
         onSave={value => updateResource(value, currentResource)}
         initialValue={getInitialResource()}
       />
@@ -305,7 +308,7 @@ function ResourceDisplay() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <Stack data-testid="resource-display-stack">
+        <Stack data-testid='resource-display-stack'>
           {currentTestCases[selectedPatient].resources.map(bundleEntry => {
             const resource = bundleEntry.resource;
             if (resource) {
