@@ -4,7 +4,7 @@ import { Edit, Trash } from 'tabler-icons-react';
 export interface ResourceInfoCardProps {
   resourceType: string;
   label: string;
-  date: any;
+  date: string | React.ReactElement;
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
 }
