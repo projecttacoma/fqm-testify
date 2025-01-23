@@ -1,11 +1,14 @@
 import { Card, Button, Text, Group, createStyles } from '@mantine/core';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import Link from 'next/link';
 import { Edit } from 'tabler-icons-react';
 import { useRouter } from 'next/router';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { IconAlertTriangle } from '@tabler/icons';
+import WarningModal from '../modals/WarningModal';
 
 const useStyles = createStyles(theme => ({
   headerContainer: {
@@ -26,9 +29,23 @@ export default function AppHeader() {
   const measureBundle = useRecoilValue(measureBundleState);
   const router = useRouter();
   const { classes } = useStyles();
+  const currentPatients = useRecoilValue(patientTestCaseState);
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+  const openWarningModal = () => {
+    setIsWarningModalOpen(true);
+  };
 
+  const closeWarningModal = () => {
+    setIsWarningModalOpen(false);
+  };
+
+  const confirmMeasureEdit = () => {
+    router.push('/');
+    closeWarningModal();
+  };
   return (
     <Group className={classes.headerContainer}>
+      <WarningModal open={isWarningModalOpen} onClose={closeWarningModal} onConfirm={() => confirmMeasureEdit()} />
       {router.pathname !== '/' && start && end && measureBundle.content && (
         <div className={classes.mbCardContainer}>
           <Card className={classes.mbCard}>
@@ -43,11 +60,17 @@ export default function AppHeader() {
                   {retrieveMeasurementPeriodString(start, end)}
                 </Text>
               </div>
-              <Link href={'/'}>
-                <Button variant="subtle" color="gray">
-                  <Edit />
+              {Object.values(currentPatients).some(cp => cp.minResources === true) ? (
+                <Button variant="subtle" color="gray" onClick={() => openWarningModal()}>
+                  <IconAlertTriangle />
                 </Button>
-              </Link>
+              ) : (
+                <Link href={'/'}>
+                  <Button variant="subtle" color="gray">
+                    <Edit />
+                  </Button>
+                </Link>
+              )}
             </Group>
           </Card>
         </div>
