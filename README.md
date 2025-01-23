@@ -82,7 +82,7 @@ Test patients can be created in the app by clicking on the "Create" button in th
 
 #### Importing a Patient Bundle
 
-Test cases can be imported by clicking the "Import" button in the left panel, which will open a file dropzone that accepts JSON files of FHIR Patient Bundles and `.zip` files composed of FHIR Patient Bundles. Patient Bundles may contain additional FHIR resources. These FHIR resources are also loaded into the app and will belong to the patient contained in the Patient Bundle.
+Test cases can be imported by clicking the "Import" button in the left panel, which will open a file dropzone that accepts JSON files of FHIR Patient Bundles and `.zip` files composed of FHIR Patient Bundles. Patient Bundles may contain additional FHIR resources. These FHIR resources are also loaded into the app and will belong to the patient contained in the Patient Bundle. When importing a Patient Bundle or Bundles, there is a switch to remove resources not relevant to the Measure. When set, the resources that are not included in the provided Measure's data requirements will be removed from the Patient Bundle. NOTE: Resources included in the provided Measure's data requirements are defined as resources whose primaryCodePath value match with ANY of the codes on any data requirements of the same resource type, whether those codes are included in a direct reference code or a ValueSet. Resources are only required to match with at least one codeFilter on a data requirement, not all codeFilters if a Data Requirement has multiple.
 
 #### Selecting Desired Measure Populations
 

@@ -184,7 +184,8 @@ describe('PatientCreationPanel', () => {
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
         fullUrl: 'urn:uuid:testPatient',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -215,7 +216,8 @@ describe('PatientCreationPanel', () => {
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
         fullUrl: 'urn:uuid:testPatient',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -256,7 +258,8 @@ describe('PatientCreationPanel', () => {
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
         fullUrl: 'urn:uuid:testPatient',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -307,7 +310,8 @@ describe('PatientCreationPanel', () => {
             },
             fullUrl: 'urn:uuid:test-id'
           }
-        ]
+        ],
+        minResources: false
       }
     });
 

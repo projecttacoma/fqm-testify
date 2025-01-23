@@ -149,6 +149,7 @@ const MOCK_TEST_CASE: TestCase = {
     patient: EXAMPLE_PATIENT,
     fullUrl: 'urn:uuid:testPatient',
     resources: [],
+    minResources: false,
     desiredPopulations: ['initial-population']
   }
 };

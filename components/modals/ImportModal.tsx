@@ -1,9 +1,25 @@
-import { Modal, Button, Center, Group, Grid, Text, Collapse, ScrollArea } from '@mantine/core';
+import {
+  Modal,
+  Button,
+  Center,
+  Group,
+  Grid,
+  Text,
+  Collapse,
+  ScrollArea,
+  Switch,
+  Popover,
+  ActionIcon,
+  Anchor
+} from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { Dropzone } from '@mantine/dropzone';
 import { IconAlertCircle, IconCaretDown, IconCaretRight, IconFileCheck, IconFileImport } from '@tabler/icons';
 import { useState } from 'react';
 import JSZip from 'jszip';
+import { useRecoilState } from 'recoil';
+import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
+import { InfoCircle } from 'tabler-icons-react';
 
 export interface ImportModalProps {
   open: boolean;
@@ -16,6 +32,8 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
   const [fileDisplay, setFileDisplay] = useState<string | string[] | null>(null);
   const [showZipFileExpansion, setShowZipFileExpansion] = useState(false);
   const [isZipInfoExpanded, setIsZipInfoExpanded] = useState(false);
+  const [switchOn, setSwitchOn] = useRecoilState(resourceSwitchOn);
+  const [minimizeResourcesPopoverOpened, setMinimizeResourcesPopoverOpened] = useState(false);
 
   const closeAndReset = () => {
     setFiles([]);
@@ -139,6 +157,39 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
           )}
           <Center>
             <Group pt={12}>
+              <Switch
+                label="Remove resources not relevant to the Measure"
+                onLabel="ON"
+                offLabel="OFF"
+                checked={switchOn}
+                onChange={event => setSwitchOn(event.currentTarget.checked)}
+              />
+              <Popover
+                opened={minimizeResourcesPopoverOpened}
+                onClose={() => setMinimizeResourcesPopoverOpened(false)}
+                width={500}
+              >
+                <Popover.Target>
+                  <ActionIcon
+                    aria-label={'More Information'}
+                    onClick={() => setMinimizeResourcesPopoverOpened(o => !o)}
+                  >
+                    <InfoCircle size={20} />
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  If set to minimize the resources on the Test Case, only resources relevant to the measure will be
+                  included. Resources relevant to the measure are defined as resources included in the data requirements
+                  of the measure. See details{' '}
+                  <Anchor
+                    href="https://github.com/projecttacoma/fqm-testify#importing-a-patient-bundle"
+                    target="_blank"
+                  >
+                    here
+                  </Anchor>
+                  .
+                </Popover.Dropdown>
+              </Popover>
               <Button
                 onClick={() => {
                   onImportSubmit(files);
