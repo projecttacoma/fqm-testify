@@ -37,7 +37,8 @@ describe('ResourcePanel', () => {
           ]
         } as fhir4.Patient,
         fullUrl: 'urn:uuid:example-pt',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -74,7 +75,8 @@ describe('ResourcePanel', () => {
           ]
         } as fhir4.Patient,
         fullUrl: 'urn:uuid:example-pt',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -111,7 +113,8 @@ describe('ResourcePanel', () => {
           ]
         } as fhir4.Patient,
         fullUrl: 'urn:uuid:example-pt',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 

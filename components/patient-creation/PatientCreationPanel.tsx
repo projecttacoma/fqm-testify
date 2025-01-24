@@ -32,6 +32,9 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
 import { dataRequirementsState } from '../../state/selectors/dataRequirements';
+import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
+import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
+import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -52,6 +55,8 @@ function PatientCreationPanel() {
   }, [measureBundle]);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
   const dataRequirements = useRecoilValue(dataRequirementsState);
+  const drLookupByType = useRecoilValue(dataRequirementsLookupByType);
+  const minResources = useRecoilValue(resourceSwitchOn);
 
   const openPatientModal = (patientId?: string, copy = false) => {
     if (patientId && Object.keys(currentPatients).includes(patientId)) {
@@ -127,6 +132,7 @@ function PatientCreationPanel() {
           patient: pt,
           fullUrl: draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
           resources: resources,
+          minResources: draftState[patientId]?.minResources,
           desiredPopulations: currentPatients[patientId]?.desiredPopulations
         };
       });
@@ -335,6 +341,12 @@ function PatientCreationPanel() {
                 </>
               );
               return;
+            }
+            if (minResources) {
+              testCase.resources = minimizeTestCaseResources(testCase, measureBundle.content, drLookupByType);
+              testCase.minResources = true;
+            } else {
+              testCase.minResources = false;
             }
 
             draftState[testCase.patient.id] = testCase;

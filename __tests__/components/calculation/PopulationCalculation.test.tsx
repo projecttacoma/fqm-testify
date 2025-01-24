@@ -88,7 +88,8 @@ describe('PopulationCalculation', () => {
           name: [{ given: ['Test123'], family: 'Patient456' }]
         },
         fullUrl: 'urn:uuid:testPatient',
-        resources: []
+        resources: [],
+        minResources: false
       }
     });
 
@@ -126,7 +127,8 @@ describe('PopulationCalculation', () => {
             },
             fullUrl: 'urn:uuid:test-id'
           }
-        ]
+        ],
+        minResources: false
       }
     });
 
@@ -198,7 +200,8 @@ describe('PopulationCalculation', () => {
             },
             fullUrl: 'urn:uuid:test-id'
           }
-        ]
+        ],
+        minResources: false
       }
     });
 
@@ -270,7 +273,8 @@ describe('PopulationCalculation', () => {
             },
             fullUrl: 'urn:uuid:test-id'
           }
-        ]
+        ],
+        minResources: false
       }
     });
 

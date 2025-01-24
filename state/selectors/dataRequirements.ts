@@ -2,7 +2,6 @@ import { selector } from 'recoil';
 import { measureBundleState } from '../atoms/measureBundle';
 import { Calculator } from 'fqm-execution';
 import { valueSetMapState } from './valueSetsMap';
-
 import { measurementPeriodState } from '../atoms/measurementPeriod';
 import { getDataRequirementFiltersString } from '../../util/fhir/codes';
 

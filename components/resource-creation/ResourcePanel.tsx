@@ -1,6 +1,6 @@
-import { Button, Center, Divider, Text } from '@mantine/core';
+import { ActionIcon, Anchor, Button, Center, Divider, Group, Popover, Text } from '@mantine/core';
 import { v4 as uuidv4 } from 'uuid';
-import { IconAlertCircle, IconCodePlus } from '@tabler/icons';
+import { IconAlertCircle, IconAlertTriangle, IconCodePlus } from '@tabler/icons';
 import { Suspense, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Loader } from 'tabler-icons-react';
@@ -28,6 +28,7 @@ export default function ResourcePanel() {
   const measurementPeriod = useRecoilValue(measurementPeriodState);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
+  const [minimizeResourcesPopoverOpened, setMinimizeResourcesPopoverOpened] = useState(false);
 
   const createNewResource = (val: string) => {
     // TODO: Validate the incoming JSON as FHIR
@@ -115,7 +116,36 @@ export default function ResourcePanel() {
           title="Add JSON for new FHIR Resource"
           onSave={createNewResource}
         />
-        <Text size="xl">{getPatientNameString(currentPatients[selectedPatient].patient)}</Text>
+        <Group>
+          <Text size="xl">{getPatientNameString(currentPatients[selectedPatient].patient)}</Text>
+          {currentPatients[selectedPatient].minResources === true ? (
+            <Popover
+              opened={minimizeResourcesPopoverOpened}
+              onClose={() => setMinimizeResourcesPopoverOpened(false)}
+              width={500}
+            >
+              <Popover.Target>
+                <ActionIcon
+                  aria-label={'Resources Minimized'}
+                  onClick={() => setMinimizeResourcesPopoverOpened(o => !o)}
+                >
+                  <IconAlertTriangle size={20} />
+                </ActionIcon>
+              </Popover.Target>
+              <Popover.Dropdown>
+                The minimize resources option was set to true when uploading this Test Case. Therefore, only resources
+                relevant to the measure were included. Resources relevant to the measure are defined as resources
+                included in the data requirements of the measure. See details{' '}
+                <Anchor href="https://github.com/projecttacoma/fqm-testify#importing-a-patient-bundle" target="_blank">
+                  here
+                </Anchor>
+                .
+              </Popover.Dropdown>
+            </Popover>
+          ) : (
+            ''
+          )}
+        </Group>
         <Text data-testid="resource-count-summary">
           <Text display="inline" fw="bold">
             {currentPatients[selectedPatient].resources.length} resource(s)

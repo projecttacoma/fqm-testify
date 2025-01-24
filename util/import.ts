@@ -70,6 +70,7 @@ export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: str
         return e.resource?.resourceType !== 'Patient' && !isTestCaseMeasureReport(e);
       })
       .map(e => ({ fullUrl: e.fullUrl ?? `urn:uuid:${e.resource?.id}`, resource: e.resource })),
+    minResources: false,
     desiredPopulations
   };
 }
