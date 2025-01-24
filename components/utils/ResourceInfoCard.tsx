@@ -9,13 +9,21 @@ export interface ResourceInfoCardProps {
   onDeleteClick: (...args: unknown[]) => void;
 }
 
-export default function ResourceInfoCard({ resourceType, label, date, onEditClick, onDeleteClick }: ResourceInfoCardProps) {
+export default function ResourceInfoCard({
+  resourceType,
+  label,
+  date,
+  onEditClick,
+  onDeleteClick
+}: ResourceInfoCardProps) {
   return (
     <Paper withBorder p="sm" shadow="sm">
       <Grid align="center">
         <Grid.Col span={9}>
           <Text>{resourceType}</Text>
-          <Text color="gray" size="xs">{date}</Text>
+          <Text color="gray" size="xs">
+            {date}
+          </Text>
           <Tooltip
             multiline
             width={500}

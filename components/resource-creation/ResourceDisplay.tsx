@@ -20,7 +20,7 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { DetailedResult } from '../../util/types';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
-import { PrimaryDatePaths } from 'fhir-spec-tools'; 
+import { PrimaryDatePaths } from 'fhir-spec-tools';
 import { format } from 'date-fns';
 import fhirpath from 'fhirpath';
 
@@ -87,30 +87,37 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const dateForResource = (resource: fhir4.FhirResource ) => {
-    const dateInfo =  PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType] 
+  const dateForResource = (resource: fhir4.FhirResource) => {
+    const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
     if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
-      return 'N/A'
+      return 'N/A';
     }
 
     for (const nameOfResourceDate of Object.keys(dateInfo)) {
       // If only one dataType
-      const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0]
-      if(dateInfo[nameOfResourceDate].dataTypes.length === 1 && resourceDateData){
-        // If the only dataType is a period 
-        if(dateInfo[nameOfResourceDate].dataTypes[0] === 'Period'){
-          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate)
+      const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0];
+      if (dateInfo[nameOfResourceDate].dataTypes.length === 1 && resourceDateData) {
+        // If the only dataType is a period
+        if (dateInfo[nameOfResourceDate].dataTypes[0] === 'Period') {
+          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate);
         }
         // If the only dataType is either dateTime or date
         else {
           return (
-            <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={nameOfResourceDate} withArrow position='top-start'>
-              <Text >{formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0])}</Text>
-            </Tooltip>  
-          )
+            <Tooltip
+              arrowPosition="side"
+              arrowOffset={25}
+              arrowSize={8}
+              label={nameOfResourceDate}
+              withArrow
+              position="top-start"
+            >
+              <Text>{formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0])}</Text>
+            </Tooltip>
+          );
         }
       }
-      
+
       // If isChoiceType is true
       else {
         for (const dataType of dateInfo[nameOfResourceDate].dataTypes) {
@@ -123,38 +130,46 @@ function ResourceDisplay() {
             // Else if dataType === 'dateTime' || 'Date'
             else {
               return (
-                <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={fullResourceDateName} withArrow position='top-start'>
+                <Tooltip
+                  arrowPosition="side"
+                  arrowOffset={25}
+                  arrowSize={8}
+                  label={fullResourceDateName}
+                  withArrow
+                  position="top-start"
+                >
                   <Text>{formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0])}</Text>
                 </Tooltip>
-              )
+              );
             }
           }
         }
       }
     }
-    return 'N/A'
-  }
-
+    return 'N/A';
+  };
 
   // Formatter for if the date is a period
   const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
-    const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0]
-    const endTime = fhirpath.evaluate(resource,  resourcePeriod + '.end')[0]
+    const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0];
+    const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
     return (
-      <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={dateTypeName} withArrow position='top-start'>
-        <Text>{formatDate(startTime)} - {(formatDate(endTime))}</Text>
+      <Tooltip arrowPosition="side" arrowOffset={25} arrowSize={8} label={dateTypeName} withArrow position="top-start">
+        <Text>
+          {formatDate(startTime)} - {formatDate(endTime)}
+        </Text>
       </Tooltip>
-    )
-  }
+    );
+  };
 
   // Using date-fns to format (other date formats available)
   const formatDate = (dateString: string) => {
-    const formattedDate = format(new Date(dateString), 'MM/DD/YYYY')
+    const formattedDate = format(new Date(dateString), 'MM/DD/YYYY');
     if (formattedDate === 'Invalid Date') {
-      return 'N/A'
+      return 'N/A';
     }
-    return formattedDate
-  }
+    return formattedDate;
+  };
 
   const detailedResultCalculation = async (
     draftState: WritableDraft<Record<string, DetailedResult>>,
@@ -293,7 +308,7 @@ function ResourceDisplay() {
       <CodeEditorModal
         open={isResourceModalOpen}
         onClose={closeResourceModal}
-        title='Edit FHIR Resource'
+        title="Edit FHIR Resource"
         onSave={value => updateResource(value, currentResource)}
         initialValue={getInitialResource()}
       />
@@ -304,7 +319,7 @@ function ResourceDisplay() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <Stack data-testid='resource-display-stack'>
+        <Stack data-testid="resource-display-stack">
           {currentTestCases[selectedPatient].resources.map(bundleEntry => {
             const resource = bundleEntry.resource;
             if (resource) {
@@ -313,7 +328,7 @@ function ResourceDisplay() {
                   key={resource.id}
                   resourceType={resource.resourceType}
                   label={getFhirResourceSummary(resource)}
-                  date = {dateForResource(resource)}
+                  date={dateForResource(resource)}
                   onEditClick={() => openResourceModal(resource.id)}
                   onDeleteClick={() => openConfirmationModal(resource.id)}
                 />
