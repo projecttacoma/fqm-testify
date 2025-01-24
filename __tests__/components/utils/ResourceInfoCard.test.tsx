@@ -5,8 +5,9 @@ import { mantineRecoilWrap } from '../../helpers/testHelpers';
 
 const EXAMPLE_RESOURCE_TYPE = 'Procedure';
 const EXAMPLE_LABEL = 'Colonoscopy (http://example.com/ValueSet/example-vs)';
+const EXAMPLE_DATE = '1/10/2025'
 
-const MOCK_CALLBACK_PROPS: Omit<ResourceInfoCardProps, 'resourceType' | 'label'> = {
+const MOCK_CALLBACK_PROPS: Omit<ResourceInfoCardProps, 'resourceType' | 'label' | 'date'> = {
   onEditClick: jest.fn(),
   onDeleteClick: jest.fn()
 };
@@ -19,7 +20,7 @@ describe('ResourceInfoCard', () => {
   it('should render resourceType on card', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL}  date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 
@@ -29,7 +30,7 @@ describe('ResourceInfoCard', () => {
   it('should render label on card', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 
@@ -39,7 +40,7 @@ describe('ResourceInfoCard', () => {
   it('should render edit button', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 
@@ -49,7 +50,7 @@ describe('ResourceInfoCard', () => {
   it('should render delete button', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 
@@ -59,7 +60,7 @@ describe('ResourceInfoCard', () => {
   it('should call edit callback when button clicked', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 
@@ -74,7 +75,7 @@ describe('ResourceInfoCard', () => {
   it('should call edit callback when button clicked', () => {
     render(
       mantineRecoilWrap(
-        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} {...MOCK_CALLBACK_PROPS} />
+        <ResourceInfoCard resourceType={EXAMPLE_RESOURCE_TYPE} label={EXAMPLE_LABEL} date={EXAMPLE_DATE} {...MOCK_CALLBACK_PROPS} />
       )
     );
 

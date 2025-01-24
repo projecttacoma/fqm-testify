@@ -88,22 +88,18 @@ function ResourceDisplay() {
   };
 
   const dateForResource = (resource: fhir4.FhirResource ) => {
-    if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths) {
+    const dateInfo =  PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType] 
+    if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
       return 'N/A'
     }
 
-    const dateinfo =  PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType] 
-    if (!dateinfo) {
-      return 'N/A'
-    }
-
-    for (const nameOfResourceDate of Object.keys(dateinfo)) {
+    for (const nameOfResourceDate of Object.keys(dateInfo)) {
       // If only one dataType
       const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0]
-      if(dateinfo[nameOfResourceDate].dataTypes.length == 1 && resourceDateData){
+      if(dateInfo[nameOfResourceDate].dataTypes.length === 1 && resourceDateData){
         // If the only dataType is a period 
-        if(dateinfo[nameOfResourceDate].dataTypes[0] == 'Period'){
-          return formatPeriod(resource as fhir4.Period, nameOfResourceDate, nameOfResourceDate)
+        if(dateInfo[nameOfResourceDate].dataTypes[0] === 'Period'){
+          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate)
         }
         // If the only dataType is either dateTime or date
         else {
@@ -117,14 +113,14 @@ function ResourceDisplay() {
       
       // If isChoiceType is true
       else {
-        for (const dataType of dateinfo[nameOfResourceDate].dataTypes) {
+        for (const dataType of dateInfo[nameOfResourceDate].dataTypes) {
           // Capitalize the first char of dataType and append for proper resource date name
           const fullResourceDateName = nameOfResourceDate + dataType.charAt(0).toUpperCase() + dataType.slice(1);
           if (fhirpath.evaluate(resource, fullResourceDateName)[0]) {
-            if (dataType == 'Period') {
-              return formatPeriod(resource as fhir4.Period, fullResourceDateName, fullResourceDateName);
+            if (dataType === 'Period') {
+              return formatPeriod(resource, fullResourceDateName, fullResourceDateName);
             }
-            // Else if dataType == 'dateTime' || 'Date'
+            // Else if dataType === 'dateTime' || 'Date'
             else {
               return (
                 <Tooltip arrowPosition='side' arrowOffset={25} arrowSize={8} label={fullResourceDateName} withArrow position='top-start'>
@@ -141,7 +137,7 @@ function ResourceDisplay() {
 
 
   // Formatter for if the date is a period
-  const formatPeriod = (resource: fhir4.Period, resourcePeriod: string, dateTypeName: string) => {
+  const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
     const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0]
     const endTime = fhirpath.evaluate(resource,  resourcePeriod + '.end')[0]
     return (
@@ -154,7 +150,7 @@ function ResourceDisplay() {
   // Using date-fns to format (other date formats available)
   const formatDate = (dateString: string) => {
     const formattedDate = format(new Date(dateString), 'MM/DD/YYYY')
-    if (formattedDate == 'Invalid Date') {
+    if (formattedDate === 'Invalid Date') {
       return 'N/A'
     }
     return formattedDate
