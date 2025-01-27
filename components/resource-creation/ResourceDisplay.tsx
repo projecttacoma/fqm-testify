@@ -87,10 +87,11 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  const dateForResource = (resource: fhir4.FhirResource) => {
+  // Return type is a an string array, the first element is the formatted date and the second is the resource type.
+  const dateForResource = (resource: fhir4.FhirResource): string[] => {
     const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
     if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
-      return 'N/A';
+      return ['N/A', 'N/A'];
     }
 
     for (const nameOfResourceDate of Object.keys(dateInfo)) {
@@ -103,18 +104,7 @@ function ResourceDisplay() {
         }
         // If the only dataType is either dateTime or date
         else {
-          return (
-            <Tooltip
-              arrowPosition="side"
-              arrowOffset={25}
-              arrowSize={8}
-              label={nameOfResourceDate}
-              withArrow
-              position="top-start"
-            >
-              <Text>{formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0])}</Text>
-            </Tooltip>
-          );
+          return [formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]), nameOfResourceDate];
         }
       }
 
@@ -129,37 +119,20 @@ function ResourceDisplay() {
             }
             // Else if dataType === 'dateTime' || 'Date'
             else {
-              return (
-                <Tooltip
-                  arrowPosition="side"
-                  arrowOffset={25}
-                  arrowSize={8}
-                  label={fullResourceDateName}
-                  withArrow
-                  position="top-start"
-                >
-                  <Text>{formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0])}</Text>
-                </Tooltip>
-              );
+              return [formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]), fullResourceDateName];
             }
           }
         }
       }
     }
-    return 'N/A';
+    return ['N/A', 'N/A'];
   };
 
   // Formatter for if the date is a period
   const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
     const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0];
     const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
-    return (
-      <Tooltip arrowPosition="side" arrowOffset={25} arrowSize={8} label={dateTypeName} withArrow position="top-start">
-        <Text>
-          {formatDate(startTime)} - {formatDate(endTime)}
-        </Text>
-      </Tooltip>
-    );
+    return [formatDate(startTime) + '-' + formatDate(endTime), dateTypeName];
   };
 
   // Using date-fns to format (other date formats available)

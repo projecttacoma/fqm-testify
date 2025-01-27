@@ -4,7 +4,7 @@ import { Edit, Trash } from 'tabler-icons-react';
 export interface ResourceInfoCardProps {
   resourceType: string;
   label: string;
-  date: string | React.ReactElement;
+  date: string[];
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
 }
@@ -22,7 +22,9 @@ export default function ResourceInfoCard({
         <Grid.Col span={9}>
           <Text>{resourceType}</Text>
           <Text color="gray" size="xs">
-            {date}
+            <Tooltip arrowPosition="side" arrowOffset={25} arrowSize={8} label={date[1]} withArrow position="top-start">
+              <Text>{date[0]}</Text>
+            </Tooltip>
           </Text>
           <Tooltip
             multiline
