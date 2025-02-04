@@ -20,6 +20,9 @@ import { detailedResultLookupState } from '../../state/atoms/detailedResultLooku
 import { DetailedResult } from '../../util/types';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
+import { PrimaryDatePaths } from 'fhir-spec-tools';
+import { format } from 'date-fns';
+import fhirpath from 'fhirpath';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -82,6 +85,77 @@ function ResourceDisplay() {
     setIsResourceModalOpen(false);
     setCurrentResource(null);
     setSelectedDataRequirement({ name: '', content: null });
+  };
+
+  const dateForResource = (resource: fhir4.FhirResource) => {
+    const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
+    if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
+      return {
+        date: 'N/A',
+        dateType: 'N/A'
+      };
+    }
+
+    for (const nameOfResourceDate of Object.keys(dateInfo)) {
+      // If only one dataType
+      const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0];
+      if (dateInfo[nameOfResourceDate].dataTypes.length === 1 && resourceDateData) {
+        // If the only dataType is a period
+        if (dateInfo[nameOfResourceDate].dataTypes[0] === 'Period') {
+          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate);
+        }
+        // If the only dataType is either dateTime or date
+        else {
+          return {
+            date: formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]),
+            dateType: nameOfResourceDate
+          };
+        }
+      }
+
+      // If isChoiceType is true
+      else {
+        for (const dataType of dateInfo[nameOfResourceDate].dataTypes) {
+          // Capitalize the first char of dataType and append for proper resource date name
+          const fullResourceDateName = nameOfResourceDate + dataType.charAt(0).toUpperCase() + dataType.slice(1);
+          if (fhirpath.evaluate(resource, fullResourceDateName)[0]) {
+            if (dataType === 'Period') {
+              return formatPeriod(resource, fullResourceDateName, fullResourceDateName);
+            }
+            // Else if dataType === 'dateTime' || 'Date'
+            else {
+              return {
+                date: formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]),
+                dateType: fullResourceDateName
+              };
+            }
+          }
+        }
+      }
+    }
+    return {
+      date: 'N/A',
+      dateType: 'N/A'
+    };
+  };
+
+  // Formatter for if the date is a period
+  const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
+    const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0];
+    const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
+    return {
+      date: formatDate(startTime) + '-' + formatDate(endTime),
+      dateType: dateTypeName
+    };
+  };
+
+  // Using date-fns to format (other date formats available)
+  const formatDate = (dateString: string) => {
+    const formattedDate = format(new Date(dateString), 'MM/DD/YYYY');
+    if (formattedDate === 'Invalid Date') {
+      return 'N/A';
+    }
+    return formattedDate;
   };
 
   const detailedResultCalculation = async (
@@ -241,6 +315,7 @@ function ResourceDisplay() {
                   key={resource.id}
                   resourceType={resource.resourceType}
                   label={getFhirResourceSummary(resource)}
+                  date={dateForResource(resource)}
                   onEditClick={() => openResourceModal(resource.id)}
                   onDeleteClick={() => openConfirmationModal(resource.id)}
                 />
