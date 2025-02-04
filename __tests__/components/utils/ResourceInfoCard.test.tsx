@@ -8,6 +8,11 @@ const EXAMPLE_LABEL = 'Colonoscopy (http://example.com/ValueSet/example-vs)';
 const EXAMPLE_DATE = '1/10/2025';
 const EXAMPLE_DATE_TYPE = 'exampleDateType';
 
+const EXAMPLE_DATE_OBJECT = {
+  date: EXAMPLE_DATE,
+  dateType: EXAMPLE_DATE_TYPE
+};
+
 const MOCK_CALLBACK_PROPS: Omit<ResourceInfoCardProps, 'resourceType' | 'label' | 'date'> = {
   onEditClick: jest.fn(),
   onDeleteClick: jest.fn()
@@ -24,7 +29,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )
@@ -39,7 +44,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )
@@ -54,7 +59,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )
@@ -69,7 +74,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )
@@ -84,7 +89,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )
@@ -104,7 +109,7 @@ describe('ResourceInfoCard', () => {
         <ResourceInfoCard
           resourceType={EXAMPLE_RESOURCE_TYPE}
           label={EXAMPLE_LABEL}
-          date={[EXAMPLE_DATE, EXAMPLE_DATE_TYPE]}
+          date={EXAMPLE_DATE_OBJECT}
           {...MOCK_CALLBACK_PROPS}
         />
       )

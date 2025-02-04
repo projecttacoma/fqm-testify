@@ -1,10 +1,14 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
 import { Edit, Trash } from 'tabler-icons-react';
+export interface DateInfo {
+  date: string;
+  dateType: string;
+}
 export interface ResourceInfoCardProps {
   resourceType: string;
   label: string;
-  date: string[];
+  date: DateInfo;
   onEditClick: (...args: unknown[]) => void;
   onDeleteClick: (...args: unknown[]) => void;
 }
@@ -22,8 +26,15 @@ export default function ResourceInfoCard({
         <Grid.Col span={9}>
           <Text>{resourceType}</Text>
           <Text color="gray" size="xs">
-            <Tooltip arrowPosition="side" arrowOffset={25} arrowSize={8} label={date[1]} withArrow position="top-start">
-              <Text>{date[0]}</Text>
+            <Tooltip
+              arrowPosition="side"
+              arrowOffset={25}
+              arrowSize={8}
+              label={date.dateType}
+              withArrow
+              position="top-start"
+            >
+              <Text>{date.date}</Text>
             </Tooltip>
           </Text>
           <Tooltip

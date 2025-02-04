@@ -1,4 +1,4 @@
-import { Stack, Text, Tooltip } from '@mantine/core';
+import { Stack } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import produce from 'immer';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -87,11 +87,13 @@ function ResourceDisplay() {
     setSelectedDataRequirement({ name: '', content: null });
   };
 
-  // Return type is a an string array, the first element is the formatted date and the second is the resource type.
-  const dateForResource = (resource: fhir4.FhirResource): string[] => {
+  const dateForResource = (resource: fhir4.FhirResource) => {
     const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
     if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
-      return ['N/A', 'N/A'];
+      return {
+        date: 'N/A',
+        dateType: 'N/A'
+      };
     }
 
     for (const nameOfResourceDate of Object.keys(dateInfo)) {
@@ -104,7 +106,10 @@ function ResourceDisplay() {
         }
         // If the only dataType is either dateTime or date
         else {
-          return [formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]), nameOfResourceDate];
+          return {
+            date: formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]),
+            dateType: nameOfResourceDate
+          };
         }
       }
 
@@ -119,20 +124,29 @@ function ResourceDisplay() {
             }
             // Else if dataType === 'dateTime' || 'Date'
             else {
-              return [formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]), fullResourceDateName];
+              return {
+                date: formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]),
+                dateType: fullResourceDateName
+              };
             }
           }
         }
       }
     }
-    return ['N/A', 'N/A'];
+    return {
+      date: 'N/A',
+      dateType: 'N/A'
+    };
   };
 
   // Formatter for if the date is a period
   const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
     const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0];
     const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
-    return [formatDate(startTime) + '-' + formatDate(endTime), dateTypeName];
+    return {
+      date: formatDate(startTime) + '-' + formatDate(endTime),
+      dateType: dateTypeName
+    };
   };
 
   // Using date-fns to format (other date formats available)
