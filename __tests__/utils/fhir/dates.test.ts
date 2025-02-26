@@ -1,4 +1,4 @@
-import { DateFieldInfo } from '../../../scripts/parsePrimaryDatePath';
+import { DateFieldInfo } from '../../../util/fhir/dates';
 import {
   EXAMPLE_DR_CHOICE_TYPE_PERIOD_TO_PERIOD,
   EXAMPLE_DR_CHOICE_TYPE_DATETIME_TO_PERIOD,

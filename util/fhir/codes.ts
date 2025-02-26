@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import fhirpath from 'fhirpath';
 import type { ValueSetsMap } from '../../state/selectors/valueSetsMap';
-import { parsedCodePaths } from '../codePaths';
+import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 
 /**
  * Identifies the valuesets referenced in a DataRequirement and constructs a string which displays
