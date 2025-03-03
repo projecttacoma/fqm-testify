@@ -1,6 +1,6 @@
 import { selector } from 'recoil';
 import { dataRequirementsState } from './dataRequirements';
-import { parsedCodePaths } from '../../util/codePaths';
+import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 
 export interface DataRequirementsLookupByTypeProps {
   keepAll: boolean;

@@ -1,7 +1,14 @@
-import { DateFieldInfo } from '../../scripts/parsePrimaryDatePath';
-import { parsedPrimaryDatePaths } from '../primaryDatePaths';
+import { parsedPrimaryDatePaths } from 'fhir-spec-tools/build/data/primaryDatePaths';
 
 const DEFAULT_PERIOD_LENGTH = 1;
+
+export interface DateFieldInfo {
+  isChoiceType?: boolean;
+  dataTypes: string[];
+}
+export interface DateInfo {
+  [dateField: string]: DateFieldInfo;
+}
 
 /**
  * Parses the primary date path info and populates date info to satisfy date filter specified in the passed-in data requirement
