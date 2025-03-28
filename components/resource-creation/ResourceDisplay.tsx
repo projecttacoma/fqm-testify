@@ -1,28 +1,36 @@
 import { Stack } from '@mantine/core';
-import { useCallback, useEffect, useState } from 'react';
-import produce from 'immer';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import CodeEditorModal from '../modals/CodeEditorModal';
-import { measureBundleState } from '../../state/atoms/measureBundle';
-import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
-import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
-import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import ResourceInfoCard from '../utils/ResourceInfoCard';
-import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
-import { WritableDraft } from 'immer/dist/internal';
-import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
-import { getFhirResourceSummary } from '../../util/fhir/codes';
-import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { DetailedResult } from '../../util/types';
-import { calculateDetailedResult } from '../../util/MeasureCalculation';
-import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
-import { PrimaryDatePaths } from 'fhir-spec-tools';
 import { format } from 'date-fns';
+import { PrimaryDatePaths } from 'fhir-spec-tools';
 import fhirpath from 'fhirpath';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
+import { useCallback, useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
+import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
+import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
+import { selectedPatientState } from '../../state/atoms/selectedPatient';
+import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
+import { getFhirResourceSummary } from '../../util/fhir/codes';
+import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
+import { calculateDetailedResult } from '../../util/MeasureCalculation';
+import { DetailedResult } from '../../util/types';
+import CodeEditorModal from '../modals/CodeEditorModal';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import ResourceInfoCard from '../utils/ResourceInfoCard';
+import ResourceSearchSort from './ResourceSearchSort';
+
+// export interface Resource {
+//   key: Key | null | undefined;
+//   resourceType: string;
+//   label: string;
+//   date: DateInfo;
+// }
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -36,6 +44,8 @@ function ResourceDisplay() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
+  // const [resources, setResources] = useState<fhir4.BundleEntry[]>([]);
+  const [sortedResources, setSortedResources] = useState<fhir4.BundleEntry[]>([]);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -290,6 +300,32 @@ function ResourceDisplay() {
     }
   };
 
+  // Setting intial values for the resources so helper functions are not called each time the data is filtered
+  // const mapBundleEntries(entries: fhir4.BundleEntry[]): Resource[] => {
+  //   const resources: Resource[] = [];
+
+  //   for (const entry of entries) {
+  //     if (!entry.resource) continue;
+
+  //     const resource: Resource = {
+  //       key: entry.resource.id ?? null,
+  //       resourceType: entry.resource.resourceType,
+  //       label: getFhirResourceSummary(entry.resource),
+  //       date: dateForResource(entry.resource),
+  //     };
+
+  //     resources.push(resource);
+  //   }
+
+  //   return resources;
+  // }
+
+
+  // Handles changes from ResourceSearchSort
+  const handleSrotedResources = (sorted: fhir4.BundleEntry[]) => {
+    setSortedResources(sorted);
+  };
+
   return (
     <>
       <CodeEditorModal
@@ -306,23 +342,28 @@ function ResourceDisplay() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <Stack data-testid="resource-display-stack">
-          {currentTestCases[selectedPatient].resources.map(bundleEntry => {
-            const resource = bundleEntry.resource;
-            if (resource) {
-              return (
-                <ResourceInfoCard
-                  key={resource.id}
-                  resourceType={resource.resourceType}
-                  label={getFhirResourceSummary(resource)}
-                  date={dateForResource(resource)}
-                  onEditClick={() => openResourceModal(resource.id)}
-                  onDeleteClick={() => openConfirmationModal(resource.id)}
-                />
-              );
-            }
-          })}
-        </Stack>
+        <>
+          {/* Passing in the selected patient resources to allow for searching + sorting */}
+          <ResourceSearchSort resources={currentTestCases[selectedPatient].resources} onSorted={handleSrotedResources} dateForResource={dateForResource} />
+
+          <Stack data-testid="resource-display-stack">
+            {sortedResources.map(bundleEntry => {
+              const resource = bundleEntry.resource;
+              if (resource) {
+                return (
+                  <ResourceInfoCard
+                    key={resource.id}
+                    resourceType={resource.resourceType}
+                    label={getFhirResourceSummary(resource)}
+                    date={dateForResource(resource)}
+                    onEditClick={() => openResourceModal(resource.id)}
+                    onDeleteClick={() => openConfirmationModal(resource.id)}
+                  />
+                );
+              }
+            })}
+          </Stack>
+        </>
       )}
     </>
   );
