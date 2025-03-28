@@ -320,7 +320,6 @@ function ResourceDisplay() {
   //   return resources;
   // }
 
-
   // Handles changes from ResourceSearchSort
   const handleSrotedResources = (sorted: fhir4.BundleEntry[]) => {
     setSortedResources(sorted);
@@ -344,7 +343,11 @@ function ResourceDisplay() {
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
           {/* Passing in the selected patient resources to allow for searching + sorting */}
-          <ResourceSearchSort resources={currentTestCases[selectedPatient].resources} onSorted={handleSrotedResources} dateForResource={dateForResource} />
+          <ResourceSearchSort
+            resources={currentTestCases[selectedPatient].resources}
+            onSorted={handleSrotedResources}
+            dateForResource={dateForResource}
+          />
 
           <Stack data-testid="resource-display-stack">
             {sortedResources.map(bundleEntry => {
