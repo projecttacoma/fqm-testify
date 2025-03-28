@@ -25,13 +25,6 @@ import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
 import ResourceSearchSort from './ResourceSearchSort';
 
-// export interface Resource {
-//   key: Key | null | undefined;
-//   resourceType: string;
-//   label: string;
-//   date: DateInfo;
-// }
-
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
@@ -44,7 +37,6 @@ function ResourceDisplay() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
-  // const [resources, setResources] = useState<fhir4.BundleEntry[]>([]);
   const [sortedResources, setSortedResources] = useState<fhir4.BundleEntry[]>([]);
 
   const openConfirmationModal = useCallback(
@@ -300,28 +292,8 @@ function ResourceDisplay() {
     }
   };
 
-  // Setting intial values for the resources so helper functions are not called each time the data is filtered
-  // const mapBundleEntries(entries: fhir4.BundleEntry[]): Resource[] => {
-  //   const resources: Resource[] = [];
-
-  //   for (const entry of entries) {
-  //     if (!entry.resource) continue;
-
-  //     const resource: Resource = {
-  //       key: entry.resource.id ?? null,
-  //       resourceType: entry.resource.resourceType,
-  //       label: getFhirResourceSummary(entry.resource),
-  //       date: dateForResource(entry.resource),
-  //     };
-
-  //     resources.push(resource);
-  //   }
-
-  //   return resources;
-  // }
-
   // Handles changes from ResourceSearchSort
-  const handleSrotedResources = (sorted: fhir4.BundleEntry[]) => {
+  const handleSortedResources = (sorted: fhir4.BundleEntry[]) => {
     setSortedResources(sorted);
   };
 
@@ -345,7 +317,7 @@ function ResourceDisplay() {
           {/* Passing in the selected patient resources to allow for searching + sorting */}
           <ResourceSearchSort
             resources={currentTestCases[selectedPatient].resources}
-            onSorted={handleSrotedResources}
+            onSorted={handleSortedResources}
             dateForResource={dateForResource}
           />
 
