@@ -36,7 +36,7 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
   useEffect(() => {
     const query = search.toLowerCase();
 
-    let filtered = resources.filter(entry => {
+    const filtered = resources.filter(entry => {
       if (!entry.resource) return false;
       const resourceType = entry.resource?.resourceType?.toLowerCase() || '';
       const label = getFhirResourceSummary(entry.resource).toLowerCase();
