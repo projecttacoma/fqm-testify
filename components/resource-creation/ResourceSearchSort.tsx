@@ -66,7 +66,7 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
     }
 
     onSorted(filtered);
-  }, [search, resources, sortType, sortOrder, onSorted]);
+  }, [search, resources, sortType, sortOrder, onSorted, dateForResource]);
   return (
     <>
       <TextInput
