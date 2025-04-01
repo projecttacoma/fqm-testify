@@ -1,6 +1,6 @@
 import { Button, Group, TextInput } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getFhirResourceSummary } from '../../util/fhir/codes';
 
 type Props = {
@@ -32,6 +32,8 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
     if (sortType !== type) return <IconSelector size={16} stroke={1.5} />;
     return sortOrder === 'asc' ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />;
   };
+
+  const prevResultRef = useRef<string>('');
 
   useEffect(() => {
     const query = search.toLowerCase();
@@ -65,8 +67,12 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
       });
     }
 
-    onSorted(filtered);
-  }, [search, resources, sortType, sortOrder]);
+    const newHash = filtered.map(f => f.resource?.id || '').join(',');
+    if (prevResultRef.current !== newHash) {
+      prevResultRef.current = newHash;
+      onSorted(filtered);
+    }
+  }, [search, resources, sortType, sortOrder, dateForResource, onSorted]);
   return (
     <>
       <TextInput
