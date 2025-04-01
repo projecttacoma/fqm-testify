@@ -67,6 +67,7 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
       });
     }
 
+    // checking for a change in the results to prevent infinite loop
     const newHash = filtered.map(f => f.resource?.id || '').join(',');
     if (prevResultRef.current !== newHash) {
       prevResultRef.current = newHash;
