@@ -292,7 +292,6 @@ function ResourceDisplay() {
     }
   };
 
-  // Handles changes from ResourceSearchSort
   const handleSortedResources = (sorted: fhir4.BundleEntry[]) => {
     setSortedResources(sorted);
   };
