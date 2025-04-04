@@ -75,7 +75,7 @@ export function minimizeTestCaseResources(
         // the codeFilter on the data requirement was undefined, keep any resources of that type
         if (matchingDRType.keepAll === true) {
           return true;
-        } else if (codeInfo) {
+        } else if (codeInfo.primaryCodePath) {
           const primaryCodeInfo = codeInfo.paths[codeInfo.primaryCodePath];
 
           if (primaryCodeInfo.codeType === 'FHIR.CodeableConcept') {
