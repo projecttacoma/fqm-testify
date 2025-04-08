@@ -12,7 +12,7 @@ export interface GetValueSetCodesProps {
  * Helper function that takes a ValueSet url and a measure bundle and returns an
  * array of objects that contain each code and system in the ValueSet
  */
-function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetValueSetCodesProps[] {
+export function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetValueSetCodesProps[] {
   const codesAndSystems: GetValueSetCodesProps[] = [];
   valueSetUrl.forEach(vs => {
     const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)[0]
