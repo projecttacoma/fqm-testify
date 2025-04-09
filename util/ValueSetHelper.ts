@@ -6,6 +6,7 @@ import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequir
 export interface GetValueSetCodesProps {
   code?: string;
   system?: string;
+  display?: string;
 }
 
 /**
@@ -18,7 +19,7 @@ export function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null)
     const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)[0]
       .resource as fhir4.ValueSet;
     vsResource.expansion?.contains?.forEach(c => {
-      codesAndSystems.push({ code: c.code, system: c.system });
+      codesAndSystems.push({ code: c.code, system: c.system, display: c.display });
     });
   });
   return codesAndSystems;

@@ -2,7 +2,7 @@ import { Modal, Button, Center, Group, Text, Grid, Card, Paper, Select, Space, S
 import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 import { IconCodePlus } from '@tabler/icons';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
@@ -28,7 +28,6 @@ export default function CodeEditorModal({
   onSave,
   initialValue = ''
 }: CodeEditorModalProps) {
-
   const valueSetMap = useRecoilValue(valueSetMapState);
   const [currentValue, setCurrentValue] = useState(initialValue);
   const [linterError, setLinterError] = useState<string | null>(null);
@@ -37,67 +36,68 @@ export default function CodeEditorModal({
   const [codeValue, setCodeValue] = useState<string | null>('');
   const measureBundle = useRecoilValue(measureBundleState);
 
+  // capture passed initialValue state on open
+  useEffect(() => {
+    if (open) {
+      setCurrentValue(initialValue);
+    }
+  }, [open, initialValue]);
 
-  // TODO: disable code selection section if there are no codeAttributes
-  // no current choice types allow for an alternative code-like choice (instead, choices like "reference"),
-  // which would be beyond scope to implement, so we want to just insert the code type listed (no choice)
-  // options are 'FHIR.CodeableConcept', 'FHIR.Coding', 'FHIR.code'
-  
+  // [{ value: 'react', label: 'React library' }]
   let codeAttributes: string[] = [];
-  if(!linterError && currentValue){
+  if (!linterError && currentValue) {
     try {
       const resource: fhir4.Resource = JSON.parse(currentValue);
       codeAttributes = Object.keys(parsedCodePaths[resource.resourceType].paths);
     } catch (error) {
-      // current json invalid or no valid resourceType 
+      // current json invalid or no valid resourceType
     }
   }
 
-  // getValueSetCodes <- pass all valueset urls
-  // Use valueSetsMap, which is created with url keys...question: any actions if there's no vs url?
+  // Use valueSetsMap, which is created with url keys...TODO question: any actions if there's no vs url?
   // ... what about direct codes? Are those options loaded as part of the bundle at all?
 
+  // Note: choiceType ignored - current choice types only allow for an alternative non-code-like choice (i.e. "reference"),
   const insertCode = () => {
-    
-    if(!attributeValue || !vsValue || !codeValue){
+    if (!attributeValue || !vsValue || !codeValue) {
       //should be disabled
-      console.error('Unexpected code insertion accessed.')
+      console.error('Unexpected code insertion accessed.');
       return;
     }
     const resource: fhir4.Resource = JSON.parse(currentValue);
     const path = parsedCodePaths[resource.resourceType].paths[attributeValue];
-    let codedObject: fhir4.CodeableConcept|fhir4.Coding|string;
-    if(path.codeType === 'FHIR.CodeableConcept'){
+    let codedObject: fhir4.CodeableConcept | fhir4.Coding | string;
+    const [code, system, display] = codeValue.split('|');
+    if (path.codeType === 'FHIR.CodeableConcept') {
       codedObject = {
-        coding: [{code: codeValue}] //TODO: add system/display information
+        coding: [{ code, system, display }]
       } as fhir4.CodeableConcept;
-    } else if(path.codeType === 'FHIR.Coding'){
-      codedObject = {code: codeValue //TODO: add system/display information
+    } else if (path.codeType === 'FHIR.Coding') {
+      codedObject = {
+        code,
+        system,
+        display
       } as fhir4.Coding;
-    }else{
-      codedObject = codeValue; //TODO: add system/display information
+    } else {
+      codedObject = codeValue;
     }
 
-    if(path.multipleCardinality){
+    if (path.multipleCardinality) {
       // add to or create array
       const attributeData = fhirpath.evaluate(resource, attributeValue)[0];
-      if(attributeData){
+      if (attributeData) {
         // add
         (resource as any)[attributeValue].push(codedObject); //TODO: double check these any's for another typescripty way
-      }else{
+      } else {
         //create
         (resource as any)[attributeValue] = [codedObject];
       }
-    }else{
+    } else {
       // replace existing single attribute
       (resource as any)[attributeValue] = codedObject;
     }
-    setCurrentValue(JSON.stringify(resource, null, 2));// TODO: this setter seems to not be working ***
-    console.log(` status: ${JSON.stringify((resource as fhir4.Patient).maritalStatus)}`);
-      
+    setCurrentValue(JSON.stringify(resource, null, 2));
   };
-
-
 
   return (
     <Modal
@@ -118,42 +118,53 @@ export default function CodeEditorModal({
           label="Attribute"
           placeholder="Select coded attribute"
           data={codeAttributes}
-          value={attributeValue} 
+          value={attributeValue}
           onChange={setAttributeValue}
           disabled={codeAttributes.length === 0}
         />
+        {/* TODO: make this wider */}
         <Select
           label="ValueSet"
           placeholder="Select ValueSet"
-          data={Object.keys(valueSetMap)} //.map(k => `${valueSetMap[k]} (${k})`)} // TODO: prettier with name?
-          value={vsValue} 
+          data={Object.keys(valueSetMap).map(k => ({ value: k, label: `${valueSetMap[k]} (${k})` }))}
+          value={vsValue}
           onChange={setVsValue}
           searchable
         />
+        {/* TODO: make wider, when vs changes, clear selection and/or search term, check on duplicate key issue... maybe different versions and need to de-dup or carry version through? */}
         <Select
           label="Code"
           placeholder="Select Code"
-          data={vsValue ? getValueSetCodes([vsValue], measureBundle.content).map(vsProp => vsProp.code || 'Unknown code') : []}
-          value={codeValue} 
+          data={
+            vsValue
+              ? getValueSetCodes([vsValue], measureBundle.content).map(vsProp => ({
+                  value: `${vsProp.code}|${vsProp.system}|${vsProp.display}`,
+                  label: `${vsProp.code} - ${vsProp.display} (${vsProp.system})`
+                }))
+              : []
+          }
+          value={codeValue}
           onChange={setCodeValue}
+          searchable
           disabled={!vsValue}
         />
-        <Button 
-          variant="filled" 
-          rightIcon={<IconCodePlus/>} 
+        <Button
+          variant="filled"
+          rightIcon={<IconCodePlus />}
           disabled={codeAttributes.length === 0 || !attributeValue || !vsValue || !codeValue}
           onClick={() => insertCode()}
-        >Insert Code</Button>
-        </Group>
-        
-      
+        >
+          Insert Code
+        </Button>
+      </Group>
+
       <Space h="md" />
       <div style={{ overflow: 'scroll' }}>
         {open && (
           <CodeMirror
             data-testid="codemirror"
             height="700px"
-            value={initialValue}
+            value={currentValue}
             extensions={[json(), linter(jsonLinter)]}
             theme="light"
             onUpdate={v => {
