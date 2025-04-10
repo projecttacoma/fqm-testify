@@ -1,4 +1,4 @@
-import { Modal, Button, Center, Group, Text, Grid, Card, Paper, Select, Space, Stack } from '@mantine/core';
+import { Modal, Button, Center, Group, Text, Grid, Select, Space, Stack } from '@mantine/core';
 import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
