@@ -7,7 +7,7 @@ import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 import { IconCodePlus } from '@tabler/icons';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { useRecoilValue } from 'recoil';
-import { dedupVSCodes } from '../../util/ValueSetHelper';
+import { dedupVSCodes, getDRC } from '../../util/ValueSetHelper';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import fhirpath from 'fhirpath';
 
@@ -72,6 +72,7 @@ export default function CodeEditorModal({
     const path = parsedCodePaths[resource.resourceType].paths[attributeValue];
     let codedObject: fhir4.CodeableConcept | fhir4.Coding | string;
     const { code, system, display, version } = JSON.parse(codeValue) as fhir4.ValueSetExpansionContains; // pulls all fields overlapping with Coding
+    // TODO: also do choiceType adjustment
     if (path.codeType === 'FHIR.CodeableConcept') {
       codedObject = {
         coding: [{ code, system, display, version }]
@@ -130,7 +131,10 @@ export default function CodeEditorModal({
         <Select
           label="ValueSet"
           placeholder="Select ValueSet"
-          data={Object.keys(valueSetMap).map(k => ({ value: k, label: `${valueSetMap[k]} (${k})` }))} //format: name/title (url)
+          data={[
+            { value: 'DRC', label: 'Direct Reference Code' },
+            ...Object.keys(valueSetMap).map(k => ({ value: k, label: `${valueSetMap[k]} (${k})` }))
+          ]} //label format: name/title (url)
           value={vsValue}
           onChange={value => {
             setVsValue(value);
@@ -143,10 +147,12 @@ export default function CodeEditorModal({
           placeholder="Select Code"
           data={
             vsValue
-              ? dedupVSCodes(vsValue, measureBundle.content).map(vsCode => ({
-                  value: `${JSON.stringify(vsCode)}`,
-                  label: `${vsCode.code} - ${vsCode.display} (${vsCode.system}, version ${vsCode.version})`
-                }))
+              ? (vsValue === 'DRC' ? getDRC(measureBundle.content) : dedupVSCodes(vsValue, measureBundle.content)).map(
+                  coding => ({
+                    value: JSON.stringify(coding),
+                    label: `${coding.code} - ${coding.display} (${coding.system}, version ${coding.version})`
+                  })
+                )
               : []
           }
           value={codeValue}
