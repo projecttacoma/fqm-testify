@@ -7,7 +7,7 @@ import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 import { IconCodePlus } from '@tabler/icons';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { useRecoilValue } from 'recoil';
-import { getValueSetCodes } from '../../util/ValueSetHelper';
+import { dedupVSCodes } from '../../util/ValueSetHelper';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import fhirpath from 'fhirpath';
 
@@ -36,14 +36,17 @@ export default function CodeEditorModal({
   const [codeValue, setCodeValue] = useState<string | null>('');
   const measureBundle = useRecoilValue(measureBundleState);
 
-  // capture passed initialValue state on open
+  // capture passed initialValue state and reset selections on open
   useEffect(() => {
     if (open) {
       setCurrentValue(initialValue);
+      setAttributeValue('');
+      setVsValue('');
+      setCodeValue('');
     }
   }, [open, initialValue]);
 
-  // [{ value: 'react', label: 'React library' }]
+  // find all code-like attributes for the parse resource type
   let codeAttributes: string[] = [];
   if (!linterError && currentValue) {
     try {
@@ -54,9 +57,10 @@ export default function CodeEditorModal({
     }
   }
 
-  // Use valueSetsMap, which is created with url keys...TODO question: any actions if there's no vs url?
-  // ... what about direct codes? Are those options loaded as part of the bundle at all?
+  // TODO... what about direct reference codes? should those be selectable? (probably yes)
+  // These are loaded via the measure resource contained data requirements library
 
+  // Function for inserting code based on the selected attribute, vs, and code
   // Note: choiceType ignored - current choice types only allow for an alternative non-code-like choice (i.e. "reference"),
   const insertCode = () => {
     if (!attributeValue || !vsValue || !codeValue) {
@@ -67,19 +71,20 @@ export default function CodeEditorModal({
     const resource: fhir4.Resource = JSON.parse(currentValue);
     const path = parsedCodePaths[resource.resourceType].paths[attributeValue];
     let codedObject: fhir4.CodeableConcept | fhir4.Coding | string;
-    const [code, system, display] = codeValue.split('|');
+    const { code, system, display, version } = JSON.parse(codeValue) as fhir4.ValueSetExpansionContains; // pulls all fields overlapping with Coding
     if (path.codeType === 'FHIR.CodeableConcept') {
       codedObject = {
-        coding: [{ code, system, display }]
+        coding: [{ code, system, display, version }]
       } as fhir4.CodeableConcept;
     } else if (path.codeType === 'FHIR.Coding') {
       codedObject = {
         code,
         system,
-        display
+        display,
+        version
       } as fhir4.Coding;
     } else {
-      codedObject = codeValue;
+      codedObject = code as string;
     }
 
     if (path.multipleCardinality) {
@@ -87,7 +92,7 @@ export default function CodeEditorModal({
       const attributeData = fhirpath.evaluate(resource, attributeValue)[0];
       if (attributeData) {
         // add
-        (resource as any)[attributeValue].push(codedObject); //TODO: double check these any's for another typescripty way
+        (resource as any)[attributeValue].push(codedObject); //TODO: double check these any's for another typescripty/safer way
       } else {
         //create
         (resource as any)[attributeValue] = [codedObject];
@@ -113,7 +118,7 @@ export default function CodeEditorModal({
       }}
       title={title}
     >
-      <Group>
+      <Stack>
         <Select
           label="Attribute"
           placeholder="Select coded attribute"
@@ -122,24 +127,25 @@ export default function CodeEditorModal({
           onChange={setAttributeValue}
           disabled={codeAttributes.length === 0}
         />
-        {/* TODO: make this wider */}
         <Select
           label="ValueSet"
           placeholder="Select ValueSet"
-          data={Object.keys(valueSetMap).map(k => ({ value: k, label: `${valueSetMap[k]} (${k})` }))}
+          data={Object.keys(valueSetMap).map(k => ({ value: k, label: `${valueSetMap[k]} (${k})` }))} //format: name/title (url)
           value={vsValue}
-          onChange={setVsValue}
+          onChange={value => {
+            setVsValue(value);
+            setCodeValue('');
+          }}
           searchable
         />
-        {/* TODO: make wider, when vs changes, clear selection and/or search term, check on duplicate key issue... maybe different versions and need to de-dup or carry version through? */}
         <Select
           label="Code"
           placeholder="Select Code"
           data={
             vsValue
-              ? getValueSetCodes([vsValue], measureBundle.content).map(vsProp => ({
-                  value: `${vsProp.code}|${vsProp.system}|${vsProp.display}`,
-                  label: `${vsProp.code} - ${vsProp.display} (${vsProp.system})`
+              ? dedupVSCodes(vsValue, measureBundle.content).map(vsCode => ({
+                  value: `${JSON.stringify(vsCode)}`,
+                  label: `${vsCode.code} - ${vsCode.display} (${vsCode.system}, version ${vsCode.version})`
                 }))
               : []
           }
@@ -148,6 +154,9 @@ export default function CodeEditorModal({
           searchable
           disabled={!vsValue}
         />
+      </Stack>
+      <Space h="md" />
+      <Center>
         <Button
           variant="filled"
           rightIcon={<IconCodePlus />}
@@ -156,12 +165,12 @@ export default function CodeEditorModal({
         >
           Insert Code
         </Button>
-      </Group>
-
+      </Center>
       <Space h="md" />
       <div style={{ overflow: 'scroll' }}>
         {open && (
           <CodeMirror
+            data-autofocus
             data-testid="codemirror"
             height="700px"
             value={currentValue}

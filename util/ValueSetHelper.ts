@@ -2,6 +2,7 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import fhirpath from 'fhirpath';
 import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequirementsLookupByType';
+import _ from 'lodash';
 
 export interface GetValueSetCodesProps {
   code?: string;
@@ -13,16 +14,28 @@ export interface GetValueSetCodesProps {
  * Helper function that takes a ValueSet url and a measure bundle and returns an
  * array of objects that contain each code and system in the ValueSet
  */
-export function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetValueSetCodesProps[] {
+function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetValueSetCodesProps[] {
   const codesAndSystems: GetValueSetCodesProps[] = [];
   valueSetUrl.forEach(vs => {
     const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)[0]
       .resource as fhir4.ValueSet;
     vsResource.expansion?.contains?.forEach(c => {
-      codesAndSystems.push({ code: c.code, system: c.system, display: c.display });
+      codesAndSystems.push({ code: c.code, system: c.system });
     });
   });
   return codesAndSystems;
+}
+
+/**
+ * Provides full valueset expansion codes for the passed vs url, but removes duplicates
+ */
+export function dedupVSCodes(vs: string, mb: fhir4.Bundle | null): fhir4.ValueSetExpansionContains[] {
+  const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)[0]
+    .resource as fhir4.ValueSet;
+  const codes: fhir4.ValueSetExpansionContains[] = vsResource.expansion?.contains
+    ? _.uniqWith(vsResource.expansion?.contains, _.isEqual)
+    : [];
+  return codes;
 }
 
 /**
