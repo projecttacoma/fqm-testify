@@ -7,7 +7,6 @@ import _ from 'lodash';
 export interface GetValueSetCodesProps {
   code?: string;
   system?: string;
-  display?: string;
 }
 
 /**
