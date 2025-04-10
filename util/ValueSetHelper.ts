@@ -39,7 +39,6 @@ export function dedupVSCodes(vs: string, mb: fhir4.Bundle | null): fhir4.ValueSe
 
 /**
  * Pulls all unique direct reference codes from a measure bundle's listed effective data requirements
- * TODO: This approach is dependent on having an appropriate effective data requirements (not always available)... is there an alternative?
  */
 export function getDRC(mb: fhir4.Bundle | null): fhir4.Coding[] {
   const measure = mb?.entry?.find(r => r.resource?.resourceType === 'Measure')?.resource as fhir4.Measure | undefined;

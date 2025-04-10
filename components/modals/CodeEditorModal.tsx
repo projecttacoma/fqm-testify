@@ -57,9 +57,6 @@ export default function CodeEditorModal({
     }
   }
 
-  // TODO... what about direct reference codes? should those be selectable? (probably yes)
-  // These are loaded via the measure resource contained data requirements library
-
   // Function for inserting code based on the selected attribute, vs, and code
   // Note: choiceType ignored - current choice types only allow for an alternative non-code-like choice (i.e. "reference"),
   const insertCode = () => {
@@ -71,12 +68,13 @@ export default function CodeEditorModal({
     const resource: fhir4.Resource = JSON.parse(currentValue);
     const path = parsedCodePaths[resource.resourceType].paths[attributeValue];
     let codedObject: fhir4.CodeableConcept | fhir4.Coding | string;
+    let fullPath = attributeValue;
     const { code, system, display, version } = JSON.parse(codeValue) as fhir4.ValueSetExpansionContains; // pulls all fields overlapping with Coding
-    // TODO: also do choiceType adjustment
     if (path.codeType === 'FHIR.CodeableConcept') {
       codedObject = {
         coding: [{ code, system, display, version }]
       } as fhir4.CodeableConcept;
+      if (path.choiceType) fullPath += 'CodeableConcept';
     } else if (path.codeType === 'FHIR.Coding') {
       codedObject = {
         code,
@@ -84,23 +82,29 @@ export default function CodeEditorModal({
         display,
         version
       } as fhir4.Coding;
+      if (path.choiceType) fullPath += 'Coding';
     } else {
       codedObject = code as string;
+      // case doesn't exist in current data model:
+      // if(path.choiceType) fullPath += 'Code';
     }
 
     if (path.multipleCardinality) {
       // add to or create array
-      const attributeData = fhirpath.evaluate(resource, attributeValue)[0];
+      const attributeData = fhirpath.evaluate(resource, fullPath)[0];
       if (attributeData) {
         // add
-        (resource as any)[attributeValue].push(codedObject); //TODO: double check these any's for another typescripty/safer way
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resource as any)[fullPath].push(codedObject);
       } else {
         //create
-        (resource as any)[attributeValue] = [codedObject];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resource as any)[fullPath] = [codedObject];
       }
     } else {
       // replace existing single attribute
-      (resource as any)[attributeValue] = codedObject;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (resource as any)[fullPath] = codedObject;
     }
     setCurrentValue(JSON.stringify(resource, null, 2));
   };
