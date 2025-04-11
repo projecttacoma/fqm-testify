@@ -12,7 +12,14 @@ import { download } from '../../util/downloadUtil';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
+import {
+  IconAlertCircle,
+  IconFileDownload,
+  IconFileUpload,
+  IconInfoCircle,
+  IconTrash,
+  IconUserPlus
+} from '@tabler/icons';
 import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
@@ -42,6 +49,7 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDeleteAll, setIsDeleteAll] = useState(false);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -171,12 +179,16 @@ function PatientCreationPanel() {
     closePatientModal();
   };
 
-  const openConfirmationModal = () => {
+  const openConfirmationModal = (all: boolean) => {
+    if (all) {
+      setIsDeleteAll(true);
+    }
     setIsConfirmationModalOpen(true);
   };
 
   const closeConfirmationModal = () => {
     setIsConfirmationModalOpen(false);
+    setIsDeleteAll(false);
   };
 
   const deletePatientTestCase = (id: string | null) => {
@@ -237,6 +249,9 @@ function PatientCreationPanel() {
 
   const getConfirmationModalText = (patientId: string | null) => {
     let patientName;
+    if (isDeleteAll) {
+      return `Are you sure you want to delete all patients associated with ${measureBundle.fileName}?`;
+    }
     if (patientId !== null) {
       const patient = currentPatients[patientId].patient;
       patientName = getPatientNameString(patient);
@@ -277,6 +292,23 @@ function PatientCreationPanel() {
         message: 'Could not successfully create zip folder for downloading all patients'
       });
     }
+  };
+
+  const deleteAllPatients = () => {
+    const nextPatientState = produce(currentPatients, draftState => {
+      Object.keys(currentPatients).forEach(id => {
+        delete draftState[id];
+      });
+    });
+    const nextResourceState = produce(detailedResultLookup, draftState => {
+      Object.keys(detailedResultLookup).forEach(id => {
+        delete draftState[id];
+      });
+    });
+    setCurrentPatients(nextPatientState);
+    setDetailedResultLookup(nextResourceState);
+    setSelectedPatient(null);
+    closeConfirmationModal();
   };
 
   const handleSubmittedImport = (files: File[]) => {
@@ -416,7 +448,7 @@ function PatientCreationPanel() {
         open={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
         title={getConfirmationModalText(selectedPatient)}
-        onConfirm={() => deletePatientTestCase(selectedPatient)}
+        onConfirm={() => (isDeleteAll ? deleteAllPatients() : deletePatientTestCase(selectedPatient))}
       />
       <ImportModal
         open={isImportModalOpen}
@@ -441,6 +473,16 @@ function PatientCreationPanel() {
           <IconFileDownload />
           &nbsp;Download All
         </Button>
+        <Button
+          aria-label="Delete All Patients"
+          disabled={Object.keys(currentPatients).length === 0}
+          onClick={() => openConfirmationModal(true)}
+          variant="outline"
+          color="red"
+        >
+          <IconTrash />
+          &nbsp;Delete All
+        </Button>
       </Group>
       {Object.keys(currentPatients).length > 0 && (
         <div data-testid="patient-panel">
@@ -458,7 +500,7 @@ function PatientCreationPanel() {
                   onCopyClick={() => openPatientModal(id, true)}
                   onExportClick={() => exportPatientTestCase(id)}
                   onEditClick={() => openPatientModal(id)}
-                  onDeleteClick={() => openConfirmationModal()}
+                  onDeleteClick={() => openConfirmationModal(false)}
                   selected={selectedPatient === id}
                   smallScreen={isSmallScreen}
                 />
