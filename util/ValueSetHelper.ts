@@ -2,6 +2,7 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
 import fhirpath from 'fhirpath';
 import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
 import { DataRequirementsLookupByTypeProps } from '../state/selectors/dataRequirementsLookupByType';
+import _ from 'lodash';
 
 export interface GetValueSetCodesProps {
   code?: string;
@@ -15,13 +16,39 @@ export interface GetValueSetCodesProps {
 function getValueSetCodes(valueSetUrl: string[], mb: fhir4.Bundle | null): GetValueSetCodesProps[] {
   const codesAndSystems: GetValueSetCodesProps[] = [];
   valueSetUrl.forEach(vs => {
-    const vsResource = mb?.entry?.filter(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)[0]
-      .resource as fhir4.ValueSet;
-    vsResource.expansion?.contains?.forEach(c => {
+    const vsResource = mb?.entry?.find(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)
+      ?.resource as fhir4.ValueSet | undefined;
+    vsResource?.expansion?.contains?.forEach(c => {
       codesAndSystems.push({ code: c.code, system: c.system });
     });
   });
   return codesAndSystems;
+}
+
+/**
+ * Provides full valueset expansion codes for the passed vs url, but removes duplicates
+ */
+export function dedupVSCodes(vs: string, mb: fhir4.Bundle | null): fhir4.ValueSetExpansionContains[] {
+  const vsResource = mb?.entry?.find(r => r.resource?.resourceType === 'ValueSet' && r.resource?.url === vs)
+    ?.resource as fhir4.ValueSet | undefined;
+  const codes: fhir4.ValueSetExpansionContains[] = vsResource?.expansion?.contains
+    ? _.uniqWith(vsResource.expansion?.contains, _.isEqual)
+    : [];
+  return codes;
+}
+
+/**
+ * Pulls all unique direct reference codes from a measure bundle's listed effective data requirements
+ */
+export function getDRC(mb: fhir4.Bundle | null): fhir4.Coding[] {
+  const measure = mb?.entry?.find(r => r.resource?.resourceType === 'Measure')?.resource as fhir4.Measure | undefined;
+  const effectiveDR = measure?.contained?.find(
+    c => c.resourceType === 'Library' && c.id === 'effective-data-requirements'
+  ) as fhir4.Library | undefined;
+  const drc = effectiveDR?.extension
+    ?.filter(e => e.url === 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode')
+    .map(e => e.valueCoding) as fhir4.Coding[] | undefined;
+  return drc ? _.uniqWith(drc, _.isEqual) : [];
 }
 
 /**
@@ -75,7 +102,7 @@ export function minimizeTestCaseResources(
         // the codeFilter on the data requirement was undefined, keep any resources of that type
         if (matchingDRType.keepAll === true) {
           return true;
-        } else if (codeInfo) {
+        } else if (codeInfo.primaryCodePath) {
           const primaryCodeInfo = codeInfo.paths[codeInfo.primaryCodePath];
 
           if (primaryCodeInfo.codeType === 'FHIR.CodeableConcept') {
