@@ -154,6 +154,47 @@ describe('PatientCreationPanel', () => {
     expect(testPatientMetaProfile).toBeInTheDocument();
   });
 
+  it('should render confirmation modal when delete all patients button is clicked', async () => {
+    const MockMB = getMockRecoilState(measureBundleState, MEASURE_BUNDLE_POPULATED);
+    const MockPatients = getMockRecoilState(patientTestCaseState, {
+      'example-pt': {
+        patient: {
+          resourceType: 'Patient',
+          name: [{ given: ['Test123'], family: 'Patient456' }]
+        },
+        fullUrl: 'urn:uuid:testPatient',
+        resources: [],
+        minResources: false
+      }
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PatientCreationPanel />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
+
+    const deleteAllButton = screen.getByLabelText(/delete all patients/i) as HTMLButtonElement;
+    expect(deleteAllButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(deleteAllButton);
+    });
+
+    const confirmationModal = screen.getByRole('dialog', { hidden: true });
+    expect(confirmationModal).toBeInTheDocument();
+  });
+
   it('should not render test case list with empty state', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
