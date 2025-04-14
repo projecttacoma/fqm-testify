@@ -49,7 +49,7 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isDeleteAll, setIsDeleteAll] = useState(false);
+  const [patientsToDelete, setPatientsToDelete] = useState<string[]>([]);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -179,32 +179,31 @@ function PatientCreationPanel() {
     closePatientModal();
   };
 
-  const openConfirmationModal = (all: boolean) => {
-    if (all) {
-      setIsDeleteAll(true);
-    }
+  const openConfirmationModal = () => {
     setIsConfirmationModalOpen(true);
   };
 
   const closeConfirmationModal = () => {
+    setPatientsToDelete([]);
     setIsConfirmationModalOpen(false);
-    setIsDeleteAll(false);
   };
 
-  const deletePatientTestCase = (id: string | null) => {
-    if (id !== null) {
-      const nextPatientState = produce(currentPatients, draftState => {
+  const deletePatients = (ids: string[]) => {
+    const nextPatientState = produce(currentPatients, draftState => {
+      ids.forEach(id => {
         delete draftState[id];
       });
-      const nextResourceState = produce(detailedResultLookup, draftState => {
+    });
+    const nextResourceState = produce(detailedResultLookup, draftState => {
+      ids.forEach(id => {
         delete draftState[id];
       });
-      setCurrentPatients(nextPatientState);
-      setDetailedResultLookup(nextResourceState);
-      // Set the selected patient to null because the selected patient will not longer exist after it is deleted
-      setSelectedPatient(null);
-      closeConfirmationModal();
-    }
+    });
+    setCurrentPatients(nextPatientState);
+    setDetailedResultLookup(nextResourceState);
+    // Set the selected patient to null because the selected patient will not longer exist after it is deleted
+    setSelectedPatient(null);
+    closeConfirmationModal();
   };
 
   const exportPatientTestCase = (id: string) => {
@@ -247,13 +246,14 @@ function PatientCreationPanel() {
     return undefined;
   };
 
-  const getConfirmationModalText = (patientId: string | null) => {
+  const getConfirmationModalText = (patientIds: string[] | null) => {
     let patientName;
-    if (isDeleteAll) {
-      return `Are you sure you want to delete all patients associated with ${measureBundle.fileName}?`;
+    if (patientIds !== null && patientIds.length > 1) {
+      const numPatientsToDelete = patientIds.length;
+      return `Are you sure you want to delete all ${numPatientsToDelete} patients associated with ${measureBundle.fileName}?`;
     }
-    if (patientId !== null) {
-      const patient = currentPatients[patientId].patient;
+    if (patientIds !== null && patientIds.length === 1) {
+      const patient = currentPatients[patientIds[0]].patient;
       patientName = getPatientNameString(patient);
     }
     return `Are you sure you want to delete ${patientName || 'this patient'}?`;
@@ -292,23 +292,6 @@ function PatientCreationPanel() {
         message: 'Could not successfully create zip folder for downloading all patients'
       });
     }
-  };
-
-  const deleteAllPatients = () => {
-    const nextPatientState = produce(currentPatients, draftState => {
-      Object.keys(currentPatients).forEach(id => {
-        delete draftState[id];
-      });
-    });
-    const nextResourceState = produce(detailedResultLookup, draftState => {
-      Object.keys(detailedResultLookup).forEach(id => {
-        delete draftState[id];
-      });
-    });
-    setCurrentPatients(nextPatientState);
-    setDetailedResultLookup(nextResourceState);
-    setSelectedPatient(null);
-    closeConfirmationModal();
   };
 
   const handleSubmittedImport = (files: File[]) => {
@@ -447,8 +430,8 @@ function PatientCreationPanel() {
       <ConfirmationModal
         open={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
-        title={getConfirmationModalText(selectedPatient)}
-        onConfirm={() => (isDeleteAll ? deleteAllPatients() : deletePatientTestCase(selectedPatient))}
+        title={getConfirmationModalText(patientsToDelete)}
+        onConfirm={() => deletePatients(patientsToDelete)}
       />
       <ImportModal
         open={isImportModalOpen}
@@ -476,7 +459,10 @@ function PatientCreationPanel() {
         <Button
           aria-label="Delete All Patients"
           disabled={Object.keys(currentPatients).length === 0}
-          onClick={() => openConfirmationModal(true)}
+          onClick={() => {
+            setPatientsToDelete(Object.keys(currentPatients).map(cp => cp));
+            openConfirmationModal();
+          }}
           variant="outline"
           color="red"
         >
@@ -500,7 +486,10 @@ function PatientCreationPanel() {
                   onCopyClick={() => openPatientModal(id, true)}
                   onExportClick={() => exportPatientTestCase(id)}
                   onEditClick={() => openPatientModal(id)}
-                  onDeleteClick={() => openConfirmationModal(false)}
+                  onDeleteClick={() => {
+                    setPatientsToDelete([id]);
+                    openConfirmationModal();
+                  }}
                   selected={selectedPatient === id}
                   smallScreen={isSmallScreen}
                 />
