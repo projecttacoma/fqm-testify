@@ -12,6 +12,7 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { patientResourcesAtom } from '../../state/atoms/patientResources';
 import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -38,6 +39,7 @@ function ResourceDisplay() {
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
   const [sortedResources, setSortedResources] = useState<fhir4.BundleEntry[]>([]);
+  const [patientResources, setPatientResources] = useRecoilState(patientResourcesAtom);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -296,6 +298,13 @@ function ResourceDisplay() {
     setSortedResources(sorted);
   };
 
+  // Updating atom for patient resources
+  useEffect(() => {
+    if (selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0) {
+      setPatientResources(currentTestCases[selectedPatient].resources);
+    }
+  }, [currentTestCases, selectedPatient]);
+
   return (
     <>
       <CodeEditorModal
@@ -313,12 +322,7 @@ function ResourceDisplay() {
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
-          {/* Passing in the selected patient resources to allow for searching + sorting */}
-          <ResourceSearchSort
-            resources={currentTestCases[selectedPatient].resources}
-            onSorted={handleSortedResources}
-            dateForResource={dateForResource}
-          />
+          <ResourceSearchSort onSorted={handleSortedResources} dateForResource={dateForResource} />
 
           <Stack data-testid="resource-display-stack">
             {sortedResources.map(bundleEntry => {

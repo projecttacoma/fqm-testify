@@ -2,17 +2,19 @@ import { Button, Group, TextInput } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { getFhirResourceSummary } from '../../util/fhir/codes';
+import { useRecoilValue } from 'recoil';
+import { patientResourcesAtom } from '../../state/atoms/patientResources';
 
 type Props = {
-  resources: fhir4.BundleEntry[];
   onSorted: (sortedResources: fhir4.BundleEntry[]) => void;
   dateForResource: (resource: fhir4.FhirResource) => { date: string; dateType: string };
 };
 
-const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResource }) => {
+const ResourceSearchSort: React.FC<Props> = ({ onSorted, dateForResource }) => {
   const [search, setSearch] = useState('');
   const [sortType, setSortType] = useState<'date' | 'resourceType' | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const resources = useRecoilValue(patientResourcesAtom);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
@@ -32,8 +34,6 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
     if (sortType !== type) return <IconSelector size={16} stroke={1.5} />;
     return sortOrder === 'asc' ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />;
   };
-
-  const prevResultRef = useRef<string>('');
 
   useEffect(() => {
     const query = search.toLowerCase();
@@ -67,13 +67,9 @@ const ResourceSearchSort: React.FC<Props> = ({ resources, onSorted, dateForResou
       });
     }
 
-    // checking for a change in the results to prevent infinite loop
-    const newHash = filtered.map(f => f.resource?.id || '').join(',');
-    if (prevResultRef.current !== newHash) {
-      prevResultRef.current = newHash;
-      onSorted(filtered);
-    }
-  }, [search, resources, sortType, sortOrder, dateForResource, onSorted]);
+    onSorted(filtered);
+  }, [search, resources, sortType, sortOrder]);
+
   return (
     <>
       <TextInput
