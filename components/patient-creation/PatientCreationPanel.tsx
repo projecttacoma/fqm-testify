@@ -184,7 +184,6 @@ function PatientCreationPanel() {
   };
 
   const closeConfirmationModal = () => {
-    setPatientsToDelete([]);
     setIsConfirmationModalOpen(false);
   };
 
@@ -201,8 +200,9 @@ function PatientCreationPanel() {
     });
     setCurrentPatients(nextPatientState);
     setDetailedResultLookup(nextResourceState);
-    // Set the selected patient to null because the selected patient will not longer exist after it is deleted
+    // Set the selected patient to null because the selected patient will no longer exist after it is deleted
     setSelectedPatient(null);
+    setPatientsToDelete([]);
     closeConfirmationModal();
   };
 
@@ -460,7 +460,7 @@ function PatientCreationPanel() {
           aria-label="Delete All Patients"
           disabled={Object.keys(currentPatients).length === 0}
           onClick={() => {
-            setPatientsToDelete(Object.keys(currentPatients).map(cp => cp));
+            setPatientsToDelete(Object.keys(currentPatients));
             openConfirmationModal();
           }}
           variant="outline"
