@@ -12,7 +12,7 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { patientResourcesAtom } from '../../state/atoms/patientResources';
+import { patientResourcesAtom, filteredPatientResourcesAtom } from '../../state/atoms/patientResources';
 import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -38,8 +38,8 @@ function ResourceDisplay() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
-  const [sortedResources, setSortedResources] = useState<fhir4.BundleEntry[]>([]);
-  const [patientResources, setPatientResources] = useRecoilState(patientResourcesAtom);
+  const setPatientResources = useSetRecoilState(patientResourcesAtom);
+  const filteredResources = useRecoilValue(filteredPatientResourcesAtom);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -294,16 +294,12 @@ function ResourceDisplay() {
     }
   };
 
-  const handleSortedResources = (sorted: fhir4.BundleEntry[]) => {
-    setSortedResources(sorted);
-  };
-
   // Updating atom for patient resources
   useEffect(() => {
     if (selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0) {
       setPatientResources(currentTestCases[selectedPatient].resources);
     }
-  }, [currentTestCases, selectedPatient]);
+  }, [currentTestCases, selectedPatient, setPatientResources, selectedDataRequirement]);
 
   return (
     <>
@@ -322,10 +318,10 @@ function ResourceDisplay() {
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
         <>
-          <ResourceSearchSort onSorted={handleSortedResources} dateForResource={dateForResource} />
+          <ResourceSearchSort dateForResource={dateForResource} />
 
           <Stack data-testid="resource-display-stack">
-            {sortedResources.map(bundleEntry => {
+            {filteredResources.map(bundleEntry => {
               const resource = bundleEntry.resource;
               if (resource) {
                 return (

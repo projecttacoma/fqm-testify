@@ -2,7 +2,7 @@ import { ActionIcon, Anchor, Button, Center, Divider, Group, Popover, Text } fro
 import { v4 as uuidv4 } from 'uuid';
 import { IconAlertCircle, IconAlertTriangle, IconCodePlus } from '@tabler/icons';
 import { Suspense, useState } from 'react';
-import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { Loader } from 'tabler-icons-react';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -178,9 +178,7 @@ export default function ResourcePanel() {
   return (
     <>
       {renderResourceSelection()}
-      <RecoilRoot>
-        <ResourceDisplay />
-      </RecoilRoot>
+      <ResourceDisplay />
     </>
   );
 }

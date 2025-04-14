@@ -1,20 +1,20 @@
 import { Button, Group, TextInput } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getFhirResourceSummary } from '../../util/fhir/codes';
-import { useRecoilValue } from 'recoil';
-import { patientResourcesAtom } from '../../state/atoms/patientResources';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { patientResourcesAtom, filteredPatientResourcesAtom } from '../../state/atoms/patientResources';
 
 type Props = {
-  onSorted: (sortedResources: fhir4.BundleEntry[]) => void;
   dateForResource: (resource: fhir4.FhirResource) => { date: string; dateType: string };
 };
 
-const ResourceSearchSort: React.FC<Props> = ({ onSorted, dateForResource }) => {
+const ResourceSearchSort: React.FC<Props> = ({ dateForResource }) => {
   const [search, setSearch] = useState('');
   const [sortType, setSortType] = useState<'date' | 'resourceType' | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const resources = useRecoilValue(patientResourcesAtom);
+  const setFilteredPatientResources = useSetRecoilState(filteredPatientResourcesAtom);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
@@ -40,11 +40,15 @@ const ResourceSearchSort: React.FC<Props> = ({ onSorted, dateForResource }) => {
 
     const filtered = resources.filter(entry => {
       if (!entry.resource) return false;
-      const resourceType = entry.resource?.resourceType?.toLowerCase() || '';
+      const resourceType = entry.resource.resourceType?.toLowerCase() || '';
       const label = getFhirResourceSummary(entry.resource).toLowerCase();
-      const date = dateForResource(entry.resource).date.toLowerCase();
-      const dateType = dateForResource(entry.resource).dateType.toLowerCase();
-      return resourceType.includes(query) || label.includes(query) || date.includes(query) || dateType.includes(query);
+      const { date, dateType } = dateForResource(entry.resource);
+      return (
+        resourceType.includes(query) ||
+        label.includes(query) ||
+        date.toLowerCase().includes(query) ||
+        dateType.toLowerCase().includes(query)
+      );
     });
 
     if (sortType) {
@@ -67,8 +71,8 @@ const ResourceSearchSort: React.FC<Props> = ({ onSorted, dateForResource }) => {
       });
     }
 
-    onSorted(filtered);
-  }, [search, resources, sortType, sortOrder]);
+    setFilteredPatientResources(filtered);
+  }, [search, resources, sortType, sortOrder, setFilteredPatientResources ]);
 
   return (
     <>
