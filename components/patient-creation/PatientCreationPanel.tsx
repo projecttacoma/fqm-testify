@@ -12,7 +12,14 @@ import { download } from '../../util/downloadUtil';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconFileDownload, IconFileUpload, IconInfoCircle, IconUserPlus } from '@tabler/icons';
+import {
+  IconAlertCircle,
+  IconFileDownload,
+  IconFileUpload,
+  IconInfoCircle,
+  IconTrash,
+  IconUserPlus
+} from '@tabler/icons';
 import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
@@ -42,6 +49,7 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [patientsToDelete, setPatientsToDelete] = useState<string[]>([]);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
   const [selectedPatient, setSelectedPatient] = useRecoilState(selectedPatientState);
@@ -179,20 +187,23 @@ function PatientCreationPanel() {
     setIsConfirmationModalOpen(false);
   };
 
-  const deletePatientTestCase = (id: string | null) => {
-    if (id !== null) {
-      const nextPatientState = produce(currentPatients, draftState => {
+  const deletePatients = (ids: string[]) => {
+    const nextPatientState = produce(currentPatients, draftState => {
+      ids.forEach(id => {
         delete draftState[id];
       });
-      const nextResourceState = produce(detailedResultLookup, draftState => {
+    });
+    const nextResourceState = produce(detailedResultLookup, draftState => {
+      ids.forEach(id => {
         delete draftState[id];
       });
-      setCurrentPatients(nextPatientState);
-      setDetailedResultLookup(nextResourceState);
-      // Set the selected patient to null because the selected patient will not longer exist after it is deleted
-      setSelectedPatient(null);
-      closeConfirmationModal();
-    }
+    });
+    setCurrentPatients(nextPatientState);
+    setDetailedResultLookup(nextResourceState);
+    // Set the selected patient to null because the selected patient will no longer exist after it is deleted
+    setSelectedPatient(null);
+    setPatientsToDelete([]);
+    closeConfirmationModal();
   };
 
   const exportPatientTestCase = (id: string) => {
@@ -235,10 +246,14 @@ function PatientCreationPanel() {
     return undefined;
   };
 
-  const getConfirmationModalText = (patientId: string | null) => {
+  const getConfirmationModalText = (patientIds: string[] | null) => {
     let patientName;
-    if (patientId !== null) {
-      const patient = currentPatients[patientId].patient;
+    if (patientIds !== null && patientIds.length > 1) {
+      const numPatientsToDelete = patientIds.length;
+      return `Are you sure you want to delete all ${numPatientsToDelete} patients associated with ${measureBundle.fileName}?`;
+    }
+    if (patientIds !== null && patientIds.length === 1) {
+      const patient = currentPatients[patientIds[0]].patient;
       patientName = getPatientNameString(patient);
     }
     return `Are you sure you want to delete ${patientName || 'this patient'}?`;
@@ -415,8 +430,8 @@ function PatientCreationPanel() {
       <ConfirmationModal
         open={isConfirmationModalOpen}
         onClose={closeConfirmationModal}
-        title={getConfirmationModalText(selectedPatient)}
-        onConfirm={() => deletePatientTestCase(selectedPatient)}
+        title={getConfirmationModalText(patientsToDelete)}
+        onConfirm={() => deletePatients(patientsToDelete)}
       />
       <ImportModal
         open={isImportModalOpen}
@@ -441,6 +456,19 @@ function PatientCreationPanel() {
           <IconFileDownload />
           &nbsp;Download All
         </Button>
+        <Button
+          aria-label="Delete All Patients"
+          disabled={Object.keys(currentPatients).length === 0}
+          onClick={() => {
+            setPatientsToDelete(Object.keys(currentPatients));
+            openConfirmationModal();
+          }}
+          variant="outline"
+          color="red"
+        >
+          <IconTrash />
+          &nbsp;Delete All
+        </Button>
       </Group>
       {Object.keys(currentPatients).length > 0 && (
         <div data-testid="patient-panel">
@@ -458,7 +486,10 @@ function PatientCreationPanel() {
                   onCopyClick={() => openPatientModal(id, true)}
                   onExportClick={() => exportPatientTestCase(id)}
                   onEditClick={() => openPatientModal(id)}
-                  onDeleteClick={() => openConfirmationModal()}
+                  onDeleteClick={() => {
+                    setPatientsToDelete([id]);
+                    openConfirmationModal();
+                  }}
                   selected={selectedPatient === id}
                   smallScreen={isSmallScreen}
                 />
