@@ -1,17 +1,17 @@
 import { atom } from 'recoil';
 
-// type DatedResource = {
-//     bundle: fhir4.BundleEntry;
-//     date: String;
-//     dateType: String;
-// }
+type SortType = 'date' | 'resourceType' | '';
+type SortOrderType = 'asc' | 'desc' | '';
 
-export const patientResourcesAtom = atom<fhir4.BundleEntry[]>({
-  key: 'patientResourcesAtom',
-  default: []
-});
-
-export const filteredPatientResourcesAtom = atom<fhir4.BundleEntry[]>({
-  key: 'filteredPatientResourcesAtom',
-  default: []
+export const cardFiltersAtom = atom<{
+  searchString: string;
+  sortType: SortType;
+  sortOrder: SortOrderType;
+}>({
+  key: 'cardFiltersAtom',
+  default: {
+    searchString: '',
+    sortType: '',
+    sortOrder: ''
+  }
 });
