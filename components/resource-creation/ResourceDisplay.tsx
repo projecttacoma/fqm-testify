@@ -1,28 +1,28 @@
 import { Stack } from '@mantine/core';
-import { useCallback, useEffect, useState } from 'react';
-import produce from 'immer';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import CodeEditorModal from '../modals/CodeEditorModal';
-import { measureBundleState } from '../../state/atoms/measureBundle';
-import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
-import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
-import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import ResourceInfoCard from '../utils/ResourceInfoCard';
-import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
+import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
-import { getFhirResourceSummary } from '../../util/fhir/codes';
+import { useCallback, useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
-import { DetailedResult } from '../../util/types';
-import { calculateDetailedResult } from '../../util/MeasureCalculation';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { cardFiltersAtom } from '../../state/atoms/cardFilters';
+import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
+import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
+import { selectedPatientState } from '../../state/atoms/selectedPatient';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
-import { PrimaryDatePaths } from 'fhir-spec-tools';
-import { format } from 'date-fns';
-import fhirpath from 'fhirpath';
+import { getFhirResourceSummary } from '../../util/fhir/codes';
+import { dateForResource } from '../../util/fhir/dates';
+import { createFHIRResourceString } from '../../util/fhir/resourceCreation';
+import { calculateDetailedResult } from '../../util/MeasureCalculation';
+import { DetailedResult } from '../../util/types';
+import CodeEditorModal from '../modals/CodeEditorModal';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import ResourceInfoCard from '../utils/ResourceInfoCard';
+import ResourceSearchSort from './ResourceSearchSort';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -36,6 +36,8 @@ function ResourceDisplay() {
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
+  const [filteredResources, setFilteredPatientResources] = useState<fhir4.BundleEntry[]>([]);
+  const cardFilters = useRecoilValue(cardFiltersAtom);
 
   const openConfirmationModal = useCallback(
     (resourceId?: string) => {
@@ -85,77 +87,6 @@ function ResourceDisplay() {
     setIsResourceModalOpen(false);
     setCurrentResource(null);
     setSelectedDataRequirement({ name: '', content: null });
-  };
-
-  const dateForResource = (resource: fhir4.FhirResource) => {
-    const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
-    if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
-      return {
-        date: 'N/A',
-        dateType: 'N/A'
-      };
-    }
-
-    for (const nameOfResourceDate of Object.keys(dateInfo)) {
-      // If only one dataType
-      const resourceDateData = fhirpath.evaluate(resource, nameOfResourceDate)[0];
-      if (dateInfo[nameOfResourceDate].dataTypes.length === 1 && resourceDateData) {
-        // If the only dataType is a period
-        if (dateInfo[nameOfResourceDate].dataTypes[0] === 'Period') {
-          return formatPeriod(resource, nameOfResourceDate, nameOfResourceDate);
-        }
-        // If the only dataType is either dateTime or date
-        else {
-          return {
-            date: formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]),
-            dateType: nameOfResourceDate
-          };
-        }
-      }
-
-      // If isChoiceType is true
-      else {
-        for (const dataType of dateInfo[nameOfResourceDate].dataTypes) {
-          // Capitalize the first char of dataType and append for proper resource date name
-          const fullResourceDateName = nameOfResourceDate + dataType.charAt(0).toUpperCase() + dataType.slice(1);
-          if (fhirpath.evaluate(resource, fullResourceDateName)[0]) {
-            if (dataType === 'Period') {
-              return formatPeriod(resource, fullResourceDateName, fullResourceDateName);
-            }
-            // Else if dataType === 'dateTime' || 'Date'
-            else {
-              return {
-                date: formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]),
-                dateType: fullResourceDateName
-              };
-            }
-          }
-        }
-      }
-    }
-    return {
-      date: 'N/A',
-      dateType: 'N/A'
-    };
-  };
-
-  // Formatter for if the date is a period
-  const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, dateTypeName: string) => {
-    const startTime = fhirpath.evaluate(resource, resourcePeriod + '.start')[0];
-    const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
-    return {
-      date: formatDate(startTime) + '-' + formatDate(endTime),
-      dateType: dateTypeName
-    };
-  };
-
-  // Using date-fns to format (other date formats available)
-  const formatDate = (dateString: string) => {
-    const formattedDate = format(new Date(dateString), 'MM/DD/YYYY');
-    if (formattedDate === 'Invalid Date') {
-      return 'N/A';
-    }
-    return formattedDate;
   };
 
   const detailedResultCalculation = async (
@@ -290,6 +221,45 @@ function ResourceDisplay() {
     }
   };
 
+  // Card Filtering
+  useEffect(() => {
+    if (selectedPatient && currentTestCases[selectedPatient].resources.length > 0) {
+      // Search
+      const filtered = currentTestCases[selectedPatient].resources.filter(entry => {
+        if (!entry.resource) return false;
+        const resourceType = entry.resource.resourceType?.toLowerCase() || '';
+        const label = getFhirResourceSummary(entry.resource).toLowerCase();
+        const { date, dateType } = dateForResource(entry.resource);
+        return (
+          resourceType.includes(cardFilters.searchString) ||
+          label.includes(cardFilters.searchString) ||
+          date.toLowerCase().includes(cardFilters.searchString) ||
+          dateType.toLowerCase().includes(cardFilters.searchString)
+        );
+      });
+
+      // Sort
+      if (cardFilters.sortType) {
+        filtered.sort((a, b) => {
+          if (!a.resource || !b.resource) return 0;
+          if (cardFilters.sortType === 'date') {
+            const dateA = dateForResource(a.resource).date.toLowerCase();
+            const dateB = dateForResource(b.resource).date.toLowerCase();
+            return cardFilters.sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+          }
+          if (cardFilters.sortType === 'resourceType') {
+            const typeA = a.resource.resourceType.toLowerCase();
+            const typeB = b.resource.resourceType.toLowerCase();
+            return cardFilters.sortOrder === 'asc' ? typeA.localeCompare(typeB) : typeB.localeCompare(typeA);
+          }
+          return 0;
+        });
+      }
+
+      setFilteredPatientResources(filtered);
+    }
+  }, [cardFilters, selectedPatient, currentTestCases]);
+
   return (
     <>
       <CodeEditorModal
@@ -306,23 +276,27 @@ function ResourceDisplay() {
         onConfirm={() => deleteResource(currentResource)}
       />
       {selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0 && (
-        <Stack data-testid="resource-display-stack">
-          {currentTestCases[selectedPatient].resources.map(bundleEntry => {
-            const resource = bundleEntry.resource;
-            if (resource) {
-              return (
-                <ResourceInfoCard
-                  key={resource.id}
-                  resourceType={resource.resourceType}
-                  label={getFhirResourceSummary(resource)}
-                  date={dateForResource(resource)}
-                  onEditClick={() => openResourceModal(resource.id)}
-                  onDeleteClick={() => openConfirmationModal(resource.id)}
-                />
-              );
-            }
-          })}
-        </Stack>
+        <>
+          <ResourceSearchSort />
+
+          <Stack data-testid="resource-display-stack">
+            {filteredResources.map(bundleEntry => {
+              const resource = bundleEntry.resource;
+              if (resource) {
+                return (
+                  <ResourceInfoCard
+                    key={resource.id}
+                    resourceType={resource.resourceType}
+                    label={getFhirResourceSummary(resource)}
+                    date={dateForResource(resource)}
+                    onEditClick={() => openResourceModal(resource.id)}
+                    onDeleteClick={() => openConfirmationModal(resource.id)}
+                  />
+                );
+              }
+            })}
+          </Stack>
+        </>
       )}
     </>
   );
