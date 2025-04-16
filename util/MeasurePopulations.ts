@@ -1,4 +1,4 @@
-import { Enums } from 'fqm-execution';
+import { Enums, PopulationType, StatementResult } from 'fqm-execution';
 
 export interface MultiSelectData {
   value: string;
@@ -85,4 +85,59 @@ export function getMeasurePopulations(measure: fhir4.Measure): string[] {
   });
 
   return measurePopulations;
+}
+
+/**
+ * Sort statements into population, then non-functions, then functions
+ * Taken from fqm-execution HTMLBuilder.ts
+ */
+export function sortStatements(measure: fhir4.Measure, groupId: string, statements: StatementResult[]) {
+  const group = measure.group?.find(g => g.id === groupId) || measure.group?.[0];
+  const populationOrder = [
+    PopulationType.IPP,
+    PopulationType.DENOM,
+    PopulationType.DENEX,
+    PopulationType.DENEXCEP,
+    PopulationType.NUMER,
+    PopulationType.NUMEX,
+    PopulationType.MSRPOPL,
+    PopulationType.MSRPOPLEX,
+    PopulationType.OBSERV
+  ];
+
+  // this is a lookup of cql expression identifier -> population type
+  const populationIdentifiers: Record<string, PopulationType> = {};
+  group?.population?.forEach(p => {
+    if (p.code?.coding?.[0].code !== undefined) {
+      populationIdentifiers[p.criteria.expression as string] = p.code.coding[0].code as PopulationType;
+    }
+  });
+
+  function populationCompare(a: StatementResult, b: StatementResult) {
+    return (
+      populationOrder.indexOf(populationIdentifiers[a.statementName]) -
+      populationOrder.indexOf(populationIdentifiers[b.statementName])
+    );
+  }
+
+  function alphaCompare(a: StatementResult, b: StatementResult) {
+    return a.statementName <= b.statementName ? -1 : 1;
+  }
+
+  statements.sort((a, b) => {
+    // if population statement, use population or send to beginning
+    if (a.statementName in populationIdentifiers) {
+      return b.statementName in populationIdentifiers ? populationCompare(a, b) : -1;
+    }
+    if (b.statementName in populationIdentifiers) return 1;
+
+    // if function, alphabetize or send to end
+    if (a.isFunction) {
+      return b.isFunction ? alphaCompare(a, b) : 1;
+    }
+    if (b.isFunction) return -1;
+
+    // if no function or population statement, alphabetize
+    return alphaCompare(a, b);
+  });
 }
