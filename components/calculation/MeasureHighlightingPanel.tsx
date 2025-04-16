@@ -34,10 +34,10 @@ export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPane
     return relevantStatements.map(sr => {
       if (sr.statementLevelHTML) {
         return (
-          <>
+          <div key={`${dr.groupId}-${sr.libraryName}-${sr.statementName}`}>
             {parse(sr.statementLevelHTML)}
             <PrettyOutput statement={sr} />
-          </>
+          </div>
         );
       }
     });
