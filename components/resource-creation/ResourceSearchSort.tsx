@@ -1,12 +1,11 @@
 import { Button, Group, TextInput } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons';
 import React from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { cardFiltersAtom } from '../../state/atoms/patientResources';
+import { useRecoilState } from 'recoil';
+import { cardFiltersAtom } from '../../state/atoms/cardFilters';
 
 const ResourceSearchSort = () => {
-  const setCardFilters = useSetRecoilState(cardFiltersAtom);
-  const cardFilters = useRecoilValue(cardFiltersAtom);
+  const [cardFilters, setCardFilters] = useRecoilState(cardFiltersAtom);
 
   const updateSearchString = (newSearch: string) => {
     setCardFilters(prev => ({ ...prev, searchString: newSearch.toLowerCase() }));

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ResourceSearchSort from '../../../components/resource-creation/ResourceSearchSort';
 import { RecoilRoot, useRecoilValue } from 'recoil';
-import { cardFiltersAtom } from '../../../state/atoms/patientResources';
+import { cardFiltersAtom } from '../../../state/atoms/cardFilters';
 import '@testing-library/jest-dom/extend-expect';
 
 // Utility component to expose current state for assertions

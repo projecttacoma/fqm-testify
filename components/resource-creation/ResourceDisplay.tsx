@@ -9,7 +9,7 @@ import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
-import { cardFiltersAtom } from '../../state/atoms/patientResources';
+import { cardFiltersAtom } from '../../state/atoms/cardFilters';
 import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
@@ -223,7 +223,7 @@ function ResourceDisplay() {
 
   // Card Filtering
   useEffect(() => {
-    if (selectedPatient && selectedDataRequirement && currentTestCases[selectedPatient].resources.length > 0) {
+    if (selectedPatient && currentTestCases[selectedPatient].resources.length > 0) {
       // Search
       const filtered = currentTestCases[selectedPatient].resources.filter(entry => {
         if (!entry.resource) return false;
@@ -258,14 +258,7 @@ function ResourceDisplay() {
 
       setFilteredPatientResources(filtered);
     }
-  }, [
-    cardFilters.searchString,
-    cardFilters.sortType,
-    cardFilters.sortOrder,
-    selectedPatient,
-    currentTestCases,
-    selectedDataRequirement
-  ]);
+  }, [cardFilters, selectedPatient, currentTestCases]);
 
   return (
     <>
