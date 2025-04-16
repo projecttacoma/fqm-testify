@@ -1,10 +1,12 @@
 import { ActionIcon, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
-import parse, { domToReact } from 'html-react-parser';
-import { useState } from 'react';
-import { Element as DomElement } from 'domhandler';
+import parse from 'html-react-parser';
+import { useMemo, useState } from 'react';
 import { Search, X } from 'tabler-icons-react';
 import PrettyOutput from './PrettyOutput';
-import { DetailedPopulationGroupResult } from 'fqm-execution';
+import { DetailedPopulationGroupResult, Relevance } from 'fqm-execution';
+import { useRecoilValue } from 'recoil';
+import { measureBundleState } from '../../state/atoms/measureBundle';
+import { sortStatements } from '../../util/MeasurePopulations';
 
 const useStyles = createStyles({
   highlightedMarkup: {
@@ -21,24 +23,25 @@ export interface MeasureHighlightingPanelProps {
 export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPanelProps) {
   const { classes } = useStyles();
   const [searchValue, setSearchValue] = useState('');
+  const measureBundle = useRecoilValue(measureBundleState);
+  const measure = useMemo(() => {
+    return measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')?.resource as fhir4.Measure;
+  }, [measureBundle]);
 
-  const parsedHTML = parse(dr.html || '', {
-    replace: elem => {
-      if ((elem as DomElement).attribs?.['data-statement-name']) {
-        const statementName = (elem as DomElement).attribs['data-statement-name'];
-        const libraryName = (elem as DomElement).attribs['data-library-name'];
-        const statementResult = dr.statementResults.find(
-          statement => statement.statementName === statementName && statement.libraryName === libraryName
-        );
+  const parsedHTML = () => {
+    const relevantStatements = dr.statementResults.filter(s => s.relevance !== Relevance.NA);
+    sortStatements(measure, dr.groupId, relevantStatements);
+    return relevantStatements.map(sr => {
+      if (sr.statementLevelHTML) {
         return (
-          <>
-            {domToReact([elem])}
-            <PrettyOutput statement={statementResult} />
-          </>
+          <div key={`${dr.groupId}-${sr.libraryName}-${sr.statementName}`}>
+            {parse(sr.statementLevelHTML)}
+            <PrettyOutput statement={sr} />
+          </div>
         );
       }
-    }
-  });
+    });
+  };
 
   return (
     <>
@@ -79,7 +82,10 @@ export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPane
           </ActionIcon>
         }
       />
-      <div className={classes.highlightedMarkup}>{parsedHTML}</div>
+      <div className={classes.highlightedMarkup}>
+        <h2>Population Group: {dr.groupId}</h2>
+        {parsedHTML()}
+      </div>
     </>
   );
 }

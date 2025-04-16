@@ -22,7 +22,8 @@ export async function calculateDetailedResult(
     measurementPeriodStart: mpStart,
     measurementPeriodEnd: mpEnd,
     useElmJsonsCaching: true,
-    trustMetaProfile: trustMetaProfile
+    trustMetaProfile: trustMetaProfile,
+    buildStatementLevelHTML: true
   };
 
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);
