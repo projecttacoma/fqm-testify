@@ -13,6 +13,12 @@ export interface DateInfo {
   [dateField: string]: DateFieldInfo;
 }
 
+export interface DateFormatInfo {
+  date: string;
+  dateType: string;
+  sortDate?: Date;
+}
+
 /**
  * Parses the primary date path info and populates date info to satisfy date filter specified in the passed-in data requirement
  * @param {Object} resource FHIR resource being created
@@ -166,18 +172,17 @@ export function getRandomPeriodInPeriod(start: string, end: string): fhir4.Perio
 }
 
 /**
- * Takes in resource and returns the Date and dateType formatted nicely (used in Resource Display cards)
+ * Takes in resource and returns the date and dateType, formatted nicely (used in Resource Display cards), and sortDate (used for sorting).
+ * If primary date is a period, date will be in format mm/dd/yyyy-mm/dd/yyyy, and sortDate is set to start (if available) by default
  * @param {fhir4.FhirResource} resource resource to have date formatted
- * @param {string} end end date string for the period
- * @returns {Object} two strings  {date, dateType} if date is a period it will be in the format of mm/dd/yyyy-mm/dd/yyyy
+ * @returns {Object} primary date formatting strings and sorting date
  */
-export function dateForResource(resource: fhir4.FhirResource) {
+export function dateForResource(resource: fhir4.FhirResource): DateFormatInfo {
   const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
   if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
     return {
       date: 'N/A',
-      dateType: 'N/A',
-      sortDate: undefined
+      dateType: 'N/A'
     };
   }
 
@@ -222,8 +227,7 @@ export function dateForResource(resource: fhir4.FhirResource) {
   }
   return {
     date: 'N/A',
-    dateType: 'N/A',
-    sortDate: undefined
+    dateType: 'N/A'
   };
 }
 
