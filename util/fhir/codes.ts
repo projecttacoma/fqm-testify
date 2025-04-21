@@ -115,8 +115,7 @@ export function getFhirResourceSummary(resource: fhir4.Resource) {
     if (pathInfo?.choiceType) {
       primaryCodePath = `${primaryCodePath}${pathInfo.codeType.replace('FHIR.', '')}`;
     }
-
-    console.log(`code type ${pathInfo?.codeType}`);
+    
     if (pathInfo?.codeType === 'FHIR.CodeableConcept') {
       pathEval = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] as fhir4.Coding;
     } else if (pathInfo?.codeType === 'FHIR.Coding') {

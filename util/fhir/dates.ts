@@ -166,17 +166,18 @@ export function getRandomPeriodInPeriod(start: string, end: string): fhir4.Perio
 }
 
 /**
- * Takes in resource and returns the Date and dateType formatted nicley (used in Resource Display cards)
+ * Takes in resource and returns the Date and dateType formatted nicely (used in Resource Display cards)
  * @param {fhir4.FhirResource} resource resource to have date formatted
  * @param {string} end end date string for the period
  * @returns {Object} two strings  {date, dateType} if date is a period it will be in the format of mm/dd/yyyy-mm/dd/yyyy
  */
-export function dateForResource(resource: fhir4.FhirResource): any {
+export function dateForResource(resource: fhir4.FhirResource) {
   const dateInfo = PrimaryDatePaths.parsedPrimaryDatePaths[resource.resourceType];
   if (!resource || !PrimaryDatePaths?.parsedPrimaryDatePaths || !dateInfo) {
     return {
       date: 'N/A',
-      dateType: 'N/A'
+      dateType: 'N/A',
+      sortDate: undefined
     };
   }
 
@@ -192,7 +193,8 @@ export function dateForResource(resource: fhir4.FhirResource): any {
       else {
         return {
           date: formatDate(fhirpath.evaluate(resource, nameOfResourceDate)[0]),
-          dateType: nameOfResourceDate
+          dateType: nameOfResourceDate,
+          sortDate: new Date(fhirpath.evaluate(resource, nameOfResourceDate)[0])
         };
       }
     }
@@ -210,7 +212,8 @@ export function dateForResource(resource: fhir4.FhirResource): any {
           else {
             return {
               date: formatDate(fhirpath.evaluate(resource, fullResourceDateName)[0]),
-              dateType: fullResourceDateName
+              dateType: fullResourceDateName,
+              sortDate: new Date(fhirpath.evaluate(resource, fullResourceDateName)[0])
             };
           }
         }
@@ -219,7 +222,8 @@ export function dateForResource(resource: fhir4.FhirResource): any {
   }
   return {
     date: 'N/A',
-    dateType: 'N/A'
+    dateType: 'N/A',
+    sortDate: undefined
   };
 }
 
@@ -229,7 +233,8 @@ const formatPeriod = (resource: fhir4.FhirResource, resourcePeriod: string, date
   const endTime = fhirpath.evaluate(resource, resourcePeriod + '.end')[0];
   return {
     date: formatDate(startTime) + '-' + formatDate(endTime),
-    dateType: dateTypeName
+    dateType: dateTypeName,
+    sortDate: startTime ? new Date(startTime) : new Date(endTime)
   };
 };
 

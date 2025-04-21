@@ -241,11 +241,16 @@ function ResourceDisplay() {
       // Sort
       if (cardFilters.sortType) {
         filtered.sort((a, b) => {
-          if (!a.resource || !b.resource) return 0;
+          // set no resource as "higher" values
+          if (!a.resource) return b.resource ? 1 : 0;
+          if (!b.resource) return -1;
           if (cardFilters.sortType === 'date') {
-            const dateA = dateForResource(a.resource).date.toLowerCase();
-            const dateB = dateForResource(b.resource).date.toLowerCase();
-            return cardFilters.sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+            const dateA = dateForResource(a.resource).sortDate?.getTime();
+            const dateB = dateForResource(b.resource).sortDate?.getTime();
+            // set no sortDate resource as "higher" values
+            if (!dateA) return dateB ? 1 : 0;
+            if (!dateB) return -1;
+            return cardFilters.sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
           }
           if (cardFilters.sortType === 'resourceType') {
             const typeA = a.resource.resourceType.toLowerCase();
