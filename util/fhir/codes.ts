@@ -108,20 +108,37 @@ export function getResourceCode(resource: any, dr: fhir4.DataRequirement, mb: fh
  */
 export function getFhirResourceSummary(resource: fhir4.Resource) {
   let primaryCodePath = parsedCodePaths[resource.resourceType]?.primaryCodePath;
+  let pathEval;
+  // handle choice type
+  if (primaryCodePath) {
+    const pathInfo = parsedCodePaths[resource.resourceType].paths[primaryCodePath];
+    if (pathInfo?.choiceType) {
+      primaryCodePath = `${primaryCodePath}${pathInfo.codeType.replace('FHIR.', '')}`;
+    }
 
-  if (fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] === undefined) {
+    if (pathInfo?.codeType === 'FHIR.CodeableConcept') {
+      pathEval = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] as fhir4.Coding;
+    } else if (pathInfo?.codeType === 'FHIR.Coding') {
+      pathEval = fhirpath.evaluate(resource, primaryCodePath)[0] as fhir4.Coding;
+    } else if (pathInfo?.codeType === 'FHIR.code') {
+      pathEval = fhirpath.evaluate(resource, primaryCodePath)[0] as string;
+    }
+  }
+
+  // backup case finds first available coding
+  if (pathEval === undefined) {
     const paths = parsedCodePaths[resource.resourceType]?.paths;
     for (const p in paths) {
       if (fhirpath.evaluate(resource, `${p}.coding`)[0]) {
         primaryCodePath = p;
       }
     }
+    pathEval = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0] as string;
   }
 
-  if (primaryCodePath) {
-    const primaryCoding = fhirpath.evaluate(resource, `${primaryCodePath}.coding`)[0];
-    const resourceCode = primaryCoding?.code;
-    const resourceDisplay = primaryCoding?.display;
+  if (pathEval) {
+    const resourceCode = typeof pathEval === 'string' ? pathEval : pathEval.code;
+    const resourceDisplay = typeof pathEval === 'string' ? undefined : pathEval.display;
 
     if (resourceCode && resourceDisplay) {
       return `(${resourceCode}: ${resourceDisplay})`;
