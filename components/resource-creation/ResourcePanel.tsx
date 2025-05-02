@@ -13,7 +13,7 @@ import ResourceSelection from './ResourceSelection';
 import { showNotification } from '@mantine/notifications';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { getPatientNameString } from '../../util/fhir/patient';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../../util/MeasureCalculation';
@@ -25,7 +25,7 @@ export default function ResourcePanel() {
   const [isNewResourceModalOpen, setIsNewResourceModalOpen] = useState(false);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const measureBundle = useRecoilValue(measureBundleState);
-  const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const measurementPeriodFormatted = useRecoilValue(measurementPeriodFormattedState);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
   const [minimizeResourcesPopoverOpened, setMinimizeResourcesPopoverOpened] = useState(false);
@@ -64,8 +64,8 @@ export default function ResourcePanel() {
                 draftState[selectedPatient] = await calculateDetailedResult(
                   nextResourceState[selectedPatient],
                   measureBundle.content,
-                  measurementPeriod.start?.toISOString(),
-                  measurementPeriod.end?.toISOString(),
+                  measurementPeriodFormatted?.start,
+                  measurementPeriodFormatted?.end,
                   trustMetaProfile
                 );
               } catch (error) {

@@ -8,7 +8,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { detailedResultLookupState } from '../../state/atoms/detailedResultLookup';
 import { measureBundleState } from '../../state/atoms/measureBundle';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measurementPeriodFormattedState, measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { cardFiltersAtom } from '../../state/atoms/cardFilters';
 import { patientTestCaseState, TestCase } from '../../state/atoms/patientTestCase';
 import { selectedDataRequirementState } from '../../state/atoms/selectedDataRequirement';
@@ -23,6 +23,7 @@ import CodeEditorModal from '../modals/CodeEditorModal';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
 import ResourceSearchSort from './ResourceSearchSort';
+import React from 'react';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
@@ -32,6 +33,7 @@ function ResourceDisplay() {
   const measureBundle = useRecoilValue(measureBundleState);
   const selectedPatient = useRecoilValue(selectedPatientState);
   const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const measurementPeriodFormatted = useRecoilValue(measurementPeriodFormattedState);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
   const [detailedResultLookup, setDetailedResultLookup] = useRecoilState(detailedResultLookupState);
@@ -99,8 +101,8 @@ function ResourceDisplay() {
         draftState[selectedPatient] = await calculateDetailedResult(
           nextResourceState[selectedPatient],
           measureBundle.content,
-          measurementPeriod.start?.toISOString(),
-          measurementPeriod.end?.toISOString(),
+          measurementPeriodFormatted?.start,
+          measurementPeriodFormatted?.end,
           trustMetaProfile
         );
       } catch (error) {

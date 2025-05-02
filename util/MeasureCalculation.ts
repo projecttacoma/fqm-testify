@@ -26,6 +26,7 @@ export async function calculateDetailedResult(
     buildStatementLevelHTML: true
   };
 
+  console.log(options);
   const patientBundle = createPatientBundle(patientTestCase.patient, patientTestCase.resources);
 
   const { results } = await Calculator.calculate(mb, [patientBundle], options);

@@ -17,3 +17,26 @@ export const measurementPeriodState = selector<{ start: Date | null; end: Date |
     end: get(measurementPeriodEndState)
   })
 });
+
+/**
+ * Selector for the start and end date normalized to 00:00:00.000Z and 23:59:59.999Z
+ */
+export const measurementPeriodFormattedState = selector<{ start: string; end: string } | null>({
+  key: 'measurementPeriodFormattedState',
+  get: ({ get }) => {
+    const startDate = get(measurementPeriodStartState);
+    const endDate = get(measurementPeriodEndState);
+    if (startDate && endDate) {
+      const fixedStart = new Date(startDate);
+      fixedStart.setUTCHours(0, 0, 0, 0);
+      const fixedEnd = new Date(endDate);
+      fixedEnd.setUTCHours(23, 59, 59, 999);
+      return {
+        start: fixedStart.toISOString(),
+        end: fixedEnd.toISOString()
+      };
+    } else {
+      return null;
+    }
+  }
+});

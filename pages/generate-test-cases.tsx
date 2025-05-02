@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import TestCaseEditor from '../components/TestCaseEditor';
 import { measureBundleState } from '../state/atoms/measureBundle';
-import { measurementPeriodState } from '../state/atoms/measurementPeriod';
+import { measurementPeriodFormattedState } from '../state/atoms/measurementPeriod';
 import type { NextPage } from 'next';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
 import produce from 'immer';
@@ -16,7 +16,7 @@ import { calculateDetailedResult } from '../util/MeasureCalculation';
 import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
 
 const TestCaseEditorPage: NextPage = () => {
-  const { start, end } = useRecoilValue(measurementPeriodState);
+  const measurementPeriodFormatted = useRecoilValue(measurementPeriodFormattedState);
   const measureBundle = useRecoilValue(measureBundleState);
   const currentPatients = useRecoilValue(patientTestCaseState);
   const setIsCalculationLoading = useSetRecoilState(calculationLoading);
@@ -34,8 +34,8 @@ const TestCaseEditorPage: NextPage = () => {
             draftState[patientId] = await calculateDetailedResult(
               testCaseInfo,
               mb,
-              start?.toISOString(),
-              end?.toISOString(),
+              measurementPeriodFormatted?.start,
+              measurementPeriodFormatted?.end,
               trustMetaProfile
             );
           } catch (error) {
@@ -62,7 +62,7 @@ const TestCaseEditorPage: NextPage = () => {
   return (
     <>
       <div>
-        {start && end && measureBundle.content ? (
+        {measurementPeriodFormatted && measureBundle.content ? (
           <TestCaseEditor />
         ) : (
           <Center sx={() => ({ flexDirection: 'column' })}>
