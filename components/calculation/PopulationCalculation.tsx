@@ -4,7 +4,7 @@ import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useState } from 'react';
-import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
+import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
 import { IconAlertCircle } from '@tabler/icons';
 import { getPatientInfoString } from '../../util/fhir/patient';
@@ -19,7 +19,7 @@ export default function PopulationCalculation() {
 
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
-  const measurementPeriod = useRecoilValue(measurementPeriodState);
+  const measurementPeriodFormatted = useRecoilValue(measurementPeriodFormattedState);
   const [detailedResults, setDetailedResults] = useState<LabeledDetailedResult[]>([]);
   const [opened, setOpened] = useState(false);
   const [enableTableButton, setEnableTableButton] = useState(false);
@@ -53,8 +53,8 @@ export default function PopulationCalculation() {
       calculateClauseCoverage: true,
       calculateClauseUncoverage: true,
       reportType: 'individual',
-      measurementPeriodStart: measurementPeriod.start?.toISOString(),
-      measurementPeriodEnd: measurementPeriod.end?.toISOString(),
+      measurementPeriodStart: measurementPeriodFormatted?.start,
+      measurementPeriodEnd: measurementPeriodFormatted?.end,
       trustMetaProfile: trustMetaProfile
     };
 
