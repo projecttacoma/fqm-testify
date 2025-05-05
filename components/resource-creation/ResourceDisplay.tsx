@@ -23,7 +23,6 @@ import CodeEditorModal from '../modals/CodeEditorModal';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import ResourceInfoCard from '../utils/ResourceInfoCard';
 import ResourceSearchSort from './ResourceSearchSort';
-import React from 'react';
 
 function ResourceDisplay() {
   const [currentTestCases, setCurrentTestCases] = useRecoilState(patientTestCaseState);
