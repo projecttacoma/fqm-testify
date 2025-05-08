@@ -5,5 +5,5 @@ import { atom } from 'recoil';
  */
 export const trustMetaProfileState = atom<boolean>({
   key: 'trustMetaProfileState',
-  default: false
+  default: true
 });

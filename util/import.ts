@@ -1,3 +1,4 @@
+import { MeasureReport } from 'fhir/r4';
 import { TestCaseInfo } from '../state/atoms/patientTestCase';
 
 /**
@@ -10,18 +11,18 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
  * valid desired populations
  * @returns An fqm-testify test case
  */
-export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: string[]): TestCaseInfo {
+export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: string[], measureURL?: string): TestCaseInfo {
   if (!bundle.entry || bundle.entry.length === 0) {
     throw new Error('Bundle has no entries');
   }
 
   const patientEntry = bundle.entry.find(e => e.resource?.resourceType === 'Patient');
   const desiredPopulations: string[] = [];
-  const testCaseMeasureReportArr = bundle.entry.filter(isTestCaseMeasureReport);
+  const testCaseMeasureReportArr = bundle.entry.filter( e => isTestCaseMeasureReport(e) && (e.resource as MeasureReport).measure === measureURL);
   if (testCaseMeasureReportArr.length > 1) {
     // TODO: Once we have import errors persist on page, replace this!!!
     throw new Error(
-      `Expected 0 or 1 test case measure reports in bundle, but found ${testCaseMeasureReportArr.length}`
+      `Expected 0 or 1 test case measure reports in bundle that match the loaded measure, but found ${testCaseMeasureReportArr.length}`
     );
   }
   if (testCaseMeasureReportArr.length === 1) {

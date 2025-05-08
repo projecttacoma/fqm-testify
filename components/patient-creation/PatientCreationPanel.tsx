@@ -335,7 +335,7 @@ function PatientCreationPanel() {
 
             try {
               if (measure) {
-                testCase = bundleToTestCase(bundle, getMeasurePopulations(measure));
+                testCase = bundleToTestCase(bundle, getMeasurePopulations(measure), measure.url);
               }
             } catch (e) {
               if (e instanceof Error) {
