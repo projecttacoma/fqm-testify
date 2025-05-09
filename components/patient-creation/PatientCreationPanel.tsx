@@ -303,6 +303,24 @@ function PatientCreationPanel() {
     Promise.all(filePromises)
       .then(allFileContent => {
         const nextPatientState = produce(currentPatients, draftState => {
+          // Find and handle README file if it exists. (Use to populate test case names)
+          const readmeIdx = allFileContent.findIndex(f => f.fileName.toLowerCase() === 'readme.txt');
+
+          const testCaseMap: Record<string, string | undefined> = {};
+          if (readmeIdx > -1) {
+            const readme = allFileContent[readmeIdx];
+            // remove readme file from list if found
+            allFileContent.splice(readmeIdx, 1);
+
+            //create mapping for any lines with an "="
+            readme.fileContent.split('\n').forEach(line => {
+              if (line.includes('=')) {
+                const [id, name] = line.split('=').map(part => part.trim());
+                testCaseMap[id] = name;
+              }
+            });
+          }
+
           allFileContent.forEach(({ fileName, fileContent }) => {
             // Cast to FhirResource to safely access resourceType if no error is thrown during parse
             let resource = {} as fhir4.FhirResource;
@@ -335,7 +353,7 @@ function PatientCreationPanel() {
 
             try {
               if (measure) {
-                testCase = bundleToTestCase(bundle, getMeasurePopulations(measure), measure.url);
+                testCase = bundleToTestCase(bundle, getMeasurePopulations(measure), testCaseMap, measure.url);
               }
             } catch (e) {
               if (e instanceof Error) {
