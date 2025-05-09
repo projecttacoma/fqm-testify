@@ -59,7 +59,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
           );
         })
         .then(resolvedFiles => {
-          setFileDisplay(`${uploadedFiles[0].name} containing ${resolvedFiles.length} Bundle(s)`);
+          setFileDisplay(`${uploadedFiles[0].name} containing ${resolvedFiles.length} File(s)`);
           setFiles(resolvedFiles);
           setShowZipFileExpansion(true);
         });
@@ -114,7 +114,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
           <Dropzone
             data-testid="import-dropzone"
             onDrop={handleDrop}
-            accept={['application/json', 'application/zip']}
+            accept={['application/json', 'application/zip', 'text/plain']}
             multiple={true}
           >
             <Grid justify="center">
