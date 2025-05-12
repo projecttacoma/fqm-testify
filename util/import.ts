@@ -10,18 +10,30 @@ import { TestCaseInfo } from '../state/atoms/patientTestCase';
  * valid desired populations
  * @returns An fqm-testify test case
  */
-export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: string[]): TestCaseInfo {
+export function bundleToTestCase(
+  bundle: fhir4.Bundle,
+  populationGroupCodes: string[],
+  testCaseMap: Record<string, string | undefined>,
+  measureURL?: string
+): TestCaseInfo {
   if (!bundle.entry || bundle.entry.length === 0) {
     throw new Error('Bundle has no entries');
   }
 
   const patientEntry = bundle.entry.find(e => e.resource?.resourceType === 'Patient');
   const desiredPopulations: string[] = [];
-  const testCaseMeasureReportArr = bundle.entry.filter(isTestCaseMeasureReport);
+  let testCaseMeasureReportArr = bundle.entry.filter(e => isTestCaseMeasureReport(e));
+  if (testCaseMeasureReportArr.length > 1) {
+    // if multiple found, reduce to the one(s) that match the loaded measure
+    testCaseMeasureReportArr = testCaseMeasureReportArr.filter(
+      e => (e.resource as fhir4.MeasureReport).measure === measureURL
+    );
+  }
+
   if (testCaseMeasureReportArr.length > 1) {
     // TODO: Once we have import errors persist on page, replace this!!!
     throw new Error(
-      `Expected 0 or 1 test case measure reports in bundle, but found ${testCaseMeasureReportArr.length}`
+      `Found multiple test case measure reports in bundle that match the loaded measure. ${testCaseMeasureReportArr.length} found, so cannot select correct measure report.`
     );
   }
   if (testCaseMeasureReportArr.length === 1) {
@@ -60,6 +72,16 @@ export function bundleToTestCase(bundle: fhir4.Bundle, populationGroupCodes: str
 
   if (!patientResource) {
     throw new Error('Bundle does not contain a patient resource');
+  }
+  if (patientResource.id && testCaseMap[patientResource.id]) {
+    const testCaseNames = testCaseMap[patientResource.id]?.split(' ');
+    //replace name from use case map
+    if (patientResource.name?.[0]) {
+      patientResource.name[0].family = testCaseNames?.[1] || '';
+      patientResource.name[0].given = [testCaseNames?.[0] || ''];
+    } else {
+      patientResource.name = [{ family: testCaseNames?.[1] || '', given: [testCaseNames?.[0] || ''] }];
+    }
   }
 
   return {

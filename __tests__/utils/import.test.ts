@@ -112,7 +112,7 @@ describe('bundleToTestCase', () => {
       ]
     };
 
-    const result = bundleToTestCase(bundle, []);
+    const result = bundleToTestCase(bundle, [], {});
 
     expect(result).toEqual({
       patient: TEST_PATIENT,
@@ -129,7 +129,7 @@ describe('bundleToTestCase', () => {
       type: 'collection'
     };
 
-    expect(() => bundleToTestCase(bundleNoEntries, [])).toThrowError('Bundle has no entries');
+    expect(() => bundleToTestCase(bundleNoEntries, [], {})).toThrowError('Bundle has no entries');
   });
 
   it('should throw error with empty bundle entry array', () => {
@@ -139,7 +139,7 @@ describe('bundleToTestCase', () => {
       entry: []
     };
 
-    expect(() => bundleToTestCase(bundleNoEntries, [])).toThrowError('Bundle has no entries');
+    expect(() => bundleToTestCase(bundleNoEntries, [], {})).toThrowError('Bundle has no entries');
   });
 
   it('should throw error with no patient resource', () => {
@@ -153,7 +153,7 @@ describe('bundleToTestCase', () => {
       ]
     };
 
-    expect(() => bundleToTestCase(bundleNoPatient, [])).toThrowError('Bundle does not contain a patient resource');
+    expect(() => bundleToTestCase(bundleNoPatient, [], {})).toThrowError('Bundle does not contain a patient resource');
   });
 
   it('should properly populate desired population array when cqfm test case MeasureReport present', () => {
@@ -173,12 +173,12 @@ describe('bundleToTestCase', () => {
       ]
     };
 
-    const result = bundleToTestCase(bundle, [
-      'initial-population',
-      'numerator',
-      'denominator',
-      'denominator-exclusion'
-    ]);
+    const result = bundleToTestCase(
+      bundle,
+      ['initial-population', 'numerator', 'denominator', 'denominator-exclusion'],
+      {},
+      'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130'
+    );
 
     expect(result).toEqual({
       patient: TEST_PATIENT,
@@ -204,7 +204,9 @@ describe('bundleToTestCase', () => {
         }
       ]
     };
-    expect(() => bundleToTestCase(bundle, ['initial-population'])).toThrowError(
+    expect(() =>
+      bundleToTestCase(bundle, ['initial-population'], {}, 'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130')
+    ).toThrowError(
       'Found invalid population codes: numerator, denominator. Ensure all imported desired populations are valid with uploaded measure populations'
     );
   });
@@ -228,8 +230,15 @@ describe('bundleToTestCase', () => {
       ]
     };
     expect(() =>
-      bundleToTestCase(bundle, ['initial-population, numerator, denominator, denominator-exclusion'])
-    ).toThrowError(`Expected 0 or 1 test case measure reports in bundle, but found 2`);
+      bundleToTestCase(
+        bundle,
+        ['initial-population, numerator, denominator, denominator-exclusion'],
+        {},
+        'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130'
+      )
+    ).toThrowError(
+      `Found multiple test case measure reports in bundle that match the loaded measure. 2 found, so cannot select correct measure report.`
+    );
   });
 });
 
