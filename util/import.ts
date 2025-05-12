@@ -1,4 +1,3 @@
-import { MeasureReport } from 'fhir/r4';
 import { TestCaseInfo } from '../state/atoms/patientTestCase';
 
 /**
@@ -23,13 +22,18 @@ export function bundleToTestCase(
 
   const patientEntry = bundle.entry.find(e => e.resource?.resourceType === 'Patient');
   const desiredPopulations: string[] = [];
-  const testCaseMeasureReportArr = bundle.entry.filter(
-    e => isTestCaseMeasureReport(e) && (e.resource as MeasureReport).measure === measureURL
-  );
+  let testCaseMeasureReportArr = bundle.entry.filter(e => isTestCaseMeasureReport(e));
+  if (testCaseMeasureReportArr.length > 1) {
+    // if multiple found, reduce to the one(s) that match the loaded measure
+    testCaseMeasureReportArr = testCaseMeasureReportArr.filter(
+      e => (e.resource as fhir4.MeasureReport).measure === measureURL
+    );
+  }
+
   if (testCaseMeasureReportArr.length > 1) {
     // TODO: Once we have import errors persist on page, replace this!!!
     throw new Error(
-      `Expected 0 or 1 test case measure reports in bundle that match the loaded measure, but found ${testCaseMeasureReportArr.length}`
+      `Found multiple test case measure reports in bundle that match the loaded measure. ${testCaseMeasureReportArr.length} found, so cannot select correct measure report.`
     );
   }
   if (testCaseMeasureReportArr.length === 1) {

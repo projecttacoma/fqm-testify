@@ -236,7 +236,9 @@ describe('bundleToTestCase', () => {
         {},
         'http://hl7.org/fhir/us/cqfmeasures/Measure/EXM130'
       )
-    ).toThrowError(`Expected 0 or 1 test case measure reports in bundle that match the loaded measure, but found 2`);
+    ).toThrowError(
+      `Found multiple test case measure reports in bundle that match the loaded measure. 2 found, so cannot select correct measure report.`
+    );
   });
 });
 
