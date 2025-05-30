@@ -63,7 +63,7 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
   }
 
   /**
-   * Strips population results off of a DetailedResult and calls PopulationResultsRow to format them into a TSX component
+   * Strips population results off of a DetailedResult and gives back info on results and whether they match desired
    */
   function extractPopulationResultInfo(dr: DetailedResult, label = 'Unlabeled Patient') {
     const group = dr.detailedResults?.[0];
@@ -76,10 +76,14 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
           currentPatients[dr.patientId].desiredPopulations === undefined
             ? undefined
             : pr.result === currentPatients[dr.patientId].desiredPopulations?.includes(pr.populationType);
-        if (!matchesDesired) {
-          // falsify patient label (not a total match)
+        if (matchesDesired === undefined) {
+          // don't highlight label if there isn't a result
+          labeledPopulationResults.label[1] = undefined;
+        } else if (!matchesDesired) {
+          // falsify patient label if not a total match
           labeledPopulationResults.label[1] = false;
         }
+
         labeledPopulationResults[key as string] = [pr.result ? 1 : 0, matchesDesired];
       }
     });
