@@ -1,8 +1,9 @@
-import { createStyles, Table } from '@mantine/core';
+import { Badge, createStyles, Table } from '@mantine/core';
 import { useMemo } from 'react';
 import { DetailedResult } from '../../util/types';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { IconCheck, IconX } from '@tabler/icons';
 
 const useStyles = createStyles({
   highlightRed: {
@@ -100,16 +101,35 @@ export default function PopulationResultTable({ results }: PopulationResultViewe
         {populationResult.label[1] === undefined ? (
           <td>{populationResult.label[0]}</td>
         ) : (
-          <td className={populationResult.label[1] ? classes.highlightGreen : classes.highlightRed}>
+          <td>
+            {populationResult.label[1] ? (
+              <Badge
+                color="green"
+                style={{
+                  marginRight: '5px'
+                }}
+              >
+                <IconCheck />
+              </Badge>
+            ) : (
+              <Badge
+                color="red"
+                style={{
+                  marginRight: '5px'
+                }}
+              >
+                <IconX />
+              </Badge>
+            )}
             {populationResult.label[0]}
           </td>
         )}
 
         {tableHeaders.map(e =>
-          populationResult[e][1] === undefined ? (
+          populationResult[e][1] === undefined || populationResult[e][1] ? (
             <td key={e}>{populationResult[e][0]}</td>
           ) : (
-            <td className={populationResult[e][1] ? classes.highlightGreen : classes.highlightRed} key={e}>
+            <td className={classes.highlightRed} key={e}>
               {populationResult[e][0]}
             </td>
           )
