@@ -1,5 +1,5 @@
 import { Alert, Button, Group, Space, TextInput } from '@mantine/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { evaluationState } from '../../state/atoms/evaluation';
 import { measureBundleState } from '../../state/atoms/measureBundle';
@@ -10,6 +10,14 @@ export default function EvaluationServiceVerifier() {
   const [isLoadingId, setIsLoadingId] = useState(false);
   const { content } = useRecoilValue(measureBundleState);
   const [{ evaluationServiceUrl, evaluationMeasureId }, setEvaluation] = useRecoilState(evaluationState);
+
+  useEffect(() => {
+    // Called when the measure content value changes
+    setEvaluation(e => ({
+      ...e,
+      evaluationMeasureId: ''
+    }));
+  }, [content, setEvaluation]);
 
   /**
    * Handles updating of the Evaluation Service url field and associated state variables
@@ -60,6 +68,7 @@ export default function EvaluationServiceVerifier() {
             message: `Could not find measure with url ${selectedMeasure.url} and version ${selectedMeasure.version} on the selected evaluation service.`,
             color: 'red'
           });
+          setIsLoadingId(false);
           return;
         }
 
