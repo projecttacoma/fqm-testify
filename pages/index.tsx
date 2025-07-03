@@ -21,12 +21,13 @@ import MeasureFileUpload from '../components/measure-upload/MeasureFileUpload';
 import DateSelectors from '../components/measure-upload/DateSelectors';
 import { measureBundleState } from '../state/atoms/measureBundle';
 import MeasureFileUploadHeader from '../components/utils/MeasureFileUploadHeader';
-import MeasureRepositoryUploadHeader from '../components/utils/MeasureRespositoryUploadHeader';
+import MeasureRepositoryUploadHeader from '../components/utils/MeasureRepositoryUploadHeader';
 import UploadErrorLog from '../components/measure-upload/UploadErrorLog';
 import MeasureRepositoryUpload from '../components/measure-upload/MeasureRepositoryUpload';
 import { MeasureUploadError } from '../util/measureUploadUtils';
 import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
 import { InfoCircle } from 'tabler-icons-react';
+import EvaluationServiceVerifier from '../components/measure-upload/EvaluationServiceVerifier';
 
 const useStyles = createStyles(theme => ({
   headerContainer: {
@@ -131,6 +132,13 @@ const Home: NextPage = () => {
                   </Popover.Dropdown>
                 </Popover>
               </Group>
+            </Grid.Col>
+            <Grid.Col sm={3} md={1}>
+              <Space h="md" />
+              <Text weight="lighter">(Optional) Select measure evaluation service</Text>
+            </Grid.Col>
+            <Grid.Col sm={3} md={2}>
+              <EvaluationServiceVerifier />
             </Grid.Col>
           </Grid>
           <Divider className={classes.divider} />
