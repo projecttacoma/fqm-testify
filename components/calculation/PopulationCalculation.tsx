@@ -1,4 +1,4 @@
-import { Button, Center, Drawer, Group, Tooltip } from '@mantine/core';
+import { Button, Center, Drawer, Group, Modal, Tooltip } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { Calculator, CalculatorTypes } from 'fqm-execution';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
@@ -6,13 +6,17 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useState } from 'react';
 import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle } from '@tabler/icons';
-import { getPatientInfoString } from '../../util/fhir/patient';
-import { createPatientBundle } from '../../util/fhir/resourceCreation';
+import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
+import { getPatientInfoString, getPatientNameString } from '../../util/fhir/patient';
+import { createDataExchangeMeasureReport, createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
 import { DetailedResult } from '../../util/types';
 import { useRouter } from 'next/router';
 import { trustMetaProfileState } from '../../state/atoms/trustMetaProfile';
+import { useDisclosure } from '@mantine/hooks';
+import { evaluationState } from '../../state/atoms/evaluation';
+import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
+import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
 
 export default function PopulationCalculation() {
   const router = useRouter();
@@ -20,10 +24,14 @@ export default function PopulationCalculation() {
   const currentPatients = useRecoilValue(patientTestCaseState);
   const measureBundle = useRecoilValue(measureBundleState);
   const measurementPeriodFormatted = useRecoilValue(measurementPeriodFormattedState);
+  const { evaluationServiceUrl, evaluationMeasureId } = useRecoilValue(evaluationState);
+  const drLookupByType = useRecoilValue(dataRequirementsLookupByType);
   const [detailedResults, setDetailedResults] = useState<LabeledDetailedResult[]>([]);
-  const [opened, setOpened] = useState(false);
+  const [drawerOpened, setDrawerOpened] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
   const [enableTableButton, setEnableTableButton] = useState(false);
   const [enableClauseCoverageButton, setEnableClauseCoverageButton] = useState(false);
+  const [enableEvaluateButton, setEnableEvaluateButton] = useState(false);
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
   const [clauseUncoverageHTML, setClauseUncoverageHTML] = useState<string | null>(null);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
@@ -38,6 +46,101 @@ export default function PopulationCalculation() {
       patientLabels[id] = getPatientInfoString(currentPatients[id].patient);
     });
     return patientLabels;
+  };
+
+  /**
+   * POSTS patient data in conformance with https://build.fhir.org/ig/HL7/davinci-deqm/OperationDefinition-submit-data.html
+   * without using Measure/$deqm-submit-data endpoint
+   * Each transaction bundle should contain DEQM Data Exchange MeasureReports with data-of-interest
+   * and should be for a single subject (will do a separate POST for each patient)
+   * @returns { string[] } the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful)
+   */
+  const submitDataToEvaluationService = async (): Promise<(string | undefined)[]> => {
+    // collect data and POST to evaluation service (TODO: should be $submit-data when available)
+
+    const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')
+      ?.resource as fhir4.Measure;
+
+    const postedIds: Promise<string | undefined>[] = Object.keys(currentPatients).map(async id => {
+      const bundle = createPatientBundle(
+        currentPatients[id].patient,
+        minimizeTestCaseResources(currentPatients[id], measureBundle.content, drLookupByType),
+        currentPatients[id].fullUrl,
+        createDataExchangeMeasureReport(measure, measurementPeriodFormatted as fhir4.Period, id)
+      );
+      const response = await fetch(`${evaluationServiceUrl}/`, {
+        method: 'POST',
+        body: JSON.stringify(bundle),
+        headers: { 'Content-Type': 'application/json+fhir' }
+      });
+      if (!response.ok) {
+        showNotification({
+          icon: <IconAlertCircle />,
+          title: 'Evaluation service failure',
+          message: `Submitting data for Patient: ${getPatientNameString(
+            currentPatients[id].patient
+          )} failed with code ${response.status}`,
+          color: 'red'
+        });
+        return;
+      }
+      const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
+      if (responseBody.resourceType === 'OperationOutcome') {
+        showNotification({
+          icon: <IconAlertCircle />,
+          title: 'Patient data submission failed',
+          message: `Submitting data for Patient: ${getPatientNameString(
+            currentPatients[id].patient
+          )} failed with message: "${responseBody.issue[0].details?.text}"`,
+          color: 'red'
+        });
+        return;
+      }
+
+      // should return transaction response bundles from which we can pull the posted patient id
+      return responseBody.entry
+        ?.find(e => e.response?.location?.includes('Patient/'))
+        ?.response?.location?.split('Patient/')[1];
+    });
+
+    return Promise.all(postedIds);
+  };
+
+  /**
+   * Wrapper function that calls submitDataToEvaluationService() and resolves patient data for future evaluation
+   */
+  const submitData = () => {
+    submitDataToEvaluationService()
+      .then(postedIds => {
+        const resolvedIds = postedIds?.filter(id => id !== undefined);
+        if (resolvedIds) {
+          showNotification({
+            icon: <IconCircleCheck />,
+            title: 'Successfully sent data',
+            message: `Successfully sent data for ${resolvedIds.length} patients for measure ${evaluationMeasureId}`, //TODO: update to canonical, currently using evaluationMeasureId here whereas it will be used for $submitdata in the future
+            color: 'green'
+          });
+          // TODO: use resolvedIds to populate evaluate modal
+          setEnableEvaluateButton(true);
+        } else {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'No patient information',
+            message: 'No patient information was successfully POSTed to the Evaluation Service',
+            color: 'red'
+          });
+        }
+      })
+      .catch(e => {
+        if (e instanceof Error) {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'Data Submission Error',
+            message: e.message,
+            color: 'red'
+          });
+        }
+      });
   };
 
   /**
@@ -99,7 +202,7 @@ export default function PopulationCalculation() {
             });
           });
           setDetailedResults(labeledDetailedResults);
-          setOpened(true);
+          setDrawerOpened(true);
           setEnableTableButton(true);
           setEnableClauseCoverageButton(true);
         }
@@ -140,7 +243,7 @@ export default function PopulationCalculation() {
                 aria-label="Show Table"
                 styles={{ root: { marginTop: 20 } }}
                 disabled={!enableTableButton}
-                onClick={() => setOpened(true)}
+                onClick={() => setDrawerOpened(true)}
                 variant="outline"
               >
                 &nbsp;Show Table
@@ -175,12 +278,37 @@ export default function PopulationCalculation() {
                 &nbsp;Show Clause Coverage
               </Button>
             </Tooltip>
+            <Button
+              data-testid="submit-data-button"
+              aria-label="Submit Data"
+              styles={{ root: { marginTop: 20 } }}
+              onClick={() => submitData()}
+              variant="outline"
+            >
+              &nbsp;Submit Data
+            </Button>
+            <Tooltip
+              label="Disabled until data submission has succeeeded"
+              openDelay={1000}
+              disabled={enableEvaluateButton}
+            >
+              <Button
+                data-testid="evaluate-button"
+                aria-label="Evaluate"
+                styles={{ root: { marginTop: 20 } }}
+                disabled={!enableEvaluateButton}
+                onClick={open}
+                variant="outline"
+              >
+                &nbsp;Evaluate
+              </Button>
+            </Tooltip>
           </Group>
           {detailedResults.length > 0 && (
             <>
               <Drawer
-                opened={opened}
-                onClose={() => setOpened(false)}
+                opened={drawerOpened}
+                onClose={() => setDrawerOpened(false)}
                 position="bottom"
                 padding="md"
                 overlayProps={{
@@ -207,6 +335,9 @@ export default function PopulationCalculation() {
               </Drawer>
             </>
           )}
+          <Modal centered size="xl" withCloseButton={true} opened={opened} onClose={close} title="Evaluate">
+            TODO: Evaluate Modal
+          </Modal>
         </Center>
       )}
     </>
