@@ -31,7 +31,7 @@ export default function EvaluationServiceVerifier() {
 
   /**
    * Sends a `GET` request to the `/Measure` endpoint of the specified evaluation service URL.
-   * Parses and stores the url and the if of the matching (same url/version) Measure if successful
+   * Parses and stores the url and the id of the matching (same url/version) Measure if successful
    */
   async function verifyMeasure() {
     setIsLoadingId(true);

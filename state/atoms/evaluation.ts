@@ -6,7 +6,7 @@ interface EvaluationStateType {
 }
 
 /**
- * Atom tracking and controlling the value of uploaded measure bundle
+ * Atom tracking and controlling values for the evaluation service
  */
 export const evaluationState = atom<EvaluationStateType>({
   key: 'evaluationState',
