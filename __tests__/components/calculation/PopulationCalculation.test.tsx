@@ -8,6 +8,7 @@ import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 import { DetailedResult } from '../../../util/types';
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
+import { Suspense } from 'react';
 
 const MOCK_DETAILED_RESULT: DetailedResult = {
   patientId: '',
@@ -72,7 +73,7 @@ describe('PopulationCalculation', () => {
     expect(showClauseCoverageButton).not.toBeInTheDocument();
   });
 
-  it('should render Calculate Population Results button when measure bundle is present and at least one patient created', () => {
+  it('should render Calculate Population Results button when measure bundle is present and at least one patient created', async () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       fileName: 'testName',
       content: MOCK_BUNDLE,
@@ -93,17 +94,29 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockMB />
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: {
+        resourceType: 'Library',
+        status: 'draft',
+        type: {}
+      }
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const calculateButton = screen.getByRole('button', { name: 'Calculate Population Results' }) as HTMLButtonElement;
     expect(calculateButton).toBeInTheDocument();
@@ -161,9 +174,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
@@ -234,9 +249,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
@@ -307,9 +324,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
