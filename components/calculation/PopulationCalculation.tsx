@@ -170,7 +170,7 @@ export default function PopulationCalculation() {
         }
       ]
     };
-    if (reportTypeValue === 'individual' && subjectValue) {
+    if (reportTypeValue === 'subject' && subjectValue) {
       parameters.parameter?.push({
         name: 'subject',
         valueString: `Patient/${subjectValue}`
@@ -181,21 +181,12 @@ export default function PopulationCalculation() {
       body: JSON.stringify(parameters),
       headers: { 'Content-Type': 'application/json+fhir' }
     });
-    if (!response.ok) {
-      showNotification({
-        icon: <IconAlertCircle />,
-        title: 'Evaluation service failure',
-        message: `Evaluation call failed with code ${response.status}`,
-        color: 'red'
-      });
-      return;
-    }
     const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
     if (responseBody.resourceType === 'OperationOutcome') {
       showNotification({
         icon: <IconAlertCircle />,
         title: 'Evaluation operation failed',
-        message: `Evaluation call failed with message: "${responseBody.issue[0].details?.text}"`,
+        message: `Evaluation call failed with details: "${responseBody.issue[0].details?.text ?? response.status}"`,
         color: 'red'
       });
       return;
