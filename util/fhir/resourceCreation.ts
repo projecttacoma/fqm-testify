@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getRandomFirstName, getRandomLastName } from '../randomizer';
 import _ from 'lodash';
-import { getResourcePrimaryDates } from './dates';
+import { getResourcePrimaryDates, jsDateToFHIRDate } from './dates';
 import { getResourcePatientReference } from './patient';
 import { getResourceCode } from './codes';
 import { Enums } from 'fqm-execution';
@@ -179,6 +179,42 @@ export function createFHIRResourceString(
   getResourcePatientReference(resource, dr, patientId);
   getResourcePrimaryDates(resource, dr, mpStart, mpEnd);
   return JSON.stringify(resource, null, 2);
+}
+
+/**
+ * Creates a FHIR data exchange MeasureReport from measure and subject data to be submitted with associated patient
+ * https://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-datax-measurereport-deqm.html
+ * @param measure FHIR Measure
+ * @param measurementPeriod FHIR Period representing the measurement period
+ * @param subjectId the patient id the MeasureReport is associated with
+ * @returns { fhir4.MeasureReport } a data exchange measure report used to send Measure-relevant data to a server
+ */
+export function createDataExchangeMeasureReport(
+  measure: fhir4.Measure,
+  measurementPeriod: fhir4.Period,
+  subjectId: string
+): fhir4.MeasureReport {
+  return {
+    resourceType: 'MeasureReport',
+    id: uuidv4(),
+    measure: measure.url?.includes('|') ? measure.url : `${measure.url}|${measure.version}`, //canonical measure/version
+    period: measurementPeriod,
+    status: 'complete',
+    type: 'data-collection',
+    subject: { reference: `Patient/${subjectId}` },
+    date: jsDateToFHIRDate(new Date()),
+    reporter: { reference: 'Organization/fqm-testify' }, //TODO: do we need to send an organization resource?
+    meta: {
+      profile: ['http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/datax-measurereport-deqm']
+    },
+    extension: [
+      {
+        url: 'http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-submitDataUpdateType',
+        valueCode: 'snapshot'
+      }
+    ],
+    contained: [{ resourceType: 'Organization', id: 'fqm-testify' }]
+  };
 }
 
 /**

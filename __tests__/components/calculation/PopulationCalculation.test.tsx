@@ -8,6 +8,7 @@ import { Calculator } from 'fqm-execution';
 import MeasureUpload from '../../../components/measure-upload/MeasureFileUpload';
 import { DetailedResult } from '../../../util/types';
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
+import { Suspense } from 'react';
 
 const MOCK_DETAILED_RESULT: DetailedResult = {
   patientId: '',
@@ -27,52 +28,64 @@ const MOCK_BUNDLE: fhir4.Bundle = {
 };
 
 describe('PopulationCalculation', () => {
-  it('should not render Calculate Population Results button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Calculate Population Results button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const calculateButton = screen.queryByTestId('calculate-all-button');
     expect(calculateButton).not.toBeInTheDocument();
   });
 
-  it('should not render Show Table button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Show Table button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const showTableButton = screen.queryByTestId('show-table-button');
     expect(showTableButton).not.toBeInTheDocument();
   });
 
-  it('should not render Show Clause Coverage button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Show Clause Coverage button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const showClauseCoverageButton = screen.queryByTestId('show-coverage-button');
     expect(showClauseCoverageButton).not.toBeInTheDocument();
   });
 
-  it('should render Calculate Population Results button when measure bundle is present and at least one patient created', () => {
+  it('should render Calculate Population Results button when measure bundle is present and at least one patient created', async () => {
     const MockMB = getMockRecoilState(measureBundleState, {
       fileName: 'testName',
       content: MOCK_BUNDLE,
@@ -93,17 +106,29 @@ describe('PopulationCalculation', () => {
       }
     });
 
-    render(
-      mantineRecoilWrap(
-        <>
-          <MockMB />
-          <MockPatients />
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+    jest.spyOn(Calculator, 'calculateDataRequirements').mockResolvedValue({
+      results: {
+        resourceType: 'Library',
+        status: 'draft',
+        type: {}
+      }
+    });
+
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <MockMB />
+            <MockPatients />
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const calculateButton = screen.getByRole('button', { name: 'Calculate Population Results' }) as HTMLButtonElement;
     expect(calculateButton).toBeInTheDocument();
@@ -161,9 +186,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
@@ -234,9 +261,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
@@ -307,9 +336,11 @@ describe('PopulationCalculation', () => {
             <MockPatients />
             <MockMB />
             <MeasureUpload logError={jest.fn()} />
-            <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-              <PopulationCalculation />
-            </RouterContext.Provider>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
           </>
         )
       );
