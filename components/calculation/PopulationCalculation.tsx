@@ -80,7 +80,7 @@ export default function PopulationCalculation() {
           title: 'Patient data submission failed',
           message: `Submitting data for Patient: ${getPatientNameString(
             currentPatients[id].patient
-          )} failed with message: "${responseBody.issue[0].details?.text}"`,
+          )} failed with details: "${responseBody.issue[0].details?.text ?? response.status}"`,
           color: 'red'
         });
         return;
