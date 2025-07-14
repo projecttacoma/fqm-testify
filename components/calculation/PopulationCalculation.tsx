@@ -1,4 +1,17 @@
-import { Button, Center, Drawer, Grid, Group, Modal, Radio, Select, Space, Text, Tooltip } from '@mantine/core';
+import {
+  Button,
+  Center,
+  CopyButton,
+  Drawer,
+  Grid,
+  Group,
+  Modal,
+  Radio,
+  Select,
+  Space,
+  Text,
+  Tooltip
+} from '@mantine/core';
 import CodeMirror from '@uiw/react-codemirror';
 import { useRecoilValue } from 'recoil';
 import { Calculator, CalculatorTypes } from 'fqm-execution';
@@ -7,7 +20,7 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useState } from 'react';
 import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
+import { IconAlertCircle, IconCircleCheck, IconCopy } from '@tabler/icons';
 import { getPatientInfoString, getPatientNameString } from '../../util/fhir/patient';
 import { createDataExchangeMeasureReport, createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
@@ -124,8 +137,6 @@ export default function PopulationCalculation() {
               return { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) };
             })
           );
-
-          // TODO: fix this to have better labels
           setEnableEvaluateButton(true);
         } else {
           showNotification({
@@ -199,6 +210,7 @@ export default function PopulationCalculation() {
    * Wrapper function that calls sendEvaluate() and populates the results view
    */
   const onEvaluate = (): void => {
+    setEvaluateText(''); // clear text until evaluation is done
     sendEvaluate()
       .then(responseBundle => {
         if (responseBundle) {
@@ -438,6 +450,7 @@ export default function PopulationCalculation() {
                     value={subjectValue}
                     onChange={setSubjectValue}
                     disabled={reportTypeValue === 'population'}
+                    searchable={true}
                   />
                 </Center>
               </Grid.Col>
@@ -453,11 +466,18 @@ export default function PopulationCalculation() {
                 </Center>
               </Grid.Col>
               <Grid.Col>
+                <CopyButton value={evaluateText}>
+                  {({ copied, copy }) => (
+                    <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+                      <IconCopy />
+                    </Button>
+                  )}
+                </CopyButton>
                 <Text lineClamp={4}>
                   <CodeMirror
                     data-autofocus
                     data-testid="codemirror"
-                    height="200px"
+                    height="300px"
                     value={evaluateText}
                     theme="light"
                     editable={false}
