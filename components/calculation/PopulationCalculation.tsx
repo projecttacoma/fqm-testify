@@ -53,7 +53,7 @@ export default function PopulationCalculation() {
    * without using Measure/$deqm-submit-data endpoint
    * Each transaction bundle should contain DEQM Data Exchange MeasureReports with data-of-interest
    * and should be for a single subject (will do a separate POST for each patient)
-   * @returns { string[] } the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful)
+   * @returns { string|undefined[] } the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful)
    */
   const submitDataToEvaluationService = async (): Promise<(string | undefined)[]> => {
     // collect data and POST to evaluation service (TODO: should be $submit-data when available)
@@ -73,17 +73,6 @@ export default function PopulationCalculation() {
         body: JSON.stringify(bundle),
         headers: { 'Content-Type': 'application/json+fhir' }
       });
-      if (!response.ok) {
-        showNotification({
-          icon: <IconAlertCircle />,
-          title: 'Evaluation service failure',
-          message: `Submitting data for Patient: ${getPatientNameString(
-            currentPatients[id].patient
-          )} failed with code ${response.status}`,
-          color: 'red'
-        });
-        return;
-      }
       const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
       if (responseBody.resourceType === 'OperationOutcome') {
         showNotification({
@@ -113,11 +102,11 @@ export default function PopulationCalculation() {
     submitDataToEvaluationService()
       .then(postedIds => {
         const resolvedIds = postedIds?.filter(id => id !== undefined);
-        if (resolvedIds) {
+        if (resolvedIds.length > 0) {
           showNotification({
             icon: <IconCircleCheck />,
             title: 'Successfully sent data',
-            message: `Successfully sent data for ${resolvedIds.length} patients for measure ${evaluationMeasureId}`, //TODO: update to canonical, currently using evaluationMeasureId here whereas it will be used for $submitdata in the future
+            message: `Successfully sent data for ${resolvedIds.length} patients for measure ${evaluationMeasureId}`, //TODO: update to canonical, currently using evaluationMeasureId here whereas it will be used for $submit-data in the future
             color: 'green'
           });
           // TODO: use resolvedIds to populate evaluate modal
