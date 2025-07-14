@@ -134,7 +134,9 @@ export default function PopulationCalculation() {
           });
           setSubjectData(
             resolvedIds.map(idObj => {
-              return { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) };
+              return idObj
+                ? { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) }
+                : { value: '', label: '' };
             })
           );
           setEnableEvaluateButton(true);
