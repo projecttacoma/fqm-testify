@@ -28,46 +28,58 @@ const MOCK_BUNDLE: fhir4.Bundle = {
 };
 
 describe('PopulationCalculation', () => {
-  it('should not render Calculate Population Results button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Calculate Population Results button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const calculateButton = screen.queryByTestId('calculate-all-button');
     expect(calculateButton).not.toBeInTheDocument();
   });
 
-  it('should not render Show Table button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Show Table button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const showTableButton = screen.queryByTestId('show-table-button');
     expect(showTableButton).not.toBeInTheDocument();
   });
 
-  it('should not render Show Clause Coverage button by default', () => {
-    render(
-      mantineRecoilWrap(
-        <>
-          <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-            <PopulationCalculation />
-          </RouterContext.Provider>
-        </>
-      )
-    );
+  it('should not render Show Clause Coverage button by default', async () => {
+    await act(async () => {
+      render(
+        mantineRecoilWrap(
+          <>
+            <Suspense>
+              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
+                <PopulationCalculation />
+              </RouterContext.Provider>
+            </Suspense>
+          </>
+        )
+      );
+    });
 
     const showClauseCoverageButton = screen.queryByTestId('show-coverage-button');
     expect(showClauseCoverageButton).not.toBeInTheDocument();
