@@ -203,7 +203,7 @@ export function createDataExchangeMeasureReport(
     type: 'data-collection',
     subject: { reference: `Patient/${subjectId}` },
     date: jsDateToFHIRDate(new Date()),
-    reporter: { reference: 'Organization/fqm-testify' }, //TODO: do we need to send an organization resource?
+    reporter: { reference: 'Organization/3442' }, //TODO: do we need to send an organization resource?
     meta: {
       profile: ['http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/datax-measurereport-deqm']
     },
