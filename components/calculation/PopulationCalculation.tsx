@@ -171,11 +171,11 @@ export default function PopulationCalculation() {
         },
         {
           name: 'periodStart',
-          valueString: measurementPeriodFormatted?.start
+          valueString: measurementPeriodFormatted?.start.split('T')[0]
         },
         {
           name: 'periodEnd',
-          valueString: measurementPeriodFormatted?.end
+          valueString: measurementPeriodFormatted?.end.split('T')[0]
         },
         {
           name: 'reportType',
