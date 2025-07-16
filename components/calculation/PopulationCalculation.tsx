@@ -161,7 +161,8 @@ export default function PopulationCalculation() {
       });
   };
 
-  const sendEvaluate = async (): Promise<fhir4.Bundle | undefined> => {
+  // TODO: should be constrained to Parameters in the future
+  const sendEvaluate = async (): Promise<fhir4.Bundle | fhir4.Parameters | undefined> => {
     const parameters: fhir4.Parameters = {
       resourceType: 'Parameters',
       parameter: [
@@ -171,11 +172,11 @@ export default function PopulationCalculation() {
         },
         {
           name: 'periodStart',
-          valueString: measurementPeriodFormatted?.start.split('T')[0]
+          valueDate: measurementPeriodFormatted?.start.split('T')[0]
         },
         {
           name: 'periodEnd',
-          valueString: measurementPeriodFormatted?.end.split('T')[0]
+          valueDate: measurementPeriodFormatted?.end.split('T')[0]
         },
         {
           name: 'reportType',
@@ -194,7 +195,7 @@ export default function PopulationCalculation() {
       body: JSON.stringify(parameters),
       headers: { 'Content-Type': 'application/json+fhir' }
     });
-    const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
+    const responseBody: fhir4.Bundle | fhir4.Parameters | fhir4.OperationOutcome = await response.json();
     if (responseBody.resourceType === 'OperationOutcome') {
       showNotification({
         icon: <IconAlertCircle />,
@@ -214,9 +215,9 @@ export default function PopulationCalculation() {
   const onEvaluate = (): void => {
     setEvaluateText(''); // clear text until evaluation is done
     sendEvaluate()
-      .then(responseBundle => {
-        if (responseBundle) {
-          setEvaluateText(JSON.stringify(responseBundle, null, 2));
+      .then(response => {
+        if (response) {
+          setEvaluateText(JSON.stringify(response, null, 2));
         }
       })
       .catch(e => {
