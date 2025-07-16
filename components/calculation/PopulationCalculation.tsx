@@ -1,12 +1,26 @@
-import { Button, Center, Drawer, Group, Modal, Tooltip } from '@mantine/core';
+import {
+  Button,
+  Center,
+  CopyButton,
+  Drawer,
+  Grid,
+  Group,
+  Modal,
+  Radio,
+  Select,
+  Space,
+  Text,
+  Tooltip
+} from '@mantine/core';
+import CodeMirror from '@uiw/react-codemirror';
 import { useRecoilValue } from 'recoil';
 import { Calculator, CalculatorTypes } from 'fqm-execution';
-import { patientTestCaseState } from '../../state/atoms/patientTestCase';
+import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useState } from 'react';
 import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
+import { IconAlertCircle, IconCircleCheck, IconCopy } from '@tabler/icons';
 import { getPatientInfoString, getPatientNameString } from '../../util/fhir/patient';
 import { createDataExchangeMeasureReport, createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
@@ -35,6 +49,10 @@ export default function PopulationCalculation() {
   const [clauseCoverageHTML, setClauseCoverageHTML] = useState<string | null>(null);
   const [clauseUncoverageHTML, setClauseUncoverageHTML] = useState<string | null>(null);
   const trustMetaProfile = useRecoilValue(trustMetaProfileState);
+  const [reportTypeValue, setReportTypeValue] = useState('population');
+  const [subjectValue, setSubjectValue] = useState<string | null>('');
+  const [subjectData, setSubjectData] = useState<{ value: string; label: string }[]>([]);
+  const [evaluateText, setEvaluateText] = useState<string>('');
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -53,15 +71,19 @@ export default function PopulationCalculation() {
    * without using Measure/$deqm-submit-data endpoint
    * Each transaction bundle should contain DEQM Data Exchange MeasureReports with data-of-interest
    * and should be for a single subject (will do a separate POST for each patient)
-   * @returns { string|undefined[] } the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful)
+   * @returns { {postedId: string, testCaseInfo: testCaseInfo}|undefined[] } objects with the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful) and the corresponding test case information
    */
-  const submitDataToEvaluationService = async (): Promise<(string | undefined)[]> => {
+  const submitDataToEvaluationService = async (): Promise<
+    ({ postedId: string; testCaseInfo: TestCaseInfo } | undefined)[]
+  > => {
     // collect data and POST to evaluation service (TODO: should be $submit-data when available)
 
     const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')
       ?.resource as fhir4.Measure;
 
-    const postedIds: Promise<string | undefined>[] = Object.keys(currentPatients).map(async id => {
+    const postedIds: Promise<{ postedId: string; testCaseInfo: TestCaseInfo } | undefined>[] = Object.keys(
+      currentPatients
+    ).map(async id => {
       const bundle = createPatientBundle(
         currentPatients[id].patient,
         minimizeTestCaseResources(currentPatients[id], measureBundle.content, drLookupByType),
@@ -87,9 +109,10 @@ export default function PopulationCalculation() {
       }
 
       // should return transaction response bundles from which we can pull the posted patient id
-      return responseBody.entry
+      const locationId = responseBody.entry
         ?.find(e => e.response?.location?.includes('Patient/'))
         ?.response?.location?.split('Patient/')[1];
+      return locationId ? { postedId: locationId, testCaseInfo: currentPatients[id] } : undefined;
     });
 
     return Promise.all(postedIds);
@@ -101,7 +124,7 @@ export default function PopulationCalculation() {
   const submitData = () => {
     submitDataToEvaluationService()
       .then(postedIds => {
-        const resolvedIds = postedIds?.filter(id => id !== undefined);
+        const resolvedIds = postedIds?.filter(idObj => idObj !== undefined);
         if (resolvedIds.length > 0) {
           showNotification({
             icon: <IconCircleCheck />,
@@ -109,7 +132,13 @@ export default function PopulationCalculation() {
             message: `Successfully sent data for ${resolvedIds.length} patients for measure ${evaluationMeasureId}`, //TODO: update to canonical, currently using evaluationMeasureId here whereas it will be used for $submit-data in the future
             color: 'green'
           });
-          // TODO: use resolvedIds to populate evaluate modal
+          setSubjectData(
+            resolvedIds.map(idObj => {
+              return idObj
+                ? { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) }
+                : { value: '', label: '' };
+            })
+          );
           setEnableEvaluateButton(true);
         } else {
           showNotification({
@@ -125,6 +154,77 @@ export default function PopulationCalculation() {
           showNotification({
             icon: <IconAlertCircle />,
             title: 'Data Submission Error',
+            message: e.message,
+            color: 'red'
+          });
+        }
+      });
+  };
+
+  // TODO: should be constrained to Parameters in the future
+  const sendEvaluate = async (): Promise<fhir4.Bundle | fhir4.Parameters | undefined> => {
+    const parameters: fhir4.Parameters = {
+      resourceType: 'Parameters',
+      parameter: [
+        {
+          name: 'measureId',
+          valueString: evaluationMeasureId
+        },
+        {
+          name: 'periodStart',
+          valueDate: measurementPeriodFormatted?.start.split('T')[0]
+        },
+        {
+          name: 'periodEnd',
+          valueDate: measurementPeriodFormatted?.end.split('T')[0]
+        },
+        {
+          name: 'reportType',
+          valueString: reportTypeValue
+        }
+      ]
+    };
+    if (reportTypeValue === 'subject' && subjectValue) {
+      parameters.parameter?.push({
+        name: 'subject',
+        valueString: `Patient/${subjectValue}`
+      });
+    }
+    const response = await fetch(`${evaluationServiceUrl}/Measure/$evaluate`, {
+      method: 'POST',
+      body: JSON.stringify(parameters),
+      headers: { 'Content-Type': 'application/json+fhir' }
+    });
+    const responseBody: fhir4.Bundle | fhir4.Parameters | fhir4.OperationOutcome = await response.json();
+    if (responseBody.resourceType === 'OperationOutcome') {
+      showNotification({
+        icon: <IconAlertCircle />,
+        title: 'Evaluation operation failed',
+        message: `Evaluation call failed with details: "${responseBody.issue[0].details?.text ?? response.status}"`,
+        color: 'red'
+      });
+      return;
+    }
+
+    return responseBody;
+  };
+
+  /**
+   * Wrapper function that calls sendEvaluate() and populates the results view
+   */
+  const onEvaluate = (): void => {
+    setEvaluateText(''); // clear text until evaluation is done
+    sendEvaluate()
+      .then(response => {
+        if (response) {
+          setEvaluateText(JSON.stringify(response, null, 2));
+        }
+      })
+      .catch(e => {
+        if (e instanceof Error) {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'Evaluation Error',
             message: e.message,
             color: 'red'
           });
@@ -324,8 +424,71 @@ export default function PopulationCalculation() {
               </Drawer>
             </>
           )}
-          <Modal centered size="xl" withCloseButton={true} opened={opened} onClose={close} title="Evaluate">
-            TODO: Evaluate Modal
+          <Modal centered size="xl" withCloseButton={true} opened={opened} onClose={close}>
+            <Grid align="center" justify="center">
+              <Grid.Col>
+                <Center>
+                  <Text weight={700} align="center" lineClamp={2}>
+                    Evaluate
+                  </Text>
+                </Center>
+              </Grid.Col>
+              <Grid.Col>
+                <Center>
+                  <Radio.Group
+                    value={reportTypeValue}
+                    onChange={setReportTypeValue}
+                    name="reportType"
+                    label="Select the report type:"
+                  >
+                    <Group mt="xs">
+                      <Radio value="population" label="population" />
+                      <Radio value="subject" label="subject" />
+                    </Group>
+                  </Radio.Group>
+                  <Space w="xl" />
+                  <Select
+                    label="Select subject:"
+                    data={subjectData}
+                    value={subjectValue}
+                    onChange={setSubjectValue}
+                    disabled={reportTypeValue === 'population'}
+                    searchable={true}
+                  />
+                </Center>
+              </Grid.Col>
+
+              <Grid.Col>
+                <Center>
+                  <Group pt={8}>
+                    <Button onClick={() => onEvaluate()}>Evaluate</Button>
+                    <Button variant="default" onClick={close}>
+                      Cancel
+                    </Button>
+                  </Group>
+                </Center>
+              </Grid.Col>
+              <Grid.Col>
+                <CopyButton value={evaluateText}>
+                  {({ copied, copy }) => (
+                    <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+                      <IconCopy />
+                    </Button>
+                  )}
+                </CopyButton>
+                <Text lineClamp={4}>
+                  <CodeMirror
+                    data-autofocus
+                    data-testid="codemirror"
+                    height="300px"
+                    value={evaluateText}
+                    theme="light"
+                    editable={false}
+                    placeholder="Waiting for $evaluate response..."
+                  />
+                </Text>
+              </Grid.Col>
+            </Grid>
           </Modal>
         </Center>
       )}
