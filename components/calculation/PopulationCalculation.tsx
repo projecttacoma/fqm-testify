@@ -5,12 +5,14 @@ import {
   Drawer,
   Grid,
   Group,
+  Menu,
   Modal,
   Radio,
   Select,
   Space,
   Text,
-  Tooltip
+  Tooltip,
+  useMantineTheme
 } from '@mantine/core';
 import CodeMirror from '@uiw/react-codemirror';
 import { useRecoilValue } from 'recoil';
@@ -20,7 +22,14 @@ import { measureBundleState } from '../../state/atoms/measureBundle';
 import { useState } from 'react';
 import { measurementPeriodFormattedState } from '../../state/atoms/measurementPeriod';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconCircleCheck, IconCopy } from '@tabler/icons';
+import {
+  IconAlertCircle,
+  IconChevronDown,
+  IconCircleCheck,
+  IconCopy,
+  IconPackage,
+  IconSquareCheck
+} from '@tabler/icons';
 import { getPatientInfoString, getPatientNameString } from '../../util/fhir/patient';
 import { createDataExchangeMeasureReport, createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';
@@ -53,6 +62,7 @@ export default function PopulationCalculation() {
   const [subjectValue, setSubjectValue] = useState<string | null>('');
   const [subjectData, setSubjectData] = useState<{ value: string; label: string }[]>([]);
   const [evaluateText, setEvaluateText] = useState<string>('');
+  const theme = useMantineTheme();
 
   /**
    * Creates object that maps patient ids to their name/DOB info strings.
@@ -71,58 +81,102 @@ export default function PopulationCalculation() {
    * without using Measure/$deqm-submit-data endpoint
    * Each transaction bundle should contain DEQM Data Exchange MeasureReports with data-of-interest
    * and should be for a single subject (will do a separate POST for each patient)
+   * @param proto: true if we should do a proto submit data that simply POSTs transaction bundles
    * @returns { {postedId: string, testCaseInfo: testCaseInfo}|undefined[] } objects with the evaluation service ids for POSTed patients (may be different than sent IDs or undefined if send was unsuccessful) and the corresponding test case information
    */
-  const submitDataToEvaluationService = async (): Promise<
-    ({ postedId: string; testCaseInfo: TestCaseInfo } | undefined)[]
-  > => {
-    // collect data and POST to evaluation service (TODO: should be $submit-data when available)
-
+  const submitDataToEvaluationService = async (
+    proto: boolean
+  ): Promise<({ postedId: string; testCaseInfo: TestCaseInfo } | undefined)[]> => {
     const measure = measureBundle.content?.entry?.find(e => e.resource?.resourceType === 'Measure')
       ?.resource as fhir4.Measure;
 
-    const postedIds: Promise<{ postedId: string; testCaseInfo: TestCaseInfo } | undefined>[] = Object.keys(
-      currentPatients
-    ).map(async id => {
-      const bundle = createPatientBundle(
+    const patientIds = Object.keys(currentPatients);
+    const bundles = patientIds.map(id => {
+      return createPatientBundle(
         currentPatients[id].patient,
         minimizeTestCaseResources(currentPatients[id], measureBundle.content, drLookupByType),
         currentPatients[id].fullUrl,
         createDataExchangeMeasureReport(measure, measurementPeriodFormatted as fhir4.Period, id)
       );
-      const response = await fetch(`${evaluationServiceUrl}/`, {
+    });
+
+    let responseBundles: (fhir4.Bundle | undefined)[] = [];
+    if (proto) {
+      // Simple POST
+      const bundlePromises = bundles.map(async (bundle, idx) => {
+        const response = await fetch(`${evaluationServiceUrl}/`, {
+          method: 'POST',
+          body: JSON.stringify(bundle),
+          headers: { 'Content-Type': 'application/json+fhir' }
+        });
+        const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
+        if (responseBody.resourceType === 'OperationOutcome') {
+          showNotification({
+            icon: <IconAlertCircle />,
+            title: 'Patient data submission failed',
+            message: `Submitting data for Patient: ${getPatientNameString(
+              currentPatients[patientIds[idx]].patient
+            )} failed with details: "${responseBody.issue[0].details?.text ?? response.status}"`,
+            color: 'red'
+          });
+          return undefined;
+        }
+        return responseBody;
+      });
+      responseBundles = await Promise.all(bundlePromises);
+    } else {
+      // full $submit-data
+      const parameters = {
+        resourceType: 'Parameters',
+        parameter: bundles.map(bundle => {
+          return {
+            name: 'bundle',
+            resource: bundle
+          };
+        })
+      };
+      const response = await fetch(`${evaluationServiceUrl}/Measure/$submit-data`, {
         method: 'POST',
-        body: JSON.stringify(bundle),
+        body: JSON.stringify(parameters),
         headers: { 'Content-Type': 'application/json+fhir' }
       });
-      const responseBody: fhir4.Bundle | fhir4.OperationOutcome = await response.json();
+      const responseBody: fhir4.Parameters | fhir4.OperationOutcome = await response.json();
       if (responseBody.resourceType === 'OperationOutcome') {
         showNotification({
           icon: <IconAlertCircle />,
-          title: 'Patient data submission failed',
-          message: `Submitting data for Patient: ${getPatientNameString(
-            currentPatients[id].patient
-          )} failed with details: "${responseBody.issue[0].details?.text ?? response.status}"`,
+          title: '$submit-data failure',
+          message: `$submit-data operation failed with details: "${
+            responseBody.issue[0].details?.text ?? response.status
+          }"`,
           color: 'red'
         });
-        return;
+      } else if (!responseBody.parameter) {
+        showNotification({
+          icon: <IconAlertCircle />,
+          title: '$submit-data no parameters',
+          message: `$submit-data operation received a response with no parameters`,
+          color: 'red'
+        });
+      } else {
+        responseBundles = responseBody.parameter.map(p => p.resource as fhir4.Bundle);
       }
+    }
 
-      // should return transaction response bundles from which we can pull the posted patient id
-      const locationId = responseBody.entry
+    const postedIds = responseBundles.map((bundle, idx) => {
+      // should be transaction response bundles from which we can pull the posted patient id
+      const locationId = bundle?.entry
         ?.find(e => e.response?.location?.includes('Patient/'))
         ?.response?.location?.split('Patient/')[1];
-      return locationId ? { postedId: locationId, testCaseInfo: currentPatients[id] } : undefined;
+      return locationId ? { postedId: locationId, testCaseInfo: currentPatients[patientIds[idx]] } : undefined;
     });
-
-    return Promise.all(postedIds);
+    return postedIds;
   };
 
   /**
    * Wrapper function that calls submitDataToEvaluationService() and resolves patient data for future evaluation
    */
-  const submitData = () => {
-    submitDataToEvaluationService()
+  const submitData = (proto = false) => {
+    submitDataToEvaluationService(proto)
       .then(postedIds => {
         const resolvedIds = postedIds?.filter(idObj => idObj !== undefined);
         if (resolvedIds.length > 0) {
@@ -367,15 +421,31 @@ export default function PopulationCalculation() {
                 &nbsp;Show Clause Coverage
               </Button>
             </Tooltip>
-            <Button
-              data-testid="submit-data-button"
-              aria-label="Submit Data"
-              styles={{ root: { marginTop: 20 } }}
-              onClick={() => submitData()}
-              variant="outline"
-            >
-              &nbsp;Submit Data
-            </Button>
+            <Menu>
+              <Menu.Target>
+                <Button
+                  styles={{ root: { marginTop: 20 } }}
+                  variant="outline"
+                  rightIcon={<IconChevronDown size={18} />}
+                >
+                  Submit Data
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  onClick={() => submitData()}
+                  icon={<IconPackage color={theme.colors.green[6]} stroke={1.5} />}
+                >
+                  $submit-data
+                </Menu.Item>
+                <Menu.Item
+                  onClick={() => submitData(true)}
+                  icon={<IconSquareCheck color={theme.colors.yellow[6]} stroke={1.5} />}
+                >
+                  POST data
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
             <Tooltip
               label="Disabled until data submission has succeeeded"
               openDelay={1000}
