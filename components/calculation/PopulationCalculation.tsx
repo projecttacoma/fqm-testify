@@ -40,6 +40,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { evaluationState } from '../../state/atoms/evaluation';
 import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function PopulationCalculation() {
   const router = useRouter();
@@ -240,10 +241,12 @@ export default function PopulationCalculation() {
     };
     if (reportTypeValue === 'subject' && subjectValue) {
       if (subjectValue === 'All') {
+        const groupId = uuidv4();
         parameters.parameter?.push({
           name: 'subjectGroup',
           resource: {
             resourceType: 'Group',
+            id: groupId,
             type: 'person',
             actual: true,
             member: subjectData.slice(1).map(subjectInfo => {
@@ -254,6 +257,10 @@ export default function PopulationCalculation() {
               };
             })
           }
+        });
+        parameters.parameter?.push({
+          name: 'subject',
+          valueString: `Group/${groupId}`
         });
       } else {
         parameters.parameter?.push({
