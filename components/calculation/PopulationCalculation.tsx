@@ -239,7 +239,7 @@ export default function PopulationCalculation() {
         }
       ]
     };
-    if (reportTypeValue === 'subject' && subjectValue) {
+    if (subjectValue) {
       if (subjectValue === 'All') {
         const groupId = uuidv4();
         parameters.parameter?.push({
@@ -547,8 +547,8 @@ export default function PopulationCalculation() {
                     data={subjectData}
                     value={subjectValue}
                     onChange={setSubjectValue}
-                    disabled={reportTypeValue === 'population'}
                     searchable={true}
+                    clearable
                   />
                 </Center>
               </Grid.Col>
