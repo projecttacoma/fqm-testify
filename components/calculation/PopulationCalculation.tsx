@@ -40,6 +40,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { evaluationState } from '../../state/atoms/evaluation';
 import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function PopulationCalculation() {
   const router = useRouter();
@@ -186,13 +187,13 @@ export default function PopulationCalculation() {
             message: `Successfully sent data for ${resolvedIds.length} patients for measure ${evaluationMeasureId}`, //TODO: update to canonical, currently using evaluationMeasureId here whereas it will be used for $submit-data in the future
             color: 'green'
           });
-          setSubjectData(
-            resolvedIds.map(idObj => {
-              return idObj
-                ? { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) }
-                : { value: '', label: '' };
-            })
-          );
+          const subjectData = resolvedIds.map(idObj => {
+            return idObj
+              ? { value: idObj.postedId, label: getPatientNameString(idObj.testCaseInfo.patient) }
+              : { value: '', label: '' };
+          });
+          subjectData.unshift({ value: 'All', label: 'All' });
+          setSubjectData(subjectData);
           setEnableEvaluateButton(true);
         } else {
           showNotification({
@@ -238,11 +239,35 @@ export default function PopulationCalculation() {
         }
       ]
     };
-    if (reportTypeValue === 'subject' && subjectValue) {
-      parameters.parameter?.push({
-        name: 'subject',
-        valueString: `Patient/${subjectValue}`
-      });
+    if (subjectValue) {
+      if (subjectValue === 'All') {
+        const groupId = uuidv4();
+        parameters.parameter?.push({
+          name: 'subjectGroup',
+          resource: {
+            resourceType: 'Group',
+            id: groupId,
+            type: 'person',
+            actual: true,
+            member: subjectData.slice(1).map(subjectInfo => {
+              return {
+                entity: {
+                  reference: `Patient/${subjectInfo.value}`
+                }
+              };
+            })
+          }
+        });
+        parameters.parameter?.push({
+          name: 'subject',
+          valueString: `Group/${groupId}`
+        });
+      } else {
+        parameters.parameter?.push({
+          name: 'subject',
+          valueString: `Patient/${subjectValue}`
+        });
+      }
     }
     const response = await fetch(`${evaluationServiceUrl}/Measure/$evaluate`, {
       method: 'POST',
@@ -522,8 +547,8 @@ export default function PopulationCalculation() {
                     data={subjectData}
                     value={subjectValue}
                     onChange={setSubjectValue}
-                    disabled={reportTypeValue === 'population'}
                     searchable={true}
+                    clearable
                   />
                 </Center>
               </Grid.Col>
