@@ -32,7 +32,7 @@
     "fhir-spec-tools": "^0.5.0",
     "fhirpath": "^2.14.6",
     "file-saver": "^2.0.5",
-    "fqm-execution": "^1.7.0",
+    "fqm-execution": "^1.8.3",
     "immer": "^9.0.14",
     "jszip": "^3.10.0",
     "luxon": "^2.5.2",
