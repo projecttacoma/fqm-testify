@@ -2,7 +2,7 @@
  * Generates a lookup table of randomized fake names to use during patient creation in the app
  * This is a standalone script to avoid using faker in the core application, as it is quite a large library
  */
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 

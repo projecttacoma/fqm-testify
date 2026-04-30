@@ -1,7 +1,7 @@
 import JSZip from 'jszip';
 import { downloadZip } from '../../util/downloadUtil';
 import { Button, Group, Stack } from '@mantine/core';
-import produce from 'immer';
+import { createDraft, finishDraft, produce } from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { patientTestCaseState, TestCaseInfo } from '../../state/atoms/patientTestCase';
@@ -19,7 +19,7 @@ import {
   IconInfoCircle,
   IconTrash,
   IconUserPlus
-} from '@tabler/icons';
+} from '@tabler/icons-react';
 import ImportModal from '../modals/ImportModal';
 import { bundleToTestCase } from '../../util/import';
 import PatientInfoCard from '../utils/PatientInfoCard';
@@ -42,6 +42,8 @@ import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
 import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
 import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
+import { calculate } from 'fqm-execution/build/calculation/Calculator';
+import nextAppLoader from 'next/dist/build/webpack/loaders/next-app-loader';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -93,10 +95,12 @@ function PatientCreationPanel() {
     if (!detailedResultLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      produce(detailedResultLookup, async draftState => {
+      async () => {
+        const draft = createDraft(detailedResultLookup);
+
         if (measureBundle.content) {
           try {
-            draftState[id] = await calculateDetailedResult(
+            draft[id] = await calculateDetailedResult(
               currentPatients[id],
               measureBundle.content,
               measurementPeriodFormatted?.start,
@@ -114,10 +118,11 @@ function PatientCreationPanel() {
             }
           }
         }
-      }).then(nextDRLookupState => {
+
+        const nextDRLookupState = finishDraft(draft);
         setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
-      });
+      };
     }
   };
 
@@ -146,34 +151,36 @@ function PatientCreationPanel() {
         };
       });
       setCurrentPatients(nextPatientState);
-      setIsCalculationLoading(true);
 
-      setTimeout(() => {
-        produce(detailedResultLookup, async draftState => {
-          if (measureBundle.content) {
-            try {
-              draftState[patientId] = await calculateDetailedResult(
-                nextPatientState[patientId],
-                measureBundle.content,
-                measurementPeriodFormatted?.start,
-                measurementPeriodFormatted?.end,
-                trustMetaProfile
-              );
-            } catch (error) {
-              if (error instanceof Error) {
-                showNotification({
-                  icon: <IconAlertCircle />,
-                  title: 'Calculation Error',
-                  message: error.message,
-                  color: 'red'
-                });
-              }
+      setTimeout(async () => {
+        setIsCalculationLoading(true);
+
+        const draft = createDraft(detailedResultLookup);
+
+        if (measureBundle.content) {
+          try {
+            draft[patientId] = await calculateDetailedResult(
+              nextPatientState[patientId],
+              measureBundle.content,
+              measurementPeriodFormatted?.start,
+              measurementPeriodFormatted?.end,
+              trustMetaProfile
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              showNotification({
+                icon: <IconAlertCircle />,
+                title: 'Calculation Error',
+                message: error.message,
+                color: 'red'
+              });
             }
           }
-        }).then(nextDRLookupState => {
-          setDetailedResultLookup(nextDRLookupState);
-          setIsCalculationLoading(false);
-        });
+        }
+
+        const nextDRLookupState = finishDraft(draft);
+        setDetailedResultLookup(nextDRLookupState);
+        setIsCalculationLoading(false);
       }, 400);
     }
 

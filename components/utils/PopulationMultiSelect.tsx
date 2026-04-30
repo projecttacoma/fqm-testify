@@ -1,6 +1,6 @@
 import { Group, MultiSelect, Popover, Text, ActionIcon } from '@mantine/core';
-import { InfoCircle } from 'tabler-icons-react';
-import produce from 'immer';
+import { IconInfoCircle } from '@tabler/icons-react';
+import { produce } from 'immer';
 import { Enums } from 'fqm-execution';
 import { useMemo, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -155,7 +155,7 @@ export default function PopulationMultiSelect() {
               <Popover opened={opened} onClose={() => setOpened(false)}>
                 <Popover.Target>
                   <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
-                    <InfoCircle size={20} />
+                    <IconInfoCircle size={20} />
                   </ActionIcon>
                 </Popover.Target>
                 <Popover.Dropdown>

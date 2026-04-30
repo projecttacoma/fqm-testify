@@ -1,8 +1,7 @@
 import { Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle } from '@tabler/icons';
-import produce from 'immer';
-import { WritableDraft } from 'immer/dist/internal';
+import { IconAlertCircle } from '@tabler/icons-react';
+import { WritableDraft, produce, createDraft, finishDraft } from 'immer';
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
@@ -146,15 +145,18 @@ function ResourceDisplay() {
           }
         });
         setCurrentTestCases(nextResourceState);
-        setIsCalculationLoading(true);
 
-        setTimeout(() => {
-          produce(detailedResultLookup, async draftState => {
-            await detailedResultCalculation(draftState, selectedPatient, nextResourceState);
-          }).then(nextDRLookupState => {
-            setDetailedResultLookup(nextDRLookupState);
-            setIsCalculationLoading(false);
-          });
+        setTimeout(async () => {
+          setIsCalculationLoading(true);
+
+          const draft = createDraft(detailedResultLookup);
+
+          await detailedResultCalculation(draft, selectedPatient, nextResourceState);
+
+          const nextDRLookupState = finishDraft(draft);
+
+          setDetailedResultLookup(nextDRLookupState);
+          setIsCalculationLoading(false);
         }, 400);
       }
     }
@@ -170,15 +172,18 @@ function ResourceDisplay() {
         }
       });
       setCurrentTestCases(nextResourceState);
-      setIsCalculationLoading(true);
 
-      setTimeout(() => {
-        produce(detailedResultLookup, async draftState => {
-          await detailedResultCalculation(draftState, selectedPatient, nextResourceState);
-        }).then(nextDRLookupState => {
-          setDetailedResultLookup(nextDRLookupState);
-          setIsCalculationLoading(false);
-        });
+      setTimeout(async () => {
+        setIsCalculationLoading(true);
+
+        const draft = createDraft(detailedResultLookup);
+
+        await detailedResultCalculation(draft, selectedPatient, nextResourceState);
+
+        const nextDRLookupState = finishDraft(draft);
+
+        setDetailedResultLookup(nextDRLookupState);
+        setIsCalculationLoading(false);
       }, 400);
     }
     closeConfirmationModal();

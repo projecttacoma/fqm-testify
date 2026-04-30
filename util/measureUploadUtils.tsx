@@ -2,7 +2,7 @@ import { showNotification } from '@mantine/notifications';
 import { Calculator } from 'fqm-execution';
 import { DateTime } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
-import { IconAlertCircle } from '@tabler/icons';
+import { IconAlertCircle } from '@tabler/icons-react';
 
 export interface MeasureUploadError {
   id: string;

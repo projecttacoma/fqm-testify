@@ -4,7 +4,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { evaluationState } from '../../state/atoms/evaluation';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
+import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
 
 export default function EvaluationServiceVerifier() {
   const [isLoadingId, setIsLoadingId] = useState(false);

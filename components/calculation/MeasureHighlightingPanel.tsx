@@ -1,7 +1,7 @@
 import { ActionIcon, Autocomplete, ScrollArea, Space, Text, createStyles } from '@mantine/core';
 import parse from 'html-react-parser';
 import { useMemo, useState } from 'react';
-import { Search, X } from 'tabler-icons-react';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import PrettyOutput from './PrettyOutput';
 import { DetailedPopulationGroupResult, Relevance } from 'fqm-execution';
 import { useRecoilValue } from 'recoil';
@@ -57,7 +57,7 @@ export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPane
         dropdownComponent={ScrollArea}
         maxDropdownHeight={200}
         placeholder="Expression Name"
-        icon={<Search />}
+        icon={<IconSearch />}
         nothingFound={
           <Text align="left" pl={10}>
             No Matches
@@ -78,7 +78,7 @@ export default function MeasureHighlightingPanel({ dr }: MeasureHighlightingPane
               setSearchValue('');
             }}
           >
-            <X size={16} />
+            <IconX size={16} />
           </ActionIcon>
         }
       />

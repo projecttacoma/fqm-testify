@@ -1,5 +1,5 @@
 import { Button, Group, TextInput } from '@mantine/core';
-import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons';
+import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from '@tabler/icons-react';
 import React from 'react';
 import { useRecoilState } from 'recoil';
 import { cardFiltersAtom } from '../../state/atoms/cardFilters';
