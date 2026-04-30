@@ -4,7 +4,7 @@ import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter } from '@codemirror/lint';
 import { useEffect, useState } from 'react';
 import { parsedCodePaths } from 'fhir-spec-tools/build/data/codePaths';
-import { IconCodePlus } from '@tabler/icons';
+import { IconCodePlus } from '@tabler/icons-react';
 import { valueSetMapState } from '../../state/selectors/valueSetsMap';
 import { useRecoilValue } from 'recoil';
 import { dedupVSCodes, getDRC } from '../../util/ValueSetHelper';

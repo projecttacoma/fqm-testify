@@ -1,6 +1,6 @@
 import { Group } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconCalendar } from '@tabler/icons';
+import { IconCalendar } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { measurementPeriodEndState, measurementPeriodStartState } from '../../state/atoms/measurementPeriod';

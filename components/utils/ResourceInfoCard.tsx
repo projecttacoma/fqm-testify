@@ -1,6 +1,6 @@
 import { Button, Grid, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
-import { Edit, Trash } from 'tabler-icons-react';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 export interface DateInfo {
   date: string;
   dateType: string;
@@ -62,7 +62,7 @@ export default function ResourceInfoCard({
               variant="subtle"
               aria-label="Edit Resource"
             >
-              <Edit />
+              <IconEdit />
             </Button>
           </Tooltip>
           <Tooltip label="Delete FHIR Resource" openDelay={1000}>
@@ -74,7 +74,7 @@ export default function ResourceInfoCard({
               variant="subtle"
               aria-label="Delete Resource"
             >
-              <Trash />
+              <IconTrash />
             </Button>
           </Tooltip>
         </Grid.Col>

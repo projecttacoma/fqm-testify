@@ -7,10 +7,10 @@ import { measureBundleState } from '../state/atoms/measureBundle';
 import { measurementPeriodFormattedState } from '../state/atoms/measurementPeriod';
 import type { NextPage } from 'next';
 import { patientTestCaseState } from '../state/atoms/patientTestCase';
-import produce from 'immer';
+import { createDraft, finishDraft } from 'immer';
 import { calculationLoading } from '../state/atoms/calculationLoading';
 import { showNotification } from '@mantine/notifications';
-import { IconAlertCircle } from '@tabler/icons';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { detailedResultLookupState } from '../state/atoms/detailedResultLookup';
 import { calculateDetailedResult } from '../util/MeasureCalculation';
 import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
@@ -27,11 +27,14 @@ const TestCaseEditorPage: NextPage = () => {
   useEffect(() => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
-      setIsCalculationLoading(true);
-      produce(detailedResultLookup, async draftState => {
+
+      async () => {
+        setIsCalculationLoading(true);
+
+        const draft = createDraft(detailedResultLookup);
         for (const [patientId, testCaseInfo] of Object.entries(currentPatients)) {
           try {
-            draftState[patientId] = await calculateDetailedResult(
+            draft[patientId] = await calculateDetailedResult(
               testCaseInfo,
               mb,
               measurementPeriodFormatted?.start,
@@ -49,10 +52,11 @@ const TestCaseEditorPage: NextPage = () => {
             }
           }
         }
-      }).then(nextDRLookupState => {
+
+        const nextDRLookupState = finishDraft(draft);
         setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
-      });
+      };
     }
     // have to disable eslint for the following line because we only want to run the effect once
     // in order to do this, we have an empty dependencies array but that gives us a warning

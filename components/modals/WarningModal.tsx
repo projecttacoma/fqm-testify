@@ -1,5 +1,5 @@
 import { Modal, Button, Center, Group, Text, Grid, Space } from '@mantine/core';
-import { AlertTriangle } from 'tabler-icons-react';
+import { IconAlertTriangle } from '@tabler/icons-react';
 
 export interface WarningModalProps {
   open: boolean;
@@ -14,7 +14,7 @@ export default function WarningModal({ open = true, onClose, onConfirm }: Warnin
       <Grid align="center" justify="center">
         <Grid.Col>
           <Center>
-            <AlertTriangle color="red" size={35} />
+            <IconAlertTriangle color="red" size={35} />
           </Center>
           <Space></Space>
           <Center>

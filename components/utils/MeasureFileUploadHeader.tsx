@@ -1,6 +1,6 @@
 import { Text, Popover, List, Anchor, ActionIcon, Group } from '@mantine/core';
 import React, { useState } from 'react';
-import { InfoCircle } from 'tabler-icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 export default function MeasureFileUploadHeader() {
   const [opened, setOpened] = useState(false);
@@ -14,7 +14,7 @@ export default function MeasureFileUploadHeader() {
         <Popover opened={opened} onClose={() => setOpened(false)}>
           <Popover.Target>
             <ActionIcon aria-label={'More Information'} onClick={() => setOpened(o => !o)}>
-              <InfoCircle size={20} />
+              <IconInfoCircle size={20} />
             </ActionIcon>
           </Popover.Target>
           <Popover.Dropdown>

@@ -11,8 +11,8 @@ import {
   rejectUpload
 } from '../../util/measureUploadUtils';
 import { showNotification, cleanNotifications } from '@mantine/notifications';
-import { IconAlertCircle, IconCircleCheck } from '@tabler/icons';
-import { CircleCheck } from 'tabler-icons-react';
+import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
+// import { CircleCheck } from 'tabler-icons-react'; why was this even different lol
 import { displayMapToSelectDataState } from '../../state/selectors/displayMapToSelectData';
 
 enum PACKAGE_STATES {
@@ -249,7 +249,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
           </Grid.Col>
           <Grid.Col span={1} style={{ display: 'flex', alignItems: 'end', justifyContent: 'center' }}>
             {isLoadingPackage === PACKAGE_STATES.LOADING && <Loader />}
-            {isLoadingPackage === PACKAGE_STATES.SUCCESS && <CircleCheck color="green" size={40} />}
+            {isLoadingPackage === PACKAGE_STATES.SUCCESS && <IconCircleCheck color="green" size={40} />}
             {isLoadingPackage === PACKAGE_STATES.FAIL && <IconAlertCircle color="red" size={40} />}
           </Grid.Col>
         </Grid>
