@@ -12,7 +12,6 @@ import {
 } from '../../util/measureUploadUtils';
 import { showNotification, cleanNotifications } from '@mantine/notifications';
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
-// import { CircleCheck } from 'tabler-icons-react'; why was this even different lol
 import { displayMapToSelectDataState } from '../../state/selectors/displayMapToSelectData';
 
 enum PACKAGE_STATES {
