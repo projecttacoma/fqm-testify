@@ -28,7 +28,7 @@ const TestCaseEditorPage: NextPage = () => {
     if (measureBundle.content) {
       const mb = measureBundle.content;
 
-      async () => {
+      void (async () => {
         setIsCalculationLoading(true);
 
         const draft = createDraft(detailedResultLookup);
@@ -56,7 +56,7 @@ const TestCaseEditorPage: NextPage = () => {
         const nextDRLookupState = finishDraft(draft);
         setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
-      };
+      })();
     }
     // have to disable eslint for the following line because we only want to run the effect once
     // in order to do this, we have an empty dependencies array but that gives us a warning

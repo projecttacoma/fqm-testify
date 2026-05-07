@@ -81,7 +81,7 @@ export default function EvaluationServiceVerifier() {
           color: 'red'
         });
       }
-    } catch (e) {
+    } catch {
       showNotification({
         icon: <IconAlertCircle />,
         title: 'Failed reaching out to server',

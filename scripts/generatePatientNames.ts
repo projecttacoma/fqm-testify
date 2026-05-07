@@ -2,8 +2,8 @@
  * Generates a lookup table of randomized fake names to use during patient creation in the app
  * This is a standalone script to avoid using faker in the core application, as it is quite a large library
  */
-import fs from 'fs/promises';
-import path from 'path';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 import { faker } from '@faker-js/faker';
 
 // TODO: add non-binary genders/names that are FHIR-compliant
@@ -50,9 +50,9 @@ function generateNames(count: number) {
 }
 
 const names = generateNames(50);
-const outputPath = path.join(__dirname, '../data/names.ts');
+const outputPath = join(__dirname, '../data/names.ts');
 
-fs.writeFileSync(
+writeFileSync(
   outputPath,
   `
 export const fakeNames = ${JSON.stringify(names, null, 2)};

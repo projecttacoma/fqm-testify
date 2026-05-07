@@ -137,7 +137,7 @@ export default function MeasureRepositoryUpload({ logError }: MeasureUploadProps
           color: 'red'
         });
       }
-    } catch (e) {
+    } catch {
       showNotification({
         icon: <IconAlertCircle />,
         title: 'Failed reaching out to server',

@@ -12,7 +12,7 @@ export const valueSetMapState = selector<ValueSetsMap>({
     const bundle = get(measureBundleState).content;
     if (bundle) {
       return (
-        bundle.entry?.reduce((acc: any, e: fhir4.BundleEntry) => {
+        bundle.entry?.reduce<ValueSetsMap>((acc, e: fhir4.BundleEntry) => {
           if (e.resource?.resourceType === 'ValueSet' && e.resource.url) {
             acc[e.resource.url] = e.resource.name ?? e.resource.title ?? 'Name Missing';
           }

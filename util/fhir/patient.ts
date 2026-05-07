@@ -12,6 +12,7 @@ export function getPatientNameString(patient: fhir4.Patient) {
   return `${patient.name?.[0]?.given?.join(' ')} ${patient.name?.[0]?.family}`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getResourcePatientReference(resource: any, dr: fhir4.DataRequirement, patientId: string | null) {
   // determine if we should add a reference to the patient
   if (patientAttributePaths[dr.type] && patientId) {

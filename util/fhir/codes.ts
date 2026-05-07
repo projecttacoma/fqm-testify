@@ -28,6 +28,7 @@ export function getDataRequirementFiltersString(dr: fhir4.DataRequirement, value
   return '';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getResourceCode(resource: any, dr: fhir4.DataRequirement, mb: fhir4.Bundle) {
   // go through each of the elements in the codeFilter array on the data requirement, if it exists
 
