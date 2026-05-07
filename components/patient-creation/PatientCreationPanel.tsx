@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { downloadZip } from '../../util/downloadUtil';
-import { Button, Group, Stack } from '@mantine/core';
+import { Button, Group, Modal, Stack, Textarea } from '@mantine/core';
 import { createDraft, finishDraft, produce } from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -17,6 +17,7 @@ import {
   IconFileDownload,
   IconFileUpload,
   IconInfoCircle,
+  IconSparkles,
   IconTrash,
   IconUserPlus
 } from '@tabler/icons-react';
@@ -42,8 +43,7 @@ import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
 import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
 import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
-import { calculate } from 'fqm-execution/build/calculation/Calculator';
-import nextAppLoader from 'next/dist/build/webpack/loaders/next-app-loader';
+import { postLang2fhirCreateMulti } from '../../util/phenoml';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -51,6 +51,11 @@ function PatientCreationPanel() {
   const [copiedPatient, setCopiedPatient] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isNarrativeModalOpen, setIsNarrativeModalOpen] = useState(false);
+  const [isNarrativePatientLoading, setIsNarrativePatientLoading] = useState(false);
+  const [isGeneratedPatientModalOpen, setIsGeneratedPatientModalOpen] = useState(false);
+  const [patientNarrative, setPatientNarrative] = useState('');
+  const [generatedPatientResource, setGeneratedPatientResource] = useState('');
   const [patientsToDelete, setPatientsToDelete] = useState<string[]>([]);
   const [currentPatients, setCurrentPatients] = useRecoilState(patientTestCaseState);
   const currentTestMRLookup = useRecoilValue(cqfmTestMRLookupState);
@@ -90,43 +95,81 @@ function PatientCreationPanel() {
     setCopiedPatient(null);
   };
 
+  const closeNarrativeModal = () => {
+    setIsNarrativeModalOpen(false);
+    setPatientNarrative('');
+  };
+
+  const createPatientFromNarrative = async () => {
+    const trimmedNarrative = patientNarrative.trim();
+
+    if (!trimmedNarrative) {
+      return;
+    }
+
+    setIsNarrativePatientLoading(true);
+
+    try {
+      const { output, patient, patientFullUrl, resources } = await postLang2fhirCreateMulti(trimmedNarrative);
+      const patientResource = JSON.stringify(patient, null, 2);
+
+      updatePatientTestCase(patientResource, resources, patientFullUrl);
+      setGeneratedPatientResource(JSON.stringify(output, null, 2));
+      closeNarrativeModal();
+      setIsGeneratedPatientModalOpen(true);
+      showNotification({
+        icon: <IconInfoCircle />,
+        title: 'Patient Created',
+        message: 'Created a patient from the AI narrative.',
+        color: 'blue'
+      });
+    } catch (error) {
+      showNotification({
+        icon: <IconAlertCircle />,
+        title: 'AI Patient Creation Failed',
+        message: error instanceof Error ? error.message : 'Could not create a patient from the AI narrative.',
+        color: 'red'
+      });
+    } finally {
+      setIsNarrativePatientLoading(false);
+    }
+  };
+
   const detailedResultCalculation = async (id: string) => {
     setSelectedPatient(id);
     if (!detailedResultLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      async () => {
-        const draft = createDraft(detailedResultLookup);
+      const draft = createDraft(detailedResultLookup);
 
-        if (measureBundle.content) {
-          try {
-            draft[id] = await calculateDetailedResult(
-              currentPatients[id],
-              measureBundle.content,
-              measurementPeriodFormatted?.start,
-              measurementPeriodFormatted?.end,
-              trustMetaProfile
-            );
-          } catch (error) {
-            if (error instanceof Error) {
-              showNotification({
-                icon: <IconAlertCircle />,
-                title: 'Calculation Error',
-                message: error.message,
-                color: 'red'
-              });
-            }
+      if (measureBundle.content) {
+        try {
+          draft[id] = await calculateDetailedResult(
+            currentPatients[id],
+            measureBundle.content,
+            measurementPeriodFormatted?.start,
+            measurementPeriodFormatted?.end,
+            trustMetaProfile
+          );
+        } catch (error) {
+          if (error instanceof Error) {
+            showNotification({
+              icon: <IconAlertCircle />,
+              title: 'Calculation Error',
+              message: error.message,
+              color: 'red'
+            });
           }
         }
+      }
 
-        const nextDRLookupState = finishDraft(draft);
-        setDetailedResultLookup(nextDRLookupState);
-        setIsCalculationLoading(false);
-      };
+      const nextDRLookupState = finishDraft(draft);
+      setDetailedResultLookup(nextDRLookupState);
+      setIsCalculationLoading(false);
     }
   };
 
-  const updatePatientTestCase = (val: string) => {
+  const updatePatientTestCase = (val: string, generatedResources?: fhir4.BundleEntry[], generatedFullUrl?: string) => {
     // TODO: Validate the incoming JSON as FHIR
     const pt = JSON.parse(val.trim()) as fhir4.Patient;
     if (pt.id) {
@@ -137,6 +180,8 @@ function PatientCreationPanel() {
       if (copiedPatient) {
         const pat = currentPatients[copiedPatient];
         resources = createCopiedResources(pat.resources, pat.patient.id ?? '', patientId);
+      } else if (generatedResources) {
+        resources = generatedResources;
       } else {
         resources = currentPatients[patientId]?.resources ?? [];
       }
@@ -144,7 +189,7 @@ function PatientCreationPanel() {
       const nextPatientState = produce(currentPatients, draftState => {
         draftState[patientId] = {
           patient: pt,
-          fullUrl: draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
+          fullUrl: generatedFullUrl ?? draftState[patientId]?.fullUrl ?? `urn:uuid:${patientId}`,
           resources: resources,
           minResources: draftState[patientId]?.minResources,
           desiredPopulations: currentPatients[patientId]?.desiredPopulations
@@ -464,10 +509,72 @@ function PatientCreationPanel() {
         onClose={() => setIsImportModalOpen(false)}
         onImportSubmit={handleSubmittedImport}
       />
+      <Modal
+        centered
+        size="lg"
+        withCloseButton={true}
+        opened={isNarrativeModalOpen}
+        onClose={closeNarrativeModal}
+        title="AI Narrative"
+      >
+        <Stack>
+          <Textarea
+            label="Patient Narrative"
+            placeholder="Describe the patient and relevant clinical details"
+            autosize
+            minRows={6}
+            value={patientNarrative}
+            onChange={event => setPatientNarrative(event.currentTarget.value)}
+          />
+          <Group position="right">
+            <Button
+              aria-label="Create Patient From AI Narrative"
+              disabled={!patientNarrative.trim()}
+              loading={isNarrativePatientLoading}
+              onClick={createPatientFromNarrative}
+            >
+              <IconSparkles />
+              &nbsp;Create Patient
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+      <Modal
+        centered
+        size="xl"
+        withCloseButton={true}
+        opened={isGeneratedPatientModalOpen}
+        onClose={() => setIsGeneratedPatientModalOpen(false)}
+        title="Generated FHIR Resources"
+      >
+        <Stack>
+          <Textarea
+            label="PhenoML Output"
+            readOnly
+            autosize
+            minRows={12}
+            value={generatedPatientResource}
+            styles={{
+              input: {
+                fontFamily: 'monospace'
+              }
+            }}
+          />
+          <Group position="right">
+            <Button onClick={() => setIsGeneratedPatientModalOpen(false)} variant="default">
+              Close
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
       <Group py={24} position="center">
         <Button aria-label="Create Test Patient" onClick={() => openPatientModal()}>
           <IconUserPlus />
           &nbsp;Create
+        </Button>
+        <Button aria-label="AI Narrative" onClick={() => setIsNarrativeModalOpen(true)} variant="outline">
+          <IconSparkles />
+          &nbsp;AI Narrative
         </Button>
         <Button aria-label="Import Test Patient(s)" onClick={() => setIsImportModalOpen(true)} variant="outline">
           <IconFileUpload />
