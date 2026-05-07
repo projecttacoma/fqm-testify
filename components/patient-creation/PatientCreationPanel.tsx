@@ -42,8 +42,6 @@ import { dataRequirementsState } from '../../state/selectors/dataRequirements';
 import { minimizeTestCaseResources } from '../../util/ValueSetHelper';
 import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
 import { dataRequirementsLookupByType } from '../../state/selectors/dataRequirementsLookupByType';
-import { calculate } from 'fqm-execution/build/calculation/Calculator';
-import nextAppLoader from 'next/dist/build/webpack/loaders/next-app-loader';
 
 function PatientCreationPanel() {
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
@@ -95,7 +93,7 @@ function PatientCreationPanel() {
     if (!detailedResultLookup[id]) {
       setIsCalculationLoading(true);
       // Create a new state object using immer without needing to shallow clone the entire previous object
-      async () => {
+      void (async () => {
         const draft = createDraft(detailedResultLookup);
 
         if (measureBundle.content) {
@@ -122,7 +120,7 @@ function PatientCreationPanel() {
         const nextDRLookupState = finishDraft(draft);
         setDetailedResultLookup(nextDRLookupState);
         setIsCalculationLoading(false);
-      };
+      })();
     }
   };
 
