@@ -168,7 +168,7 @@ export function createFHIRResourceString(
   mpStart: string,
   mpEnd: string
 ): string {
-  const resource: any = {
+  const resource: fhir4.Resource = {
     resourceType: dr.type,
     id: uuidv4()
   };

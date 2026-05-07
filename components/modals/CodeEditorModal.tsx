@@ -52,7 +52,7 @@ export default function CodeEditorModal({
     try {
       const resource: fhir4.Resource = JSON.parse(currentValue);
       codeAttributes = Object.keys(parsedCodePaths[resource.resourceType].paths);
-    } catch (error) {
+    } catch {
       // current json invalid or no valid resourceType
     }
   }

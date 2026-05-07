@@ -26,6 +26,7 @@ export interface DateFormatInfo {
  * @param {String} mpStart the start of the specified measurement period
  * @param {String} mpEnd the end of the specified measurement period
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getResourcePrimaryDates(resource: any, dr: fhir4.DataRequirement, mpStart: string, mpEnd: string) {
   const rt = dr.type;
   const primaryDateInfo = parsedPrimaryDatePaths[rt];
