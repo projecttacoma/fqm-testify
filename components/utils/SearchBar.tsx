@@ -1,5 +1,5 @@
 import { TextInput, TextInputProps } from '@mantine/core';
-import { IconSearch } from '@tabler/icons';
+import { IconSearch } from '@tabler/icons-react';
 
 export interface SearchBarProps {
   searchQuery: string;

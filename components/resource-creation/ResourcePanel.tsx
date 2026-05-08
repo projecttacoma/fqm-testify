@@ -1,12 +1,11 @@
 import { ActionIcon, Anchor, Button, Center, Divider, Group, Popover, Text } from '@mantine/core';
 import { v4 as uuidv4 } from 'uuid';
-import { IconAlertCircle, IconAlertTriangle, IconCodePlus } from '@tabler/icons';
+import { IconAlertCircle, IconAlertTriangle, IconCodePlus, IconLoader } from '@tabler/icons-react';
 import { Suspense, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { Loader } from 'tabler-icons-react';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
 import { selectedPatientState } from '../../state/atoms/selectedPatient';
-import produce from 'immer';
+import { createDraft, finishDraft, produce } from 'immer';
 import CodeEditorModal from '../modals/CodeEditorModal';
 import ResourceDisplay from './ResourceDisplay';
 import ResourceSelection from './ResourceSelection';
@@ -55,34 +54,36 @@ export default function ResourcePanel() {
           draftState[selectedPatient].resources.push(entry);
         });
         setCurrentPatients(nextResourceState);
-        setIsCalculationLoading(true);
 
-        setTimeout(() => {
-          produce(detailedResultLookup, async draftState => {
-            if (measureBundle.content) {
-              try {
-                draftState[selectedPatient] = await calculateDetailedResult(
-                  nextResourceState[selectedPatient],
-                  measureBundle.content,
-                  measurementPeriodFormatted?.start,
-                  measurementPeriodFormatted?.end,
-                  trustMetaProfile
-                );
-              } catch (error) {
-                if (error instanceof Error) {
-                  showNotification({
-                    icon: <IconAlertCircle />,
-                    title: 'Calculation Error',
-                    message: error.message,
-                    color: 'red'
-                  });
-                }
+        setTimeout(async () => {
+          setIsCalculationLoading(true);
+
+          const draft = createDraft(detailedResultLookup);
+
+          if (measureBundle.content) {
+            try {
+              draft[selectedPatient] = await calculateDetailedResult(
+                nextResourceState[selectedPatient],
+                measureBundle.content,
+                measurementPeriodFormatted?.start,
+                measurementPeriodFormatted?.end,
+                trustMetaProfile
+              );
+            } catch (error) {
+              if (error instanceof Error) {
+                showNotification({
+                  icon: <IconAlertCircle />,
+                  title: 'Calculation Error',
+                  message: error.message,
+                  color: 'red'
+                });
               }
             }
-          }).then(nextDRLookupState => {
-            setDetailedResultLookup(nextDRLookupState);
-            setIsCalculationLoading(false);
-          });
+          }
+
+          const nextDRLookupState = finishDraft(draft);
+          setDetailedResultLookup(nextDRLookupState);
+          setIsCalculationLoading(false);
         }, 400);
       }
     }
@@ -106,7 +107,7 @@ export default function ResourcePanel() {
       <Suspense
         fallback={
           <Center>
-            <Loader />
+            <IconLoader />
           </Center>
         }
       >

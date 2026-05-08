@@ -26,7 +26,7 @@ import UploadErrorLog from '../components/measure-upload/UploadErrorLog';
 import MeasureRepositoryUpload from '../components/measure-upload/MeasureRepositoryUpload';
 import { MeasureUploadError } from '../util/measureUploadUtils';
 import { trustMetaProfileState } from '../state/atoms/trustMetaProfile';
-import { InfoCircle } from 'tabler-icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import EvaluationServiceVerifier from '../components/measure-upload/EvaluationServiceVerifier';
 
 const useStyles = createStyles(theme => ({
@@ -122,7 +122,7 @@ const Home: NextPage = () => {
                 <Popover opened={trustMetaPopoverOpened} onClose={() => setTrustMetaPopoverOpened(false)} width={500}>
                   <Popover.Target>
                     <ActionIcon aria-label={'More Information'} onClick={() => setTrustMetaPopoverOpened(o => !o)}>
-                      <InfoCircle size={20} />
+                      <IconInfoCircle size={20} />
                     </ActionIcon>
                   </Popover.Target>
                   <Popover.Dropdown>
