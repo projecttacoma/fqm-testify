@@ -10,7 +10,6 @@
     "dev": "next dev",
     "build": "next build",
     "build:names": "ts-node scripts/generatePatientNames.ts && prettier --write data/names.ts --loglevel silent",
-    "upload:qicore-profiles": "ts-node --project tsconfig.scripts.json scripts/uploadQicoreProfiles.ts",
     "start": "npx serve@latest out",
     "lint": "eslint pages util components state __tests__ scripts --ext .js,.jsx,.ts,.tsx && tsc --noEmit",
     "lint:fix": "eslint pages util components state __tests__ scripts --ext .js,.jsx,.ts,.tsx --fix",
