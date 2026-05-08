@@ -1,7 +1,7 @@
 import { Dropzone } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { Center, Text, createStyles } from '@mantine/core';
-import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons';
+import { IconFileImport, IconFileCheck, IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodEndState, measurementPeriodStartState } from '../../state/atoms/measurementPeriod';

@@ -29,7 +29,7 @@ import {
   IconCopy,
   IconPackage,
   IconSquareCheck
-} from '@tabler/icons';
+} from '@tabler/icons-react';
 import { getPatientInfoString, getPatientNameString } from '../../util/fhir/patient';
 import { createDataExchangeMeasureReport, createPatientBundle } from '../../util/fhir/resourceCreation';
 import PopulationResultTable, { LabeledDetailedResult } from './PopulationResultsTable';

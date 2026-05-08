@@ -2,11 +2,16 @@
 const nextConfig = {
   output: 'export',
   reactStrictMode: true,
-  eslint: {
-    dirs: ['pages', 'utils', 'lib', 'components', 'atoms', '__tests__', 'scripts']
+  transpilePackages: ['domhandler', 'domelementtype', 'htmlparser2', 'domutils', 'dom-serializer', 'entities', 'uuid'],
+  turbopack: {
+    resolveAlias: {
+      fs: {
+        browser: './empty.ts'
+      }
+    }
   },
   webpack: config => {
-    config.resolve.fallback = { fs: false };
+    config.resolve.fallback = { ...config.resolve.fallback, fs: false };
 
     return config;
   }

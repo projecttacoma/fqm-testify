@@ -14,12 +14,18 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { Dropzone } from '@mantine/dropzone';
-import { IconAlertCircle, IconCaretDown, IconCaretRight, IconFileCheck, IconFileImport } from '@tabler/icons';
+import {
+  IconAlertCircle,
+  IconCaretDown,
+  IconCaretRight,
+  IconFileCheck,
+  IconFileImport,
+  IconInfoCircle
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import JSZip from 'jszip';
 import { useRecoilState } from 'recoil';
 import { resourceSwitchOn } from '../../state/atoms/resourceSwitch';
-import { InfoCircle } from 'tabler-icons-react';
 
 export interface ImportModalProps {
   open: boolean;
@@ -174,7 +180,7 @@ export default function ImportModal({ open, onClose, onImportSubmit }: ImportMod
                     aria-label={'More Information'}
                     onClick={() => setMinimizeResourcesPopoverOpened(o => !o)}
                   >
-                    <InfoCircle size={20} />
+                    <IconInfoCircle size={20} />
                   </ActionIcon>
                 </Popover.Target>
                 <Popover.Dropdown>

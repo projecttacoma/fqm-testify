@@ -15,7 +15,7 @@ export const dataRequirementsLookupByType = selector<Record<string, DataRequirem
     const result: Record<string, DataRequirementsLookupByTypeProps> = {};
 
     if (dataRequirements !== null) {
-      dataRequirements.forEach((dr, i) => {
+      dataRequirements.forEach(dr => {
         if (result[dr.type]) {
           if (result[dr.type].keepAll === false) {
             if (dr.codeFilter === undefined) {

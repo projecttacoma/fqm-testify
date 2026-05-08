@@ -2,12 +2,11 @@ import { Card, Button, Text, Group, createStyles } from '@mantine/core';
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import Link from 'next/link';
-import { Edit } from 'tabler-icons-react';
 import { useRouter } from 'next/router';
 import { measureBundleState } from '../../state/atoms/measureBundle';
 import { measurementPeriodState } from '../../state/atoms/measurementPeriod';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { IconAlertTriangle } from '@tabler/icons';
+import { IconAlertTriangle, IconEdit } from '@tabler/icons-react';
 import WarningModal from '../modals/WarningModal';
 
 const useStyles = createStyles(theme => ({
@@ -67,7 +66,7 @@ export default function AppHeader() {
               ) : (
                 <Link href={'/'}>
                   <Button variant="subtle" color="gray">
-                    <Edit />
+                    <IconEdit />
                   </Button>
                 </Link>
               )}

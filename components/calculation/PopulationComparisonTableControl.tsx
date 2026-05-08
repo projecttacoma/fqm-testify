@@ -1,6 +1,6 @@
 import { ActionIcon, Popover, ScrollArea } from '@mantine/core';
 import { MouseEvent, useState } from 'react';
-import { InfoCircle } from 'tabler-icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import React from 'react';
 
 export default function PopulationComparisonTablePopover() {
@@ -15,7 +15,7 @@ export default function PopulationComparisonTablePopover() {
     <Popover opened={opened} onClose={() => setOpened(false)} width={500}>
       <Popover.Target>
         <ActionIcon aria-label={'More Information'} onClick={popoverClick}>
-          <InfoCircle size={20} />
+          <IconInfoCircle size={20} />
         </ActionIcon>
       </Popover.Target>
       <Popover.Dropdown>

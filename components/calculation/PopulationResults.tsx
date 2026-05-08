@@ -3,7 +3,7 @@ import { DetailedPopulationGroupResult } from 'fqm-execution';
 import { useRecoilValue } from 'recoil';
 import { calculationLoading } from '../../state/atoms/calculationLoading';
 import { useState } from 'react';
-import { CircleCheck } from 'tabler-icons-react';
+import { IconCircleCheck } from '@tabler/icons-react';
 import MeasureHighlightingPanel from './MeasureHighlightingPanel';
 import PopulationComparisonTable from './PopulationComparisonTable';
 
@@ -65,7 +65,7 @@ export default function PopulationResults({ detailedResults, patientId }: Popula
                       </Center>
                     ) : (
                       <Center>
-                        <CircleCheck color="green" size={24} />
+                        <IconCircleCheck color="green" size={24} />
                         <Text italic color="dimmed" pl={4}>
                           Up to date
                         </Text>
@@ -96,7 +96,7 @@ export default function PopulationResults({ detailedResults, patientId }: Popula
                   </Center>
                 ) : (
                   <Center>
-                    <CircleCheck color="green" size={24} />
+                    <IconCircleCheck color="green" size={24} />
                     <Text italic color="dimmed" pl={4}>
                       Up to date
                     </Text>

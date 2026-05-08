@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { Button, Tooltip } from '@mantine/core';
-import { ArrowNarrowLeft } from 'tabler-icons-react';
+import { IconArrowNarrowLeft } from '@tabler/icons-react';
 
 const BackButton = () => {
   const router = useRouter();
@@ -17,7 +17,7 @@ const BackButton = () => {
           marginLeft: '5px'
         }}
       >
-        <ArrowNarrowLeft size="36" />
+        <IconArrowNarrowLeft size="36" />
       </Button>
     </Tooltip>
   );

@@ -1,6 +1,6 @@
 import { Button, Center, Divider, Grid, Group, Menu, Paper, Text, Tooltip } from '@mantine/core';
 import React from 'react';
-import { Copy, Dots, Download, Edit, Trash } from 'tabler-icons-react';
+import { IconCopy, IconDots, IconDownload, IconEdit, IconTrash } from '@tabler/icons-react';
 import { getPatientDOBString, getPatientNameString } from '../../util/fhir/patient';
 import PopulationMultiSelect from './PopulationMultiSelect';
 
@@ -61,13 +61,13 @@ export default function PatientInfoCard({
               <Menu shadow="md" width={200}>
                 <Menu.Target>
                   <Button variant="subtle" aria-label={'Menu Button'}>
-                    <Dots />
+                    <IconDots />
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
                   <Menu.Label>Patient Actions</Menu.Label>
                   <Menu.Item
-                    icon={<Download size={20} />}
+                    icon={<IconDownload size={20} />}
                     onClick={() => {
                       onExportClick();
                     }}
@@ -75,7 +75,7 @@ export default function PatientInfoCard({
                     Download Patient
                   </Menu.Item>
                   <Menu.Item
-                    icon={<Edit size={20} />}
+                    icon={<IconEdit size={20} />}
                     onClick={() => {
                       onEditClick();
                     }}
@@ -83,7 +83,7 @@ export default function PatientInfoCard({
                     Edit Patient
                   </Menu.Item>
                   <Menu.Item
-                    icon={<Copy size={20} />}
+                    icon={<IconCopy size={20} />}
                     onClick={() => {
                       onCopyClick();
                     }}
@@ -91,7 +91,7 @@ export default function PatientInfoCard({
                     Copy Patient
                   </Menu.Item>
                   <Menu.Item
-                    icon={<Trash size={20} />}
+                    icon={<IconTrash size={20} />}
                     color="red"
                     onClick={() => {
                       onDeleteClick();
@@ -112,7 +112,7 @@ export default function PatientInfoCard({
                     }}
                     variant="subtle"
                   >
-                    <Download />
+                    <IconDownload />
                   </Button>
                 </Tooltip>
                 <Tooltip label="Edit Patient" openDelay={1000}>
@@ -124,7 +124,7 @@ export default function PatientInfoCard({
                     variant="subtle"
                     size="xs"
                   >
-                    <Edit />
+                    <IconEdit />
                   </Button>
                 </Tooltip>
                 <Tooltip label="Copy Patient" openDelay={1000}>
@@ -136,7 +136,7 @@ export default function PatientInfoCard({
                     }}
                     variant="subtle"
                   >
-                    <Copy />
+                    <IconCopy />
                   </Button>
                 </Tooltip>
                 <Divider sx={{ height: '48px' }} size="xs" orientation="vertical" />
@@ -150,7 +150,7 @@ export default function PatientInfoCard({
                     color="red"
                     variant="subtle"
                   >
-                    <Trash />
+                    <IconTrash />
                   </Button>
                 </Tooltip>
               </Center>

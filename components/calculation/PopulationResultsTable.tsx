@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { DetailedResult } from '../../util/types';
 import { useRecoilValue } from 'recoil';
 import { patientTestCaseState } from '../../state/atoms/patientTestCase';
-import { IconCheck, IconX } from '@tabler/icons';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 const useStyles = createStyles({
   highlightRed: {
