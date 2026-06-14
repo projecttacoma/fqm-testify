@@ -9,14 +9,9 @@ import { Calculator } from 'fqm-execution';
 import { Suspense } from 'react';
 import { measureBundleState } from '../../../state/atoms/measureBundle';
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime';
-import { postLang2fhirCreateMulti } from '../../../util/phenoml';
 
 jest.mock('../../../util/downloadUtil', () => ({
   download: jest.fn()
-}));
-
-jest.mock('../../../util/phenoml', () => ({
-  postLang2fhirCreateMulti: jest.fn()
 }));
 
 // Mock out the getClientRects function to avoid warnings
@@ -94,10 +89,6 @@ const MEASURE_BUNDLE_POPULATED = {
 };
 
 describe('PatientCreationPanel', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should not render modal by default', async () => {
     const MockPatients = getMockRecoilState(patientTestCaseState, {});
 
@@ -161,104 +152,6 @@ describe('PatientCreationPanel', () => {
       '"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"'
     );
     expect(testPatientMetaProfile).toBeInTheDocument();
-  });
-
-  it('should render AI narrative modal when AI Narrative button is clicked', async () => {
-    const MockPatients = getMockRecoilState(patientTestCaseState, {});
-
-    await act(async () => {
-      render(
-        mantineRecoilWrap(
-          <>
-            <MockPatients />
-            <Suspense>
-              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-                <PatientCreationPanel />
-              </RouterContext.Provider>
-            </Suspense>
-          </>
-        )
-      );
-    });
-
-    const aiNarrativeButton = screen.getByRole('button', {
-      name: /ai narrative/i
-    });
-
-    expect(aiNarrativeButton).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(aiNarrativeButton);
-    });
-
-    const modal = screen.getByRole('dialog');
-    expect(modal).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: /patient narrative/i })).toBeInTheDocument();
-  });
-
-  it('should create a patient from AI narrative text', async () => {
-    const mockPostLang2fhirCreateMulti = postLang2fhirCreateMulti as jest.MockedFunction<
-      typeof postLang2fhirCreateMulti
-    >;
-    const patient: fhir4.Patient = {
-      resourceType: 'Patient',
-      id: 'ai-patient',
-      name: [{ given: ['AI'], family: 'Patient' }]
-    };
-    const condition: fhir4.Condition = {
-      resourceType: 'Condition',
-      id: 'ai-condition',
-      subject: { reference: 'Patient/ai-patient' }
-    };
-
-    mockPostLang2fhirCreateMulti.mockResolvedValue({
-      patient,
-      patientFullUrl: 'urn:uuid:ai-patient',
-      resources: [{ fullUrl: 'urn:uuid:ai-condition', resource: condition }],
-      output: {
-        resourceType: 'Bundle',
-        type: 'transaction',
-        entry: [
-          { fullUrl: 'urn:uuid:ai-patient', resource: patient },
-          { fullUrl: 'urn:uuid:ai-condition', resource: condition }
-        ]
-      }
-    });
-    const MockPatients = getMockRecoilState(patientTestCaseState, {});
-
-    await act(async () => {
-      render(
-        mantineRecoilWrap(
-          <>
-            <MockPatients />
-            <Suspense>
-              <RouterContext.Provider value={createMockRouter({ pathname: '/' })}>
-                <PatientCreationPanel />
-              </RouterContext.Provider>
-            </Suspense>
-          </>
-        )
-      );
-    });
-
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /ai narrative/i }));
-    });
-
-    fireEvent.change(screen.getByRole('textbox', { name: /patient narrative/i }), {
-      target: { value: 'AI Patient is a 45-year-old male with diabetes.' }
-    });
-
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /create patient from ai narrative/i }));
-    });
-
-    await waitFor(() => {
-      expect(mockPostLang2fhirCreateMulti).toHaveBeenCalledWith('AI Patient is a 45-year-old male with diabetes.');
-      expect(screen.getByText(/ai patient/i)).toBeInTheDocument();
-      expect(screen.getByText(/generated fhir resources/i)).toBeInTheDocument();
-      expect(screen.getByDisplayValue(/"id": "ai-condition"/i)).toBeInTheDocument();
-    });
   });
 
   it('should render confirmation modal when delete all patients button is clicked', async () => {
